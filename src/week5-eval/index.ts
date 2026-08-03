@@ -25,12 +25,13 @@ const EVAL_SET: EvalCase[] = [
 async function main() {
   console.log(`\n평가셋 ${EVAL_SET.length}개 실행...\n`);
 
-  // 🎯 TODO 1: EVAL_SET 을 돌며 각 케이스에 대해 ask(SYSTEM, input || "(빈 입력)") 호출
-  // 🎯 TODO 2: c.check(출력) 으로 통과/실패 판정하고, 한 줄씩 결과 출력 (✅/❌, 이름, 응답 일부)
-  // 🎯 TODO 3: 전체 통과율(passed/total, %) 을 계산해 출력
-  //   ※ 프롬프트(SYSTEM)를 바꾼 뒤 다시 돌려 '회귀'가 잡히는지 관찰하는 게 이 실습의 핵심
+  // 🎯 평가셋을 돌려 통과율을 재라.
+  //   각 케이스마다: SYSTEM 으로 모델에 input 을 물어(ask) 응답을 받고, 그 케이스의 check 로 통과/실패를 판정.
+  //   케이스별 ✅/❌ 를 출력하고, 마지막에 전체 통과율(%)을 집계해 출력.
+  //   목적: SYSTEM 을 바꾼 뒤 다시 돌려 '회귀'(전엔 통과하던 게 깨짐)가 잡히는지 보는 것.
+  //   막히면 solutions/week5-eval/index.ts.
   throw new Error(
-    "TODO: 평가 루프(실행·판정·통과율)를 구현하세요. 막히면 solutions/week5-eval/index.ts 참고"
+    "TODO: 평가 루프(실행·판정·통과율)를 구현하세요. 막히면 solutions 참고"
   );
 }
 

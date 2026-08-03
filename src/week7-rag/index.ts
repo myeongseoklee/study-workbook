@@ -19,17 +19,16 @@ const DOCS = [
 
 // 1) 검색(retrieval) — 지금은 naive 로 시작. 나중에 임베딩 검색으로 교체.
 function retrieve(query: string, k = 2): string[] {
-  // 🎯 TODO: query 와 관련도가 높은 DOCS 상위 k개를 반환하라.
-  //   처음엔 naive 하게: 문자 겹침/키워드 매칭 점수로 정렬 → slice(0, k)
-  //   (docs/06: 이후 임베딩+벡터 스토어로 교체하면 '의미 검색'이 된다)
+  // 🎯 질의와 관련도가 높은 문서 상위 k개를 DOCS 에서 골라 반환하라.
+  //   처음엔 단순하게 — 질의와 문서의 글자/키워드 겹침으로 점수를 매겨 정렬하면 된다.
+  //   (docs/06: 이후 임베딩+벡터 스토어로 바꾸면 '의미 검색'이 된다). 막히면 solutions.
   throw new Error("TODO: retrieve 구현. 막히면 solutions/week7-rag/index.ts 참고");
 }
 
 async function answer(query: string): Promise<string> {
-  // 🎯 TODO:
-  //   1) retrieve(query) 로 관련 문서를 뽑아 하나의 context 문자열로 합친다 (augment)
-  //   2) ask("아래 참고 문서에 근거해서만 답하라 ...", `참고 문서:\n${context}\n\n질문: ${query}`) (generate)
-  //   3) 최종 텍스트를 반환
+  // 🎯 retrieve 로 뽑은 문서를 근거로 답을 생성하라 (검색 → 주입 → 생성).
+  //   검색 결과를 하나의 컨텍스트로 합쳐, "이 문서에 근거해서만 답하고 없으면 모른다고 하라"는
+  //   지시와 함께 모델(ask)에 넘긴다. 막히면 solutions.
   throw new Error("TODO: answer 구현. 막히면 solutions/week7-rag/index.ts 참고");
 }
 

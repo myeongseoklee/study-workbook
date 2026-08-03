@@ -14,26 +14,22 @@ const AGENT_URLS = ["http://localhost:8001", "http://localhost:8002"];
 
 // 레지스트리: 각 서버의 Agent Card를 읽어 "누가 뭘 할 수 있나" 파악 (서비스 디스커버리)
 async function discover(): Promise<Record<string, any>> {
-  // 🎯 TODO: AGENT_URLS 각각에 fetch(`${base}/.well-known/agent.json`) → JSON 파싱
-  //   → { [card.name]: card } 형태로 모아서 반환 (발견한 에이전트를 console.log)
+  // 🎯 각 에이전트 서버의 Agent Card(/.well-known/agent.json)를 읽어 "이름 → 카드" 맵으로 모아 반환하라.
+  //   이게 레지스트리 = 서비스 디스커버리. 막히면 solutions.
   throw new Error("TODO: discover 구현. 막히면 solutions/infra/orchestrator.ts 참고");
 }
 
 // 실제 실행 = 다른 에이전트 서버로의 HTTP POST (당신 코드가 건다)
 async function invoke(base: string, query: string): Promise<string> {
-  // 🎯 TODO: fetch(`${base}/invoke`, { method:"POST", headers, body: JSON.stringify({ query }) })
-  //   → { result } 를 파싱해 result 반환
+  // 🎯 대상 서버의 /invoke 로 query 를 POST 하고, 응답에서 결과 텍스트를 꺼내 반환하라. 막히면 solutions.
   throw new Error("TODO: invoke 구현. 막히면 solutions/infra/orchestrator.ts 참고");
 }
 
 async function main() {
   console.log("\n오케스트레이터 시작 — 두 에이전트 서버가 떠 있어야 합니다.\n");
 
-  // 🎯 TODO:
-  //   1) discover() 로 Agent Card 들을 읽는다
-  //   2) analyst.url 에 invoke → analysis  (성과 데이터 + "인사이트?")
-  //   3) ad-expert.url 에 invoke → strategy  (analysis 를 넘김 = 핸드오프)
-  //   4) 결과들을 출력
+  // 🎯 discover 로 에이전트들을 파악한 뒤, 분석가 → 광고 전략가 순으로 호출하고(앞 결과를 넘기며) 결과를 출력하라.
+  //   week3(앱 레이어)와 구조가 똑같다 — 함수 호출이 HTTP 호출(invoke)로 바뀐 것뿐. 막히면 solutions.
   throw new Error("TODO: 오케스트레이션 흐름 구현. 막히면 solutions/infra/orchestrator.ts 참고");
 }
 

@@ -37,14 +37,13 @@ const model = new ChatOpenAI({
 const checkpointer = new MemorySaver(); // 재개/인터럽트의 전제
 
 async function main() {
-  // 🎯 TODO 1: createReactAgent({ llm: model, tools: [add, multiply], checkpointer }) 로 에이전트 생성
-  // 🎯 TODO 2: 같은 thread_id 로 두 번 invoke 하기
-  //    - config = { configurable: { thread_id: "demo-1" } }
-  //    - 1차: "(3 + 5) 곱하기 2는? 툴을 써서 계산해."
-  //    - 2차: "방금 결과에 10을 더하면?"  ← 체크포인터가 이전 맥락을 기억하는지 확인
-  // 🎯 TODO 3: 각 응답의 마지막 메시지 content 를 출력 (res.messages.at(-1)?.content)
+  // 🎯 위 model·tools·checkpointer 로 ReAct 에이전트를 만들고, 같은 대화 세션(thread)으로 두 번 물어라.
+  //   1) "(3 + 5) 곱하기 2는? 툴을 써서 계산해." → 답 출력
+  //   2) 같은 thread 로 "방금 결과에 10을 더하면?" → 체크포인터가 이전 맥락을 기억하는지 확인
+  //   힌트: createReactAgent, 에이전트의 invoke, 그리고 thread 를 지정하는 config (docs/03).
+  //   막히면 solutions/week1-langgraph/index.ts.
   throw new Error(
-    "TODO: createReactAgent + invoke 를 구현하세요. 막히면 solutions/week1-langgraph/index.ts 참고"
+    "TODO: ReAct 에이전트 생성 + 같은 thread 로 2회 대화를 구현하세요. 막히면 solutions 참고"
   );
 }
 

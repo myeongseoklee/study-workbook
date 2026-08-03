@@ -45,14 +45,11 @@ function geminiProvider(): LLMProvider {
 
 // --- Claude(cc) 어댑터 — 🎯 직접 구현 ---
 function anthropicProvider(): LLMProvider {
-  // 🎯 TODO: 위 geminiProvider 와 "같은 인터페이스"를 Anthropic SDK로 구현하라.
-  //   1) import 를 주석 해제하고 new Anthropic() (ANTHROPIC_API_KEY 자동 로드)
-  //   2) model 기본값: process.env.ANTHROPIC_MODEL ?? "claude-haiku-4-5"
-  //   3) ask(system, user):
-  //        client.messages.create({ model, max_tokens: 1024, system, messages: [{ role:"user", content:user }] })
-  //        → 응답 content 배열에서 type==="text" 블록만 뽑아 이어붙여 반환
-  //   힌트: Anthropic 은 system 이 top-level 파라미터(메시지 role 아님), 응답은 content 블록 배열.
-  //   막히면 정답: solutions/infra/llm-provider.ts
+  // 🎯 위 geminiProvider 와 "같은 인터페이스"(name/model/ask)를 Anthropic SDK로 구현하라.
+  //   상단 import 를 주석 해제해 쓰고, ask(system, user) 가 Claude 응답 텍스트를 돌려주면 된다.
+  //   주의(형식 차이): Anthropic 은 system 이 top-level 파라미터(메시지 role 아님)이고,
+  //   응답은 content 블록 배열이라 Gemini(OpenAI 형식)와 꺼내는 법이 다르다 — 이 차이를 손으로 겪는 게 이 과제의 핵심.
+  //   SDK 사용법은 Anthropic 문서 또는 solutions/infra/llm-provider.ts 참고.
   throw new Error("TODO: Claude(anthropic) 어댑터를 구현하세요.");
 }
 

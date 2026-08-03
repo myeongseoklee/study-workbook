@@ -26,7 +26,8 @@ app.get("/.well-known/agent.json", async () => AGENT_CARD);
 
 app.post("/invoke", async (req) => {
   const { query } = req.body as { query: string };
-  // 🎯 TODO: ask("너는 10년차 시니어 퍼포먼스 마케터다 ...", query) 로 result 를 만들어 { result } 로 반환
+  // 🎯 query 를 받아 이 에이전트의 역할(광고 전략가)로 응답을 만들어 { result } 형태로 반환하라.
+  //   역할 프롬프트 + query 를 모델(ask)에 넘기면 된다. 막히면 solutions.
   throw new Error("TODO: /invoke 구현. 막히면 solutions/infra/ad-expert-agent.ts 참고");
 });
 

@@ -52,12 +52,12 @@ async function main() {
 
   const MAX_STEPS = 10; // 무한 루프 방지 (이게 왜 필요한지 docs/02에서 체감)
   for (let step = 0; step < MAX_STEPS; step++) {
-    // 🎯 TODO 1: client.chat.completions.create({ model: MODEL, messages, tools }) 로 LLM 호출
-    // 🎯 TODO 2: res.choices[0].message 를 messages 에 push (상태 관리)
-    // 🎯 TODO 3: message.tool_calls 를 꺼낸다 (없으면 빈 배열)
-    // 🎯 TODO 4: tool_calls 가 비었으면 = 최종 답. message.content 를 출력하고 return
-    // 🎯 TODO 5: 각 tool_call 마다 JSON.parse(c.function.arguments) → runTool 실행
-    // 🎯 TODO 6: 실행 결과를 { role: "tool", tool_call_id: c.id, content: String(결과) } 로 push 하고 루프 계속
+    // 🎯 이 루프 안에 "에이전트 한 스텝"을 구현하라.
+    //   - 현재 대화(messages)와 tools 를 모델에 보내 다음 행동을 받는다.
+    //   - 응답에 툴 호출이 있으면: 그 툴을 runTool 로 실행하고, 결과를 대화에 다시 넣어 다음 스텝으로.
+    //   - 툴 호출이 없으면: 그게 최종 답. 출력하고 루프를 끝낸다.
+    //   핵심: 모델 응답도, 툴 실행 결과도 매번 messages 에 쌓아야 모델이 맥락을 잃지 않는다.
+    //   개념: docs/01 '툴 호출 4단계' + docs/02.  API 형식(OpenAI)이 막히면 solutions 참고.
     throw new Error(
       "TODO: week0 에이전트 루프를 구현하세요. 막히면 solutions/week0-agent-loop/index.ts 참고"
     );

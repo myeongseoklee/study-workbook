@@ -27,13 +27,14 @@ const ROLES = {
 async function main() {
   console.log("\n📥 요청: 이번주 광고 어떻게 세팅하지?\n");
 
-  // 🎯 TODO 1: 분석가 호출 — ask(ROLES.analyst, `성과 데이터: ${stubPerformanceData} ...`) → analysis
-  // 🎯 TODO 2: 광고 전략가 호출 — analysis 를 넘겨서(=핸드오프) ask(ROLES.adExpert, ...) → strategy
-  // 🎯 TODO 3: 개발자 호출 — strategy 를 넘겨서 ask(ROLES.developer, ...) → impl
-  // 🎯 TODO 4: 각 단계 결과를 console.log 로 출력
-  //   ※ 여기서 "오케스트레이터"는 바로 이 main 함수다 — 순서를 정하고 결과를 넘기는 이 코드.
+  // 🎯 세 전문가(ROLES + ask)를 순서대로 호출해 협업시켜라.
+  //   1) 분석가에게 성과 데이터(stubPerformanceData)로 인사이트를 뽑게 한다.
+  //   2) 그 인사이트를 광고 전략가에게 넘겨(=핸드오프) 전략을 받는다.
+  //   3) 그 전략을 개발자에게 넘겨 캠페인 세팅으로 옮긴다. 각 단계 결과를 출력.
+  //   핵심: 앞 전문가의 결과를 다음 전문가 입력에 넘기는 것 — 이 배선이 "협업"이자 "오케스트레이터"(=이 함수)다.
+  //   막히면 solutions/week3-multiagent/index.ts.
   throw new Error(
-    "TODO: 3전문가 협업(순서 호출 + 핸드오프)을 구현하세요. 막히면 solutions/week3-multiagent/index.ts 참고"
+    "TODO: 3전문가 협업(순서 호출 + 핸드오프)을 구현하세요. 막히면 solutions 참고"
   );
 }
 
