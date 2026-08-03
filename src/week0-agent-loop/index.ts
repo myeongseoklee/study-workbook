@@ -58,9 +58,47 @@ async function main() {
     //   - 툴 호출이 없으면: 그게 최종 답. 출력하고 루프를 끝낸다.
     //   핵심: 모델 응답도, 툴 실행 결과도 매번 messages 에 쌓아야 모델이 맥락을 잃지 않는다.
     //   개념: docs/01 '툴 호출 4단계' + docs/02.  API 형식(OpenAI)이 막히면 solutions 참고.
-    throw new Error(
-      "TODO: week0 에이전트 루프를 구현하세요. 막히면 solutions/week0-agent-loop/index.ts 참고"
-    );
+    const res = await client.chat.completions.create({
+      model: MODEL,
+      messages,
+      tools,
+    })
+    const msg = res.choices[0].message;
+    messages.push(msg);
+
+    const toolCalls = msg?.tool_calls ?? [];
+
+    if (toolCalls.length === 0) {
+      console.log(msg.content);
+      return;
+    }
+    
+    const results = toolCalls.map(tool => {
+      const { id, type } = tool
+
+      let content: string;
+      
+      try {
+        if (type === 'function') {
+          content = String(runTool(tool.function.name, JSON.parse(tool.function.arguments)))
+        } else if (type === 'custom') {
+          content = String(runTool(tool.custom.name, JSON.parse(tool.custom.input)))
+        } else {
+          const _exhaustive: never = tool;
+          throw new Error(`알 수 없는 tool_call type: ${(tool as any).type}`);
+        }
+      } catch (error) {
+        content = String(error)
+      }
+      
+      return {
+        tool_call_id: id,
+        role: 'tool' as const,
+        content
+      }
+    })
+
+    messages.push(...results);
   }
 
   console.log("⛔ MAX_STEPS 초과 — 강제 종료");
