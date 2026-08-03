@@ -1,0 +1,32 @@
+{
+  "name": "multi-agent-systems-workbook",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "멀티 에이전트 시스템 학습 워크북 — Node/TypeScript 실습 환경",
+  "scripts": {
+    "week0": "tsx src/week0-agent-loop/index.ts",
+    "week1": "tsx src/week1-langgraph/index.ts",
+    "week3": "tsx src/week3-multiagent/index.ts",
+    "week5": "tsx src/week5-eval/index.ts",
+    "week7": "tsx src/week7-rag/index.ts",
+    "infra:analyst": "tsx src/infra/analyst-agent.ts",
+    "infra:ad-expert": "tsx src/infra/ad-expert-agent.ts",
+    "infra:orchestrator": "tsx src/infra/orchestrator.ts",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
+    "@langchain/anthropic": "^1.5.2",
+    "@langchain/core": "^1.2.4",
+    "@langchain/langgraph": "^1.4.8",
+    "dotenv": "^17.4.2",
+    "fastify": "^5.11.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "tsx": "^4.23.5",
+    "typescript": "^7.0.2"
+  }
+}
