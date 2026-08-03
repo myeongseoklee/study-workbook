@@ -7,7 +7,7 @@
  *
  * 실행: npm run week1
  */
-import { ChatAnthropic } from "@langchain/anthropic";
+import { ChatOpenAI } from "@langchain/openai";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { MemorySaver } from "@langchain/langgraph";
 import { tool } from "@langchain/core/tools";
@@ -25,7 +25,15 @@ const multiply = tool(async ({ a, b }) => String(a * b), {
   schema: z.object({ a: z.number(), b: z.number() }),
 });
 
-const model = new ChatAnthropic({ model: process.env.MODEL ?? "claude-sonnet-5" });
+// 모델 = ChatOpenAI 를 Gemini(OpenAI 호환) 엔드포인트로 (scaffolding)
+const model = new ChatOpenAI({
+  model: process.env.MODEL ?? "gemini-2.5-flash",
+  apiKey: process.env.GEMINI_API_KEY ?? process.env.OPENAI_API_KEY,
+  configuration: {
+    baseURL:
+      process.env.LLM_BASE_URL ?? "https://generativelanguage.googleapis.com/v1beta/openai/",
+  },
+});
 const checkpointer = new MemorySaver(); // 재개/인터럽트의 전제
 
 async function main() {
@@ -34,7 +42,7 @@ async function main() {
   //    - config = { configurable: { thread_id: "demo-1" } }
   //    - 1차: "(3 + 5) 곱하기 2는? 툴을 써서 계산해."
   //    - 2차: "방금 결과에 10을 더하면?"  ← 체크포인터가 이전 맥락을 기억하는지 확인
-  // 🎯 TODO 3: 각 응답의 마지막 메시지 content 를 출력
+  // 🎯 TODO 3: 각 응답의 마지막 메시지 content 를 출력 (res.messages.at(-1)?.content)
   throw new Error(
     "TODO: createReactAgent + invoke 를 구현하세요. 막히면 solutions/week1-langgraph/index.ts 참고"
   );

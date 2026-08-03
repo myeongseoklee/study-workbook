@@ -7,7 +7,7 @@
  *
  * 실행: npm run week7
  */
-import { client, MODEL } from "../shared/llm";
+import { ask } from "../shared/llm";
 
 // 아주 작은 지식 베이스 (실제로는 회사 위키/문서를 청킹한 것)
 const DOCS = [
@@ -26,21 +26,14 @@ function retrieve(query: string, k = 2): string[] {
     .map((x) => x.d);
 }
 
-async function answer(query: string) {
+async function answer(query: string): Promise<string> {
   // 2) augment — 검색한 문서를 프롬프트에 끼워넣는다
   const context = retrieve(query).join("\n");
   // 3) generate — 그 근거로 답을 생성
-  const res = await client.messages.create({
-    model: MODEL,
-    max_tokens: 512,
-    system:
-      "너는 고객 지원 봇이다. 아래 '참고 문서'에 근거해서만 답하라. 문서에 없으면 모른다고 말하라.",
-    messages: [{ role: "user", content: `참고 문서:\n${context}\n\n질문: ${query}` }],
-  });
-  return res.content
-    .filter((b: any) => b.type === "text")
-    .map((b: any) => b.text)
-    .join("");
+  return ask(
+    "너는 고객 지원 봇이다. 아래 '참고 문서'에 근거해서만 답하라. 문서에 없으면 모른다고 말하라.",
+    `참고 문서:\n${context}\n\n질문: ${query}`
+  );
 }
 
 async function main() {

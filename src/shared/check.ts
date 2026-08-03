@@ -4,23 +4,18 @@
  *
  * 실행: npm run check
  */
-import { client, MODEL } from "./llm";
+import { MODEL, ask } from "./llm";
 
 async function main() {
-  const res = await client.messages.create({
-    model: MODEL,
-    max_tokens: 16,
-    messages: [{ role: "user", content: "정확히 'ok'라고만 답해." }],
-  });
-  const text = res.content
-    .filter((b: any) => b.type === "text")
-    .map((b: any) => b.text)
-    .join("");
+  const text = await ask("정확히 'ok'라고만 답해.", "확인");
   console.log(`✅ 환경 OK — 모델(${MODEL}) 응답: ${text.trim()}`);
 }
 
 main().catch((e) => {
   console.error("❌ 환경 점검 실패:", e?.message ?? e);
-  console.error("   .env 의 ANTHROPIC_API_KEY 와 크레딧을 확인하세요.");
+  console.error(
+    "   .env 의 GEMINI_API_KEY 를 확인하세요 (무료 키: https://aistudio.google.com/apikey).\n" +
+      "   MODEL 이 키에서 쓸 수 있는 값인지도 확인 (예: gemini-2.5-flash)."
+  );
   process.exit(1);
 });

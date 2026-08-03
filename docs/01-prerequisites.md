@@ -77,9 +77,10 @@ LLM 호출에는 보통 세 종류의 메시지가 있다: **system**(에이전�
 
 - [ ] Node 20+ 설치 확인 (`node --version`) — 최신 LTS 권장
 - [ ] 프로젝트 초기화 (`npm init -y`), TypeScript 셋업 (`npm i -D typescript tsx @types/node`)
-- [ ] LLM SDK 설치: `npm i @anthropic-ai/sdk` (또는 `openai`) — 0주차에 프레임워크 없이 쓴다
-- [ ] API 키 발급 후 환경변수로 등록 (`.env` + `process.env.ANTHROPIC_API_KEY`) — **코드에 하드코딩하지 말 것**, 백엔드 상식 그대로. `.env`는 `.gitignore`에
-- [ ] 결제/사용량 한도 확인 — 무한 루프 버그가 요금 폭탄이 될 수 있으니 스펜딩 리밋을 걸어둔다
+- [ ] LLM SDK 설치: `npm i openai` — 0주차에 프레임워크 없이 쓴다. 기본 provider는 **Gemini 무료 티어**를 OpenAI 호환 엔드포인트로 호출한다
+- [ ] API 키 발급 후 환경변수로 등록 (`.env` + `process.env.GEMINI_API_KEY`) — 무료 키: https://aistudio.google.com/apikey. **코드에 하드코딩하지 말 것**, `.env`는 `.gitignore`에
+- [ ] (여러 벤더를 인터페이스로 추상화하고 Claude(cc)를 어댑터로 두는 것은 [08장](08-agent-platform-infra.md) 연습문제)
+- [ ] 무료 티어라도 사용량 한도 확인 — 무한 루프 버그 대비
 
 **자가진단:**
 1. tool_use에서 실제로 함수를 실행하는 주체는 LLM인가 당신 코드인가? (답: 당신 코드)

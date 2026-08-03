@@ -141,6 +141,18 @@ const result   = await devAgent(`이 전략 구현: ${strategy}`);
 - [ ] **비동기 체감**: 한 에이전트에 sleep을 넣어 오래 걸리게 만들고, 동기 호출로 막히는 것 → 작업ID+폴링으로 바꿔보기
 - [ ] **승격 게이트 판정**: 지금 만드는 프로젝트가 위 4가지 트리거 중 실제로 걸리는 게 있는지 표로 체크 → 앱 레이어면 앱 레이어로 남기는 결정을 내려보기
 
+## 🛠 직접 해볼 것 — LLM Provider 추상화 (멀티 LLM)
+
+플랫폼은 특정 LLM 벤더에 묶이면 안 된다. 하나의 인터페이스 뒤에 여러 벤더를 어댑터로 두고, 설정으로 갈아끼운다 — 이게 폴리글랏 원칙의 "LLM 판(版)"이다. (실습 파일: `src/infra/llm-provider.ts`)
+
+- [ ] `LLMProvider` 인터페이스를 정한다: `{ name, model, ask(system, user): Promise<string> }`
+- [ ] **Gemini 어댑터**(OpenAI 호환)는 주어져 있다 — 읽고 구조를 파악
+- [ ] **Claude(cc) 어댑터를 직접 구현**: 같은 인터페이스를 Anthropic SDK로. system은 top-level 파라미터, 응답은 content 블록 배열 — 벤더마다 형식이 다르다는 걸 손으로 체감
+- [ ] `getProvider()`가 env(`LLM_PROVIDER`)로 어댑터를 고르게 하고, `LLM_PROVIDER=gemini` / `=anthropic` 로 바꿔 **호출부 코드는 그대로인데 벤더만 갈리는 것** 확인
+- [ ] (심화) 인터페이스에 tool 호출 지원을 추가하고, OpenAI function ↔ Anthropic tool_use 형식을 어댑터에서 정규화
+
+> **핵심:** 어댑터 패턴 = "계약(인터페이스)은 하나, 구현(벤더)은 여럿". Agent Card가 에이전트 사이의 계약이듯, `LLMProvider`는 플랫폼과 LLM 벤더 사이의 계약이다. 벤더 교체가 호출부에 새어나가지 않게 하는 것이 플랫폼의 일이다.
+
 **자가진단:**
 1. "에이전트를 인프라로 짓는다"를 한 문장으로? (답: 마이크로서비스로 짓는다)
 2. Agent Card는 백엔드의 무엇에 대응하나? (답: OpenAPI 명세 = 서비스 계약)

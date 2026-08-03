@@ -14,6 +14,7 @@
     "infra:analyst": "tsx src/infra/analyst-agent.ts",
     "infra:ad-expert": "tsx src/infra/ad-expert-agent.ts",
     "infra:orchestrator": "tsx src/infra/orchestrator.ts",
+    "infra:provider": "tsx src/infra/llm-provider.ts",
     "typecheck": "tsc"
   },
   "dependencies": {
@@ -21,8 +22,10 @@
     "@langchain/anthropic": "^1.5.2",
     "@langchain/core": "^1.2.4",
     "@langchain/langgraph": "^1.4.8",
+    "@langchain/openai": "^1.5.5",
     "dotenv": "^17.4.2",
     "fastify": "^5.11.0",
+    "openai": "^7.3.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

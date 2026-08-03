@@ -7,7 +7,7 @@
  *
  * 실행: npm run week7
  */
-import { client, MODEL } from "../shared/llm";
+import { ask } from "../shared/llm";
 
 // 아주 작은 지식 베이스 (실제로는 회사 위키/문서를 청킹한 것) — scaffolding
 const DOCS = [
@@ -28,7 +28,7 @@ function retrieve(query: string, k = 2): string[] {
 async function answer(query: string): Promise<string> {
   // 🎯 TODO:
   //   1) retrieve(query) 로 관련 문서를 뽑아 하나의 context 문자열로 합친다 (augment)
-  //   2) client.messages.create 로, "아래 참고 문서에 근거해서만 답하라" 시스템 프롬프트 + context + query (generate)
+  //   2) ask("아래 참고 문서에 근거해서만 답하라 ...", `참고 문서:\n${context}\n\n질문: ${query}`) (generate)
   //   3) 최종 텍스트를 반환
   throw new Error("TODO: answer 구현. 막히면 solutions/week7-rag/index.ts 참고");
 }

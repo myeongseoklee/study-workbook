@@ -51,7 +51,7 @@ Anthropic이 정리한, 완전한 에이전트로 가기 전에 알아야 할 �
 
 이번 주 실습의 전부는 **프레임워크 없이 계산기 에이전트 하나 짜기**다.
 
-- [ ] LLM SDK(`@anthropic-ai/sdk` 또는 `openai`)로 단순 호출 하나 성공시키기
+- [ ] LLM SDK(`openai`, 기본 provider는 Gemini OpenAI 호환)로 단순 호출 하나 성공시키기
 - [ ] 툴 2개 정의: `add(a, b)`, `multiply(a, b)` — LLM에게 이름·설명·인자 스키마(JSON Schema)를 알려준다
 - [ ] **핵심 루프 구현**:
   - [ ] 대화 히스토리(배열)를 만든다

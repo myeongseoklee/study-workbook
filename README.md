@@ -21,8 +21,11 @@ src/                       # 🎯 연습문제 (여기를 채운다)
 ├── week5-eval/            # 05장: 평가셋 하네스
 ├── week7-rag/             # 06장: 최소 RAG
 └── infra/                 # 08장: 에이전트를 독립 서비스로 (Fastify) + 오케스트레이터
+    └── llm-provider.ts    #        + LLM provider 추상화 (Gemini 주고 Claude 어댑터 직접 구현)
 solutions/                 # ✅ 완성본 (막힐 때만 열어보기 — src/ 와 동일 구조)
 ```
+
+**LLM provider:** 주차 실습은 **Gemini(무료 티어)** 를 OpenAI 호환 방식으로 쓴다. 여러 벤더(Gemini·Claude·OpenAI)를 인터페이스로 추상화하는 것은 [08장 연습문제](docs/08-agent-platform-infra.md)(`infra/llm-provider.ts`)에서 다룬다 — 거기서 Claude(cc) 어댑터를 직접 구현한다.
 
 ## 시작하기
 
@@ -30,9 +33,10 @@ solutions/                 # ✅ 완성본 (막힐 때만 열어보기 — src/ 
 # 1) 의존성 설치
 npm install
 
-# 2) API 키 설정
+# 2) API 키 설정 (기본 provider = Gemini 무료 티어)
 cp .env.example .env
-#   .env 를 열어 ANTHROPIC_API_KEY 를 채운다. MODEL 도 계정에서 쓸 수 있는 ID로 바꾼다.
+#   .env 를 열어 GEMINI_API_KEY 를 채운다. 무료 키: https://aistudio.google.com/apikey
+#   MODEL 은 무료 티어에서 쓸 수 있는 flash 계열(기본 gemini-2.5-flash)로.
 
 # 3) 환경 점검 (여기가 ✅ 되면 세팅 완료 — 이후 에러는 '내 코드' 문제)
 npm run check
@@ -67,6 +71,13 @@ npm run infra:orchestrator  # 터미널 3 — 오케스트레이터가 둘을 HT
 
 week3(앱 레이어, 함수 호출)와 결과를 비교해 보라 — **바뀐 건 "함수 호출 → HTTP 호출"뿐**이다.
 
+그리고 provider 추상화 연습문제:
+
+```bash
+npm run infra:provider                       # 기본 Gemini
+LLM_PROVIDER=anthropic npm run infra:provider # Claude 어댑터 (직접 구현 후)
+```
+
 ## 핵심 관점 (docs 전반의 뼈대)
 
 - **에이전트 = 프롬프트(역할) + 도구.** 협업 = 그걸 순서대로 부르고 결과를 넘기는 코드.
@@ -77,5 +88,6 @@ week3(앱 레이어, 함수 호출)와 결과를 비교해 보라 — **바뀐 �
 
 ## 스택
 
-Node 20+ · TypeScript(tsx) · `@anthropic-ai/sdk` · `@langchain/langgraph` · `fastify`.
+Node 20+ · TypeScript(tsx) · `openai`(→ Gemini OpenAI 호환) · `@langchain/openai` · `@langchain/langgraph` · `fastify`.
+`@anthropic-ai/sdk`·`@langchain/anthropic`은 08장 provider 추상화 연습문제의 Claude(cc) 어댑터에 쓰인다.
 파이썬 라이브러리가 꼭 필요한 에이전트만 별도 서비스로 격리하는 폴리글랏 전략은 [08장](docs/08-agent-platform-infra.md) 참고.
