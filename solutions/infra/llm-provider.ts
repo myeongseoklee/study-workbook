@@ -16,7 +16,7 @@ export interface LLMProvider {
 
 // --- Gemini 어댑터 (OpenAI 호환) ---
 function geminiProvider(): LLMProvider {
-  const model = process.env.MODEL ?? "gemini-2.5-flash";
+  const model = process.env.GEMINI_MODEL ?? "gemini-3.1-flash-lite";
   const client = new OpenAI({
     apiKey: process.env.GEMINI_API_KEY ?? process.env.OPENAI_API_KEY,
     baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
@@ -39,7 +39,7 @@ function geminiProvider(): LLMProvider {
 
 // --- Claude(cc) 어댑터 (Anthropic SDK) ---
 function anthropicProvider(): LLMProvider {
-  const model = process.env.MODEL ?? "claude-haiku-4-5";
+  const model = process.env.ANTHROPIC_MODEL ?? "claude-haiku-4-5";
   const client = new Anthropic(); // ANTHROPIC_API_KEY 자동 로드
   return {
     name: "anthropic",

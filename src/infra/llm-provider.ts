@@ -22,7 +22,7 @@ export interface LLMProvider {
 
 // --- Gemini 어댑터 (OpenAI 호환) — 완성 ---
 function geminiProvider(): LLMProvider {
-  const model = process.env.MODEL ?? "gemini-2.5-flash";
+  const model = process.env.GEMINI_MODEL ?? "gemini-3.1-flash-lite";
   const client = new OpenAI({
     apiKey: process.env.GEMINI_API_KEY ?? process.env.OPENAI_API_KEY,
     baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
@@ -47,7 +47,7 @@ function geminiProvider(): LLMProvider {
 function anthropicProvider(): LLMProvider {
   // 🎯 TODO: 위 geminiProvider 와 "같은 인터페이스"를 Anthropic SDK로 구현하라.
   //   1) import 를 주석 해제하고 new Anthropic() (ANTHROPIC_API_KEY 자동 로드)
-  //   2) model 기본값: process.env.MODEL ?? "claude-haiku-4-5"
+  //   2) model 기본값: process.env.ANTHROPIC_MODEL ?? "claude-haiku-4-5"
   //   3) ask(system, user):
   //        client.messages.create({ model, max_tokens: 1024, system, messages: [{ role:"user", content:user }] })
   //        → 응답 content 배열에서 type==="text" 블록만 뽑아 이어붙여 반환

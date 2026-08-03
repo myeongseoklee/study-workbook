@@ -25,7 +25,7 @@ const multiply = tool(async ({ a, b }) => String(a * b), {
 });
 
 const model = new ChatOpenAI({
-  model: process.env.MODEL ?? "gemini-2.5-flash",
+  model: process.env.GEMINI_MODEL ?? "gemini-3.1-flash-lite",
   apiKey: process.env.GEMINI_API_KEY ?? process.env.OPENAI_API_KEY,
   configuration: {
     baseURL:

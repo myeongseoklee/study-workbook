@@ -27,7 +27,7 @@ const multiply = tool(async ({ a, b }) => String(a * b), {
 
 // 모델 = ChatOpenAI 를 Gemini(OpenAI 호환) 엔드포인트로 (scaffolding)
 const model = new ChatOpenAI({
-  model: process.env.MODEL ?? "gemini-2.5-flash",
+  model: process.env.GEMINI_MODEL ?? "gemini-3.1-flash-lite",
   apiKey: process.env.GEMINI_API_KEY ?? process.env.OPENAI_API_KEY,
   configuration: {
     baseURL:

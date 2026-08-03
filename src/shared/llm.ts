@@ -26,7 +26,7 @@ export const client = new OpenAI({
 });
 
 // 사용할 모델. .env 의 MODEL 로 덮어쓸 수 있다.
-export const MODEL = process.env.MODEL ?? "gemini-2.5-flash";
+export const MODEL = process.env.GEMINI_MODEL ?? "gemini-3.1-flash-lite";
 
 /**
  * 시스템 프롬프트(역할) + 사용자 입력 → 최종 텍스트.

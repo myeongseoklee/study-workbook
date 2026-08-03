@@ -36,7 +36,7 @@ npm install
 # 2) API 키 설정 (기본 provider = Gemini 무료 티어)
 cp .env.example .env
 #   .env 를 열어 GEMINI_API_KEY 를 채운다. 무료 키: https://aistudio.google.com/apikey
-#   MODEL 은 무료 티어에서 쓸 수 있는 flash 계열(기본 gemini-2.5-flash)로.
+#   GEMINI_MODEL 기본값은 gemini-3.1-flash-lite. (⚠️ gemini-2.5-* 는 신규 계정엔 404)
 
 # 3) 환경 점검 (여기가 ✅ 되면 세팅 완료 — 이후 에러는 '내 코드' 문제)
 npm run check

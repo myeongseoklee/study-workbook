@@ -15,7 +15,7 @@ main().catch((e) => {
   console.error("❌ 환경 점검 실패:", e?.message ?? e);
   console.error(
     "   .env 의 GEMINI_API_KEY 를 확인하세요 (무료 키: https://aistudio.google.com/apikey).\n" +
-      "   MODEL 이 키에서 쓸 수 있는 값인지도 확인 (예: gemini-2.5-flash)."
+      "   404면 GEMINI_MODEL 을 현행 모델로: gemini-3.1-flash-lite (2.5-* 는 신규 계정 불가)."
   );
   process.exit(1);
 });
