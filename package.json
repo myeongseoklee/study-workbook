@@ -5,6 +5,7 @@
   "type": "module",
   "description": "멀티 에이전트 시스템 학습 워크북 — Node/TypeScript 실습 환경",
   "scripts": {
+    "check": "tsx src/shared/check.ts",
     "week0": "tsx src/week0-agent-loop/index.ts",
     "week1": "tsx src/week1-langgraph/index.ts",
     "week3": "tsx src/week3-multiagent/index.ts",

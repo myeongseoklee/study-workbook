@@ -1,16 +1,16 @@
 /**
- * 0주차 — 프레임워크 없이 에이전트 만들기 (docs/02-what-is-an-agent.md)
+ * 0주차 — 프레임워크 없이 에이전트 만들기 (docs/02-what-is-an-agent.md)  [연습문제]
  *
  * 에이전트의 전부: LLM 호출 → tool_use 파싱 → 함수 실행 → 결과 주입 → 반복.
- * 이 파일은 "돌아가는 기준선"이다. 실행해서 흐름을 눈으로 본 뒤,
- * 아래 [실험] 주석대로 일부러 망가뜨려 보며 왜 그 장치가 필요한지 체감하라.
+ * 아래 main()의 for 루프 안을 직접 구현하라. (툴 정의·runTool 은 이미 채워져 있다)
+ * 막히면 정답: solutions/week0-agent-loop/index.ts
  *
  * 실행: npm run week0
  */
 import Anthropic from "@anthropic-ai/sdk";
 import { client, MODEL } from "../shared/llm";
 
-// ① 개발자가 LLM에게 알려주는 툴 목록 (이름·설명·JSON Schema)
+// ① 개발자가 LLM에게 알려주는 툴 목록 (scaffolding — 그대로 사용)
 const tools: Anthropic.Tool[] = [
   {
     name: "add",
@@ -32,7 +32,7 @@ const tools: Anthropic.Tool[] = [
   },
 ];
 
-// ③ 실제 함수 — 실행 주체는 LLM이 아니라 "당신 코드"다.
+// ③ 실제 함수 — 실행 주체는 LLM이 아니라 "당신 코드"다 (scaffolding — 그대로 사용)
 function runTool(name: string, input: any): number {
   if (name === "add") return input.a + input.b;
   if (name === "multiply") return input.a * input.b;
@@ -44,44 +44,21 @@ async function main() {
     { role: "user", content: "(3 + 5) 곱하기 2는 얼마야? 반드시 툴을 써서 단계별로 계산해." },
   ];
 
-  const MAX_STEPS = 10; // [실험] 이 줄을 지우면? → 무한 루프 위험 (타임아웃의 필요성)
+  const MAX_STEPS = 10; // 무한 루프 방지 (이게 왜 필요한지 docs/02에서 체감)
   for (let step = 0; step < MAX_STEPS; step++) {
-    const res = await client.messages.create({
-      model: MODEL,
-      max_tokens: 1024,
-      tools,
-      messages,
-    });
-
-    // 어시스턴트 응답을 히스토리에 쌓는다 (상태 관리)
-    messages.push({ role: "assistant", content: res.content });
-
-    const toolUses = res.content.filter(
-      (b): b is Anthropic.ToolUseBlock => b.type === "tool_use"
+    // 🎯 TODO 1: client.messages.create({ model: MODEL, max_tokens, tools, messages }) 로 LLM 호출
+    // 🎯 TODO 2: 응답(res.content)을 messages 에 assistant 로 push (상태 관리)
+    // 🎯 TODO 3: res.content 에서 type === "tool_use" 블록들만 골라낸다
+    // 🎯 TODO 4: tool_use 가 하나도 없으면 = 최종 답. text 블록을 출력하고 return
+    // 🎯 TODO 5: 각 tool_use 를 runTool 로 실행하고 tool_result 블록 배열을 만든다
+    //           ({ type: "tool_result", tool_use_id: tu.id, content: String(결과) })
+    // 🎯 TODO 6: tool_result 들을 messages 에 user 로 push 하고 루프 계속
+    throw new Error(
+      "TODO: week0 에이전트 루프를 구현하세요. 막히면 solutions/week0-agent-loop/index.ts 참고"
     );
-
-    // tool_use가 없으면 = 최종 답. 루프 종료.
-    if (toolUses.length === 0) {
-      const text = res.content
-        .filter((b): b is Anthropic.TextBlock => b.type === "text")
-        .map((b) => b.text)
-        .join("");
-      console.log("\n✅ 최종 답:", text);
-      return;
-    }
-
-    // ③④ 각 tool_use를 실행하고 결과를 tool_result로 되돌려준다
-    const results: Anthropic.ToolResultBlockParam[] = toolUses.map((tu) => {
-      const output = runTool(tu.name, tu.input);
-      console.log(`🔧 ${tu.name}(${JSON.stringify(tu.input)}) = ${output}`);
-      return { type: "tool_result", tool_use_id: tu.id, content: String(output) };
-    });
-
-    // [실험] 이 push를 주석 처리하면? → LLM이 방금 한 계산을 잊는다 (상태 관리의 필요성)
-    messages.push({ role: "user", content: results });
   }
 
-  console.log("\n⛔ MAX_STEPS 초과 — 강제 종료");
+  console.log("⛔ MAX_STEPS 초과 — 강제 종료");
 }
 
 main().catch((e) => {
