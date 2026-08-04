@@ -21,6 +21,8 @@
 LangGraph는 이 셋을 **State + Reducer + Checkpointer + Interrupt**로 푼다. 공식 한국어 책보다 공식 문서 튜토리얼이 최신이니, 개념은 여기서 잡고 API는 문서에서 확인하라.
 
 > **이 워크북은 Node/TypeScript 기준이다.** LangGraph는 JS 정식 버전(`@langchain/langgraph`)이 있고, 개념(StateGraph·리듀서·체크포인터·인터럽트)은 Python판과 동일하다. 아래 API 이름은 JS판 기준으로 적는다.
+>
+> **패키지 경계 (v1 기준):** 그래프 원시요소(`StateGraph`·`Annotation`·`MemorySaver`)는 `@langchain/langgraph`, **프리빌트 ReAct 에이전트는 `langchain` 패키지의 `createAgent`**다. `@langchain/langgraph/prebuilt` 의 `createReactAgent` 는 `langchain` 으로 옮겨지며 deprecated 됐다 — 옵션 이름도 `llm` → `model` 로 바뀌었다. `langchain` 은 `@langchain/core`(peer)와 `@langchain/langgraph`(dep) 위에 얹히는 상위 패키지이므로 **둘을 대체하지 않는다.**
 
 ## 필수 지식 (HOW)
 
@@ -84,7 +86,8 @@ LangGraph는 이 셋을 **State + Reducer + Checkpointer + Interrupt**로 푼다
 
 ## 공식 문서
 
-- [LangGraph.js API 레퍼런스](https://langchain-ai.github.io/langgraphjs/) — StateGraph·Annotation·체크포인터·인터럽트 (JS판)
+- [LangGraph.js 공식 문서](https://docs.langchain.com/oss/javascript/langgraph/overview) — StateGraph·Annotation·체크포인터·인터럽트 (JS판). 구 `langchain-ai.github.io/langgraphjs` 는 이곳으로 이전됐다
+- [LangChain.js 에이전트 문서](https://docs.langchain.com/oss/javascript/langchain/agents) — `createAgent` 와 미들웨어(HITL·요약·툴 에러) 레퍼런스
 - [LangGraph 메모리·지속성 문서 (JS)](https://docs.langchain.com/oss/javascript/langgraph/add-memory) — 체크포인터·Thread 실습
 - [@langchain/langgraph-checkpoint (npm)](https://www.npmjs.com/package/@langchain/langgraph-checkpoint) — 체크포인터 인터페이스
 - 공식 튜토리얼(어떤 한국어 책보다 최신)에서 Checkpointer·Thread·조건부 엣지 실습을 따라가라.

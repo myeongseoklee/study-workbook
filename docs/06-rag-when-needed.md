@@ -83,5 +83,5 @@ URL은 [99. 참고 자료](99-references.md) 참고.
 
 ## 공식 문서
 
-- [LangChain.js RAG 튜토리얼](https://js.langchain.com/docs/tutorials/rag/) (버전 의존이 크므로 공식 문서 최신판을 따라가라)
+- [LangChain.js Retrieval 문서](https://docs.langchain.com/oss/javascript/langchain/retrieval) — 2-step RAG / Agentic RAG / Hybrid RAG, 로더·임베딩·벡터스토어·리트리버 (구 `js.langchain.com/docs/tutorials/rag` 는 이곳으로 이전됐다. 버전 의존이 크므로 최신판을 따라가라)
 - 벡터DB(pgvector·Qdrant·Pinecone 등) 공식 문서 — 직접 운영 시점에 참조 (모두 JS 클라이언트 제공)

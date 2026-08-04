@@ -19,9 +19,10 @@
 | Anthropic Messages API | https://docs.anthropic.com/en/api/messages | LLM 호출·tool_use 요청/응답 구조 |
 | Anthropic Tool use 개요 | https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview | function calling 메커니즘 |
 | Anthropic TypeScript SDK | https://github.com/anthropics/anthropic-sdk-typescript | Node용 `@anthropic-ai/sdk` |
-| LangGraph.js API 레퍼런스 | https://langchain-ai.github.io/langgraphjs/ | StateGraph·Annotation·체크포인터·인터럽트 (JS판) |
+| LangGraph.js 공식 문서 | https://docs.langchain.com/oss/javascript/langgraph/overview | StateGraph·Annotation·체크포인터·인터럽트 (JS판) |
 | LangGraph 메모리·지속성 (JS) | https://docs.langchain.com/oss/javascript/langgraph/add-memory | 체크포인터·Thread |
-| LangChain.js | https://js.langchain.com/ | JS 생태계 전반(RAG·도구·통합) |
+| LangChain.js | https://docs.langchain.com/oss/javascript/langchain/overview | JS 생태계 전반(RAG·도구·통합) |
+| LangChain.js 에이전트 | https://docs.langchain.com/oss/javascript/langchain/agents | `createAgent`(구 `createReactAgent`)·미들웨어 |
 
 > **이 워크북은 Node/TypeScript 기준이다.** LangGraph·LangChain·LangSmith는 버전에 따라 API가 바뀐다. 세부 API는 책보다 **공식 문서 최신판(JS)**을 따라가라 — 이 워크북은 변하지 않는 개념만 본문에 담았다.
 

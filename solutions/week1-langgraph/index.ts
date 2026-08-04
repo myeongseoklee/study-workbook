@@ -7,9 +7,10 @@
  * 실행: npm run week1
  */
 import { ChatOpenAI } from "@langchain/openai";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
+// v1부터 프리빌트 에이전트는 langchain 패키지의 createAgent 로 옮겨졌다
+// (@langchain/langgraph/prebuilt 의 createReactAgent 는 deprecated).
+import { createAgent, tool } from "langchain";
 import { MemorySaver } from "@langchain/langgraph";
-import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 
 const add = tool(async ({ a, b }) => String(a + b), {
@@ -36,7 +37,8 @@ const model = new ChatOpenAI({
 // 체크포인터: 매 노드 실행 후 상태를 저장 → 재개/사람승인(interrupt)의 전제
 const checkpointer = new MemorySaver();
 
-const agent = createReactAgent({ llm: model, tools: [add, multiply], checkpointer });
+// createReactAgent 의 llm 옵션은 createAgent 에서 model 로 이름이 바뀌었다
+const agent = createAgent({ model, tools: [add, multiply], checkpointer });
 
 async function main() {
   // 같은 thread_id로 부르면 상태가 이어진다 (체크포인터)
@@ -63,7 +65,7 @@ main().catch((e) => {
 
 /*
  * 🛠 더 해볼 것 (docs/03):
- * - createReactAgent 대신 StateGraph 를 손수 조립 (Annotation.Root + append 리듀서 + 조건부 엣지)
+ * - createAgent 대신 StateGraph 를 손수 조립 (Annotation.Root + append 리듀서 + 조건부 엣지)
  * - SqliteSaver 로 바꿔 재시작 후에도 상태가 남는지 확인
  * - "이메일 보내기" 노드 앞에 interruptBefore 로 사람 승인 끼우기 / 체크포인터 빼고 왜 안 되는지 확인
  */

@@ -25,6 +25,7 @@
     "@langchain/openai": "^1.5.5",
     "dotenv": "^17.4.2",
     "fastify": "^5.11.0",
+    "langchain": "^1.5.4",
     "openai": "^7.3.0",
     "zod": "^4.4.3"
   },

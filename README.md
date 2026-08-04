@@ -88,6 +88,6 @@ LLM_PROVIDER=anthropic npm run infra:provider # Claude 어댑터 (직접 구현 
 
 ## 스택
 
-Node 20+ · TypeScript(tsx) · `openai`(→ Gemini OpenAI 호환) · `@langchain/openai` · `@langchain/langgraph` · `fastify`.
+Node 20+ · TypeScript(tsx) · `openai`(→ Gemini OpenAI 호환) · `langchain`(프리빌트 `createAgent`) · `@langchain/openai` · `@langchain/langgraph`(StateGraph·체크포인터) · `fastify`.
 `@anthropic-ai/sdk`·`@langchain/anthropic`은 08장 provider 추상화 연습문제의 Claude(cc) 어댑터에 쓰인다.
 파이썬 라이브러리가 꼭 필요한 에이전트만 별도 서비스로 격리하는 폴리글랏 전략은 [08장](docs/08-agent-platform-infra.md) 참고.
