@@ -61,13 +61,53 @@ LangGraph는 이 셋을 **State + Reducer + Checkpointer + Interrupt**로 푼다
 - **`interruptBefore` vs `interruptAfter`** — 이 구분이 진단 신호다:
   - `interruptBefore`: 노드 실행 **전에** 멈춘다. **승인이 액션을 막는(gate)** 경우 — 이메일을 보내기 전에 승인.
   - `interruptAfter`: 노드가 **먼저 실행되고 나서** 멈춘다. 방금 한 일을 사람이 **검토**하게 할 때. 주의: `interruptAfter`면 승인받으려던 액션이 **이미 실행된 뒤**다.
+- **재개 신호는 `Command`다.** 멈춘 그래프는 같은 thread로 `graph.invoke(new Command({ resume: <사람의 결정> }), config)` 를 부르면 이어서 돈다 (`Command` 는 `@langchain/langgraph`).
+
+**어디에 거는가 — 두 갈래다 (v1 기준):**
+
+| 쓰는 것 | 승인을 끼우는 방법 |
+|---------|-------------------|
+| `StateGraph` 직접 조립 | `.compile({ checkpointer, interruptBefore: ["sendEmail"] })` — **노드 경계**에 정적으로 건다. 노드 안에서 동적으로 멈추려면 `interrupt(value)` 를 호출한다 |
+| `createAgent` 프리빌트 | `interruptBefore` 옵션이 **없다.** `humanInTheLoopMiddleware` 를 쓴다 — **툴 단위**로 건다 |
+
+```ts
+import { createAgent, humanInTheLoopMiddleware } from "langchain";
+import { Command } from "@langchain/langgraph";
+
+const agent = createAgent({
+  model, tools: [sendEmail], checkpointer,   // 체크포인터는 여기서도 전제 조건
+  middleware: [humanInTheLoopMiddleware({
+    interruptOn: { sendEmail: { allowedDecisions: ["approve", "edit", "reject"] } },
+  })],
+});
+
+const res = await agent.invoke({ messages: [...] }, config);
+if (res.__interrupt__) {                     // 멈췄다 = 승인 대기 중
+  await agent.invoke(new Command({ resume: { decisions: [{ type: "approve" }] } }), config);
+}
+```
+
+> 개념(멈춤·상태 저장·재개 신호)은 같고 **거는 지점만 노드 → 툴 호출로 옮겨간다.** 프리빌트를 쓰면 "이메일 보내기 노드" 라는 게 없고 툴 호출만 있으니 당연한 귀결이다. 되돌릴 수 없는 액션은 여기서도 실행 **전**에 막아야 한다.
+
+### 5. 미들웨어 — 프리빌트 에이전트의 확장 지점
+
+`createAgent` 는 그래프를 직접 조립하는 대신 **모델 호출·툴 호출을 감싸는 훅**을 제공한다. 위 HITL도 그중 하나다. 워크북의 다른 장들과 겹치는 것들:
+
+- `humanInTheLoopMiddleware` — 툴 승인 (이 장)
+- `summarizationMiddleware` / `contextEditingMiddleware` — 컨텍스트가 길어질 때 압축·정리
+- `toolErrorMiddleware` / `toolRetryMiddleware` / `modelFallbackMiddleware` — [0주차에서 손으로 짠 툴 에러 핸들링](02-what-is-an-agent.md)의 프레임워크판
+- `toolCallLimitMiddleware` / `modelCallLimitMiddleware` — 루프 폭주 상한 (0주차의 `MAX_STEPS`)
+- `createMiddleware({ wrapModelCall, wrapToolCall })` — 위에 없는 건 직접 만든다
+
+> **판단 기준:** 손으로 짠 루프에서 이미 겪어본 문제만 미들웨어로 옮겨라. 미들웨어부터 훑으면 [02장](02-what-is-an-agent.md)이 경고한 "추상화 뒤에서 무엇이 도는지 모르는" 상태로 되돌아간다.
 
 ## 🛠 직접 해볼 것 — 상태 있는 그래프 짜기
 
 - [ ] 0주차의 계산기 에이전트를 LangGraph로 다시 구현: `agent` 노드 + `tool` 노드 + 둘 사이 조건부 엣지(tool_use 있으면 tool 노드로, 없으면 END)
 - [ ] 상태에 `messages` 키를 두고 **리듀서로 append** 설정 — 덮어쓰기로 바꿔보고 왜 대화가 깨지는지 관찰
 - [ ] **체크포인터 붙이기**: MemorySaver로 시작 → 그래프 중간에 일부러 예외를 던져 죽인 뒤, 같은 thread로 재실행해서 **처음이 아니라 죽은 지점부터** 재개되는지 확인
-- [ ] **인터럽트 실습**: "이메일 보내기" 노드 앞에 `interruptBefore`를 걸고, 실행이 멈춰서 사람 입력을 기다리는지 확인 → 승인하면 이어서 실행되는지 확인
+- [ ] **인터럽트 실습**: "이메일 보내기" 노드 앞에 `interruptBefore`를 걸고, 실행이 멈춰서 사람 입력을 기다리는지 확인 → `new Command({ resume })` 로 승인하면 이어서 실행되는지 확인
+- [ ] 같은 승인을 `createAgent` + `humanInTheLoopMiddleware` 로도 걸어보고, **거는 지점이 노드에서 툴 호출로 바뀌는 것**을 비교
 - [ ] 체크포인터 없이 인터럽트를 시도해서 **왜 안 되는지** 직접 확인 (전제 조건 체감)
 
 **자가진단:**
@@ -75,14 +115,17 @@ LangGraph는 이 셋을 **State + Reducer + Checkpointer + Interrupt**로 푼다
 2. 병렬 노드 둘이 같은 리스트에 결과를 넣을 때 충돌 없이 합치려면 무엇이 필요한가? (답: append 리듀서)
 3. 인터럽트가 체크포인터를 요구하는 이유는?
 4. 결제 실행을 승인받고 싶다면 `interruptBefore`와 `interruptAfter` 중 무엇을 써야 하나? (답: before — 안 그러면 이미 결제됨)
+5. `createAgent` 로 만든 에이전트에 `interruptBefore` 를 주려면? (답: 못 준다 — 옵션이 없다. `humanInTheLoopMiddleware` 로 툴 단위로 건다)
+6. 프리빌트 `createAgent` 는 어느 패키지에서 오나? (답: `langchain`. `StateGraph`·`MemorySaver` 는 `@langchain/langgraph`)
 
 ## ⚠️ 암기 필수
 
 - [ ] **StateGraph는 `.compile()` 해야 실행 가능** — 빌더는 설계도, 컴파일된 것이 실행체.
 - [ ] **리듀서 = 상태 병합 규칙. 기본은 덮어쓰기, `append` 리듀서가 병렬을 안전하게 만든다.** (진단: 병렬 결과가 사라지면 리듀서를 의심)
 - [ ] **인터럽트는 체크포인터를 전제로 한다.** 체크포인터 없이 인터럽트 불가.
-- [ ] **`interruptBefore`(액션 전 승인) vs `interruptAfter`(실행 후 검토, 액션은 이미 실행됨).** 되돌릴 수 없는 액션은 반드시 `before`.
+- [ ] **`interruptBefore`(액션 전 승인) vs `interruptAfter`(실행 후 검토, 액션은 이미 실행됨).** 되돌릴 수 없는 액션은 반드시 `before`. 재개는 `new Command({ resume })`.
 - [ ] 체크포인터 선택: **MemorySaver(개발) / SqliteSaver(단일 서버) / PostgresSaver(멀티 인스턴스).**
+- [ ] **패키지 경계: 그래프 원시요소(`StateGraph`·`Annotation`·`MemorySaver`)는 `@langchain/langgraph`, 프리빌트 에이전트(`createAgent`)와 미들웨어는 `langchain`.** 승인은 그래프에선 `interruptBefore`(노드), 프리빌트에선 `humanInTheLoopMiddleware`(툴).
 
 ## 공식 문서
 

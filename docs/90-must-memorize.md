@@ -18,7 +18,7 @@
 - [ ] **핸드오프의 품질 = 넘기는 컨텍스트의 품질.** 컨텍스트 없이 넘기면 받는 쪽이 맥락 없이 재시작. → [04장](04-multi-agent-patterns.md)
 - [ ] **RAG 품질은 검색 품질이 좌우한다.** 생성 모델 바꾸기 전에 검색부터 의심. → [06장](06-rag-when-needed.md)
 - [ ] **벡터 검색은 의미에 강하고 정확한 코드/ID에 약하다 → 하이브리드(벡터+키워드)로 보완.** → [06장](06-rag-when-needed.md)
-- [ ] **`interruptBefore`(액션 전 승인) vs `interruptAfter`(실행 후 검토, 액션 이미 실행됨).** 되돌릴 수 없는 액션은 반드시 before. → [03장](03-langgraph-basics.md)
+- [ ] **`interruptBefore`(액션 전 승인) vs `interruptAfter`(실행 후 검토, 액션 이미 실행됨).** 되돌릴 수 없는 액션은 반드시 before. 프리빌트 `createAgent` 에는 이 옵션이 없고 `humanInTheLoopMiddleware` 로 툴 단위로 건다. → [03장](03-langgraph-basics.md)
 - [ ] **조정(오케스트레이션)은 없앨 수 없다 — 위치(중앙집중 vs 분산)만 바뀐다.** 인프라로 가도 오케스트레이터는 서비스가 될 뿐 사라지지 않는다. 실무 기본값은 중앙집중. → [04장](04-multi-agent-patterns.md), [08장](08-agent-platform-infra.md)
 - [ ] **MCP는 에이전트↔도구, A2A는 에이전트↔에이전트.** 방향이 다르다. 경쟁 아님, 층이 다름. → [08장](08-agent-platform-infra.md)
 
@@ -36,6 +36,7 @@
 - [ ] **에이전트를 인프라로 짓기 = 마이크로서비스로 짓기.** 함수→서비스, 서비스디스커버리→레지스트리, OpenAPI→Agent Card. 새것은 Agent Card와 A2A/MCP 둘뿐. → [08장](08-agent-platform-infra.md)
 - [ ] **StateGraph는 `.compile()` 해야 실행 가능.** 빌더는 설계도, 컴파일된 것이 실행체. → [03장](03-langgraph-basics.md)
 - [ ] **체크포인터 선택: MemorySaver(개발) / SqliteSaver(단일 서버) / PostgresSaver(멀티 인스턴스).** → [03장](03-langgraph-basics.md)
+- [ ] **패키지 경계: 그래프 원시요소는 `@langchain/langgraph`, 프리빌트 `createAgent`·미들웨어는 `langchain`.** `langchain` 은 상위 레이어지 스코프 패키지의 대체재가 아니다. → [03장](03-langgraph-basics.md)
 
 ## 학습 순서 제약
 

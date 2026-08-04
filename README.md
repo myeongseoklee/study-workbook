@@ -53,7 +53,7 @@ npm run week0
 | 명령 | 문서 | 무엇을 하나 |
 |------|------|-------------|
 | `npm run week0` | [02장](docs/02-what-is-an-agent.md) | 프레임워크 없이 계산기 에이전트 루프. 에이전트가 `while` 루프임을 체감 |
-| `npm run week1` | [03장](docs/03-langgraph-basics.md) | LangGraph로 같은 걸 다시. 체크포인터로 대화 상태 유지 |
+| `npm run week1` | [03장](docs/03-langgraph-basics.md) | 프리빌트 `createAgent`(`langchain`)로 같은 걸 다시. 체크포인터(`@langchain/langgraph`)로 대화 상태 유지 |
 | `npm run week3` | [04장](docs/04-multi-agent-patterns.md) | 분석가→광고 전략가→개발자 협업 (오케스트레이터 = 내 코드) |
 | `npm run week5` | [05장](docs/05-eval-and-observability.md) | 손으로 만든 평가셋으로 통과율 측정 |
 | `npm run week7` | [06장](docs/06-rag-when-needed.md) | 최소 RAG (검색→주입→생성) |

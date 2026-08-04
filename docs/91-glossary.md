@@ -57,7 +57,10 @@ LLM 호출 → tool_use 파싱 → 함수 실행 → 결과 주입 → 반복. �
 매 노드 실행 후 상태를 직렬화 저장 → 일시정지/재개, 크래시 복구. MemorySaver(개발)/SqliteSaver(단일 서버)/PostgresSaver(멀티 인스턴스). → 인터럽트의 전제 조건.
 
 **인터럽트(Interrupt) / Human-in-the-loop**
-실행 중 멈춰 사람 승인을 기다리는 원시 기능. **체크포인터 필수.** `interruptBefore`(액션 전 승인) vs `interruptAfter`(실행 후 검토). → [03장](03-langgraph-basics.md).
+실행 중 멈춰 사람 승인을 기다리는 원시 기능. **체크포인터 필수.** `interruptBefore`(액션 전 승인) vs `interruptAfter`(실행 후 검토). 재개는 `new Command({ resume })`. 프리빌트 `createAgent` 에는 `interruptBefore` 옵션이 없고 `humanInTheLoopMiddleware` 로 **툴 단위**로 건다. → [03장](03-langgraph-basics.md).
+
+**프리빌트 에이전트(`createAgent`) / 미들웨어**
+그래프를 직접 조립하지 않고 얻는 ReAct 루프. **`langchain` 패키지**에 있다(구 `@langchain/langgraph/prebuilt` 의 `createReactAgent`, deprecated — 옵션도 `llm` → `model`). 확장은 모델·툴 호출을 감싸는 미들웨어로 한다(HITL·요약·툴 에러·호출 상한). `langchain` 은 `@langchain/core`·`@langchain/langgraph` **위에 얹히는** 상위 패키지이며 둘을 대체하지 않는다. → [03장](03-langgraph-basics.md).
 
 **스레드(Thread)**
 체크포인터가 상태를 묶는 단위(대화 세션 식별자). 같은 thread로 재실행하면 죽은 지점부터 재개된다.
