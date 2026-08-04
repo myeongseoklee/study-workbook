@@ -90,8 +90,8 @@ LLM_PROVIDER=anthropic npm run infra:provider # Claude 어댑터 (직접 구현 
 
 ## 스택
 
-Node 20+ · TypeScript(tsx) · `openai`(→ Gemini OpenAI 호환, week0·3·5·7) · `langchain`(프리빌트 `createAgent`) · `@langchain/langgraph`(StateGraph·체크포인터) · `@langchain/google-genai`(week1 — 네이티브 Gemini) · `fastify`.
+Node 20+ · TypeScript(tsx) · `openai`(→ Gemini OpenAI 호환, week0·3·5·7) · `langchain`(프리빌트 `createAgent`) · `@langchain/langgraph`(StateGraph·체크포인터) · `@langchain/google`(week1 — 네이티브 Gemini `ChatGoogle`) · `fastify`.
 
-> **week1만 네이티브 provider인 이유:** `ChatOpenAI` 로 Gemini 3.x 에 툴을 물리면 1턴은 되고 **2턴째에 400** 이 난다. Gemini 가 요구하는 `thought_signature` 를 OpenAI 호환 변환에서 잃어버리기 때문 — 툴 루프를 프레임워크에 맡기는 순간 드러나는 종류의 비호환이다. week0의 손수 짠 루프는 응답 메시지를 그대로 되돌려주므로 이 문제가 없다.
+> **week1만 네이티브 provider인 이유:** OpenAI 호환 계층은 **단발 호출엔 충분하지만 멀티턴 툴 루프에서 깨진다.** LangChain 문서는 `openai` provider가 "공식 OpenAI 스펙 대상이며 프록시의 provider 고유 필드는 보존되지 않을 수 있다"고 경고하고, Gemini 문서는 호환 계층이 beta이며 직접 호출을 권하면서 thinking 모델의 `thought` 블록을 **받은 그대로 되돌려보내야 한다**고 못박는다. 실제로 `ChatOpenAI` 로 툴을 물리면 2턴째에 `thought_signature` 누락 400이 난다. week0의 손수 짠 루프는 응답 메시지를 그대로 히스토리에 넣으니 서명이 살아남아 문제가 없다 — 같은 엔드포인트인데 원시 SDK는 되고 프레임워크는 안 되는 이유. 자세한 인과는 [03장](docs/03-langgraph-basics.md).
 `@anthropic-ai/sdk`·`@langchain/anthropic`은 08장 provider 추상화 연습문제의 Claude(cc) 어댑터에 쓰인다.
 파이썬 라이브러리가 꼭 필요한 에이전트만 별도 서비스로 격리하는 폴리글랏 전략은 [08장](docs/08-agent-platform-infra.md) 참고.

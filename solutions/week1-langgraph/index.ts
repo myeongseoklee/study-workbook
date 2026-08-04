@@ -9,7 +9,7 @@
 // v1부터 프리빌트 에이전트는 langchain 패키지의 createAgent 로 옮겨졌다
 // (@langchain/langgraph/prebuilt 의 createReactAgent 는 deprecated).
 import { createAgent, tool } from "langchain";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatGoogle } from "@langchain/google";
 import { MemorySaver } from "@langchain/langgraph";
 import { z } from "zod";
 // 환경변수는 shared/llm 에서만 주입된다(dotenv/config) → 값은 import 해서 쓴다
@@ -28,9 +28,14 @@ const multiply = tool(async ({ a, b }) => String(a * b), {
 });
 
 // week0 은 OpenAI 호환 엔드포인트로 Gemini 를 불렀지만, 여기선 네이티브 provider 를 쓴다.
-// 이유: ChatOpenAI 로 Gemini 3.x 에 툴을 물리면 1턴은 되고 **2턴째에 400** 이 난다 —
-// Gemini 가 요구하는 thought_signature 를 OpenAI 호환 변환 과정에서 잃어버리기 때문.
-const model = new ChatGoogleGenerativeAI({
+// 공식 문서가 그렇게 안내한다 — LangChain 은 ChatOpenAI + baseURL 조합에 대해
+// "공식 OpenAI 스펙을 대상으로 하며 프록시의 provider 고유 필드는 보존되지 않을 수 있다"고
+// 경고하고, Gemini API 문서도 OpenAI 호환은 beta 이며 직접 호출을 권한다.
+// 실제 증상: 툴 호출 후 2턴째에 400 (Gemini 가 요구하는 thought_signature 유실).
+//
+// @langchain/google 이 현재 권장 패키지다 (구 @langchain/google-genai·google-vertexai 대체).
+// apiKey 를 안 주면 GOOGLE_API_KEY 를 찾으므로, 여기선 shared/llm 의 값을 명시로 넘긴다.
+const model = new ChatGoogle({
   model: MODEL,
   apiKey: API_KEY,
 });
