@@ -13,9 +13,10 @@
 docs/                      # 학습 문서 (읽기) — 00~08, 90 암기, 91 용어, 99 참고
 src/                       # 🎯 연습문제 (여기를 채운다)
 ├── shared/
-│   ├── llm.ts             # 공용 LLM 클라이언트(.env 자동 로드) — 그대로 사용
-│   │                      #   ⚠️ 환경변수는 여기서만 주입된다 → 다른 파일은
-│   │                      #   process.env 대신 export 된 API_KEY·MODEL·BASE_URL 을 import
+│   ├── env.ts             # ⚠️ 유일한 환경변수 주입 지점(dotenv/config) — 값만 export
+│   │                      #    .env 는 이 import 를 실행한 프로세스에만 로드된다.
+│   │                      #    그래서 다른 파일은 process.env 를 읽지 않고 여기 값을 import
+│   ├── llm.ts             # 공용 LLM 클라이언트(env 값 + 키 검증) — 그대로 사용
 │   └── check.ts           # 환경 점검 (npm run check)
 ├── week0-agent-loop/      # 02장: 프레임워크 없이 에이전트 루프
 ├── week1-langgraph/       # 03장: LangGraph + 체크포인터
@@ -26,6 +27,8 @@ src/                       # 🎯 연습문제 (여기를 채운다)
     └── llm-provider.ts    #        + LLM provider 추상화 (Gemini 주고 Claude 어댑터 직접 구현)
 solutions/                 # ✅ 완성본 (막힐 때만 열어보기 — src/ 와 동일 구조)
 ```
+
+**환경변수 규칙:** `.env` 는 `import "dotenv/config"` 를 실행한 프로세스에만 로드된다. 그래서 주입은 **`shared/env.ts` 한 곳**에서만 하고, 나머지 파일은 `process.env` 를 읽지 않고 거기서 export 된 값(`API_KEY`·`MODEL`·`BASE_URL`·`LLM_PROVIDER`·`ANTHROPIC_MODEL`)을 import 한다. 주차 실습은 보통 `shared/llm` 을 통해 받으면 키 검증까지 함께 얻는다. 새 환경변수를 추가할 땐 `env.ts` 에 export 를 하나 더 만드는 게 유일한 방법이다.
 
 **LLM provider:** 주차 실습은 **Gemini(무료 티어)** 를 OpenAI 호환 방식으로 쓴다. 여러 벤더(Gemini·Claude·OpenAI)를 인터페이스로 추상화하는 것은 [08장 연습문제](docs/08-agent-platform-infra.md)(`infra/llm-provider.ts`)에서 다룬다 — 거기서 Claude(cc) 어댑터를 직접 구현한다.
 

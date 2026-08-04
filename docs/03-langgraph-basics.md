@@ -24,7 +24,7 @@ LangGraph는 이 셋을 **State + Reducer + Checkpointer + Interrupt**로 푼다
 >
 > **실습 환경 두 가지 (week1 코드에 이미 반영돼 있다):**
 > ① **모델은 네이티브 provider(`@langchain/google` 의 `ChatGoogle`)를 쓴다.** week0처럼 `ChatOpenAI` + Gemini의 OpenAI 호환 엔드포인트로 가면 툴 호출 **2턴째에 400** 이 난다. 공식 문서가 이미 이 조합을 권하지 않는다 — 아래 [프레임워크와 provider 호환](#프레임워크와-provider-호환--week1에서-드러나는-것) 참고.
-> ② **환경변수는 `shared/llm.ts` 에서만 주입된다**(`import "dotenv/config"`). 다른 파일에서 `process.env.GEMINI_API_KEY` 를 직접 읽으면 `undefined` 이므로, 거기서 export 된 `API_KEY`·`MODEL`·`BASE_URL` 을 import 해서 쓴다. (`ChatGoogle` 은 `apiKey` 를 생략하면 `GOOGLE_API_KEY` 를 찾으므로, 이 워크북에선 값을 명시로 넘긴다.)
+> ② **환경변수는 `shared/env.ts` 에서만 주입된다**(`import "dotenv/config"`). `.env` 는 그 import 를 실행한 프로세스에만 로드되므로, dotenv 를 import 하지 않은 파일에서 `process.env.GEMINI_API_KEY` 를 읽으면 `undefined` 다 — `npm run week1` 이 키를 못 찾던 원인이 이것이었다. 주차 실습은 `shared/llm`(= env 값 + 키 검증)을 통해 받는다. (`ChatGoogle` 은 `apiKey` 를 생략하면 `GOOGLE_API_KEY` 를 찾으므로, 워크북에선 값을 명시로 넘긴다.)
 >
 > **패키지 경계 (v1 기준):** 그래프 원시요소(`StateGraph`·`Annotation`·`MemorySaver`)는 `@langchain/langgraph`, **프리빌트 ReAct 에이전트는 `langchain` 패키지의 `createAgent`**다. `@langchain/langgraph/prebuilt` 의 `createReactAgent` 는 `langchain` 으로 옮겨지며 deprecated 됐다 — 옵션 이름도 `llm` → `model` 로 바뀌었다. `langchain` 은 `@langchain/core`(peer)와 `@langchain/langgraph`(dep) 위에 얹히는 상위 패키지이므로 **둘을 대체하지 않는다.**
 

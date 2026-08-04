@@ -4,9 +4,12 @@
  * 하나의 인터페이스(LLMProvider) 뒤에 Gemini·Claude 어댑터. env(LLM_PROVIDER)로 전환.
  * 실행: npm run infra:provider   (LLM_PROVIDER=gemini|anthropic)
  */
-import "dotenv/config";
 import OpenAI from "openai";
 import Anthropic from "@anthropic-ai/sdk";
+// 환경변수는 shared/env 에서만 주입된다 → 값은 import 해서 쓴다.
+// (shared/llm 이 아니라 env 를 직접 보는 이유: llm 은 Gemini 키가 없으면 종료하는데,
+//  이 파일은 LLM_PROVIDER=anthropic 만으로도 돌아가야 한다)
+import { ANTHROPIC_MODEL, API_KEY, GEMINI_BASE, LLM_PROVIDER, MODEL } from "../shared/env";
 
 export interface LLMProvider {
   name: string;
@@ -16,11 +19,8 @@ export interface LLMProvider {
 
 // --- Gemini 어댑터 (OpenAI 호환) ---
 function geminiProvider(): LLMProvider {
-  const model = process.env.GEMINI_MODEL ?? "gemini-3.1-flash-lite";
-  const client = new OpenAI({
-    apiKey: process.env.GEMINI_API_KEY ?? process.env.OPENAI_API_KEY,
-    baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
-  });
+  const model = MODEL;
+  const client = new OpenAI({ apiKey: API_KEY, baseURL: GEMINI_BASE });
   return {
     name: "gemini",
     model,
@@ -39,8 +39,8 @@ function geminiProvider(): LLMProvider {
 
 // --- Claude(cc) 어댑터 (Anthropic SDK) ---
 function anthropicProvider(): LLMProvider {
-  const model = process.env.ANTHROPIC_MODEL ?? "claude-haiku-4-5";
-  const client = new Anthropic(); // ANTHROPIC_API_KEY 자동 로드
+  const model = ANTHROPIC_MODEL;
+  const client = new Anthropic(); // ANTHROPIC_API_KEY 자동 로드 (dotenv 는 shared/env 가 이미 실행)
   return {
     name: "anthropic",
     model,
@@ -60,7 +60,7 @@ function anthropicProvider(): LLMProvider {
 }
 
 export function getProvider(): LLMProvider {
-  const name = process.env.LLM_PROVIDER ?? "gemini";
+  const name = LLM_PROVIDER;
   switch (name) {
     case "gemini":
       return geminiProvider();

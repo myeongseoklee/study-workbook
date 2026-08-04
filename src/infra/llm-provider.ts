@@ -9,9 +9,12 @@
  *
  * 실행: npm run infra:provider   (LLM_PROVIDER=gemini|anthropic 로 전환)
  */
-import "dotenv/config";
 import OpenAI from "openai";
 // import Anthropic from "@anthropic-ai/sdk"; // ← Claude 어댑터에서 주석 해제
+// 환경변수는 shared/env 에서만 주입된다 → 값은 import 해서 쓴다.
+// (shared/llm 이 아니라 env 를 직접 보는 이유: llm 은 Gemini 키가 없으면 종료하는데,
+//  이 파일은 LLM_PROVIDER=anthropic 만으로도 돌아가야 한다)
+import { ANTHROPIC_MODEL, API_KEY, GEMINI_BASE, LLM_PROVIDER, MODEL } from "../shared/env";
 
 // 모든 provider가 지키는 계약(interface)
 export interface LLMProvider {
@@ -22,11 +25,8 @@ export interface LLMProvider {
 
 // --- Gemini 어댑터 (OpenAI 호환) — 완성 ---
 function geminiProvider(): LLMProvider {
-  const model = process.env.GEMINI_MODEL ?? "gemini-3.1-flash-lite";
-  const client = new OpenAI({
-    apiKey: process.env.GEMINI_API_KEY ?? process.env.OPENAI_API_KEY,
-    baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
-  });
+  const model = MODEL;
+  const client = new OpenAI({ apiKey: API_KEY, baseURL: GEMINI_BASE });
   return {
     name: "gemini",
     model,
@@ -47,6 +47,7 @@ function geminiProvider(): LLMProvider {
 function anthropicProvider(): LLMProvider {
   // 🎯 위 geminiProvider 와 "같은 인터페이스"(name/model/ask)를 Anthropic SDK로 구현하라.
   //   상단 import 를 주석 해제해 쓰고, ask(system, user) 가 Claude 응답 텍스트를 돌려주면 된다.
+  //   모델명은 shared/env 의 ANTHROPIC_MODEL 을 쓴다 (키는 SDK 가 ANTHROPIC_API_KEY 로 자동 로드).
   //   주의(형식 차이): Anthropic 은 system 이 top-level 파라미터(메시지 role 아님)이고,
   //   응답은 content 블록 배열이라 Gemini(OpenAI 형식)와 꺼내는 법이 다르다 — 이 차이를 손으로 겪는 게 이 과제의 핵심.
   //   SDK 사용법은 Anthropic 문서 또는 solutions/infra/llm-provider.ts 참고.
@@ -55,7 +56,7 @@ function anthropicProvider(): LLMProvider {
 
 // env LLM_PROVIDER 로 어댑터 선택
 export function getProvider(): LLMProvider {
-  const name = process.env.LLM_PROVIDER ?? "gemini";
+  const name = LLM_PROVIDER;
   switch (name) {
     case "gemini":
       return geminiProvider();
