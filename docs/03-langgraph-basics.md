@@ -22,6 +22,10 @@ LangGraph는 이 셋을 **State + Reducer + Checkpointer + Interrupt**로 푼다
 
 > **이 워크북은 Node/TypeScript 기준이다.** LangGraph는 JS 정식 버전(`@langchain/langgraph`)이 있고, 개념(StateGraph·리듀서·체크포인터·인터럽트)은 Python판과 동일하다. 아래 API 이름은 JS판 기준으로 적는다.
 >
+> **실습 환경 두 가지 (week1 코드에 이미 반영돼 있다):**
+> ① **모델은 네이티브 provider(`@langchain/google-genai`)를 쓴다.** `ChatOpenAI` 로 Gemini 3.x 에 툴을 물리면 1턴은 되고 **2턴째에 400** — Gemini 가 요구하는 `thought_signature` 를 OpenAI 호환 변환이 버리기 때문이다. 0주차의 손수 짠 루프는 응답 메시지를 그대로 되돌려주니 문제가 없었고, **툴 루프를 프레임워크에 맡기면서 드러난** 비호환이다.
+> ② **환경변수는 `shared/llm.ts` 에서만 주입된다**(`import "dotenv/config"`). 다른 파일에서 `process.env.GEMINI_API_KEY` 를 직접 읽으면 `undefined` 이므로, 거기서 export 된 `API_KEY`·`MODEL`·`BASE_URL` 을 import 해서 쓴다.
+>
 > **패키지 경계 (v1 기준):** 그래프 원시요소(`StateGraph`·`Annotation`·`MemorySaver`)는 `@langchain/langgraph`, **프리빌트 ReAct 에이전트는 `langchain` 패키지의 `createAgent`**다. `@langchain/langgraph/prebuilt` 의 `createReactAgent` 는 `langchain` 으로 옮겨지며 deprecated 됐다 — 옵션 이름도 `llm` → `model` 로 바뀌었다. `langchain` 은 `@langchain/core`(peer)와 `@langchain/langgraph`(dep) 위에 얹히는 상위 패키지이므로 **둘을 대체하지 않는다.**
 
 ## 필수 지식 (HOW)

@@ -7,12 +7,15 @@
  *
  * 실행: npm run week1
  */
-import { ChatOpenAI } from "@langchain/openai";
 // v1부터 프리빌트 에이전트는 langchain 패키지의 createAgent 로 옮겨졌다
 // (@langchain/langgraph/prebuilt 의 createReactAgent 는 deprecated).
 import { createAgent, tool } from "langchain";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { MemorySaver } from "@langchain/langgraph";
 import { z } from "zod";
+// 환경변수는 shared/llm 에서만 주입된다(dotenv/config) → 값은 import 해서 쓴다.
+// 여기서 process.env.GEMINI_API_KEY 를 직접 읽으면 undefined 다.
+import { API_KEY, MODEL } from "../shared/llm";
 
 // scaffolding — 그대로 사용
 const add = tool(async ({ a, b }) => String(a + b), {
@@ -26,14 +29,13 @@ const multiply = tool(async ({ a, b }) => String(a * b), {
   schema: z.object({ a: z.number(), b: z.number() }),
 });
 
-// 모델 = ChatOpenAI 를 Gemini(OpenAI 호환) 엔드포인트로 (scaffolding)
-const model = new ChatOpenAI({
-  model: process.env.GEMINI_MODEL ?? "gemini-3.1-flash-lite",
-  apiKey: process.env.GEMINI_API_KEY ?? process.env.OPENAI_API_KEY,
-  configuration: {
-    baseURL:
-      process.env.LLM_BASE_URL ?? "https://generativelanguage.googleapis.com/v1beta/openai/",
-  },
+// 모델 = Gemini 네이티브 provider (scaffolding)
+// week0 은 OpenAI 호환 엔드포인트로 Gemini 를 불렀지만, 여기선 네이티브를 쓴다.
+// 이유: ChatOpenAI 로 Gemini 3.x 에 툴을 물리면 1턴은 되고 **2턴째에 400** 이 난다 —
+// Gemini 가 요구하는 thought_signature 를 OpenAI 호환 변환 과정에서 잃어버리기 때문.
+const model = new ChatGoogleGenerativeAI({
+  model: MODEL,
+  apiKey: API_KEY,
 });
 const checkpointer = new MemorySaver(); // 재개/인터럽트의 전제
 
@@ -57,5 +59,9 @@ main().catch((e) => {
  * 🛠 더 해볼 것 (docs/03):
  * - createAgent 대신 StateGraph 를 손수 조립 (Annotation.Root + append 리듀서 + 조건부 엣지)
  * - SqliteSaver 로 바꿔 재시작 후에도 상태가 남는지 확인
- * - "이메일 보내기" 노드 앞에 interruptBefore 로 사람 승인 끼우기 / 체크포인터 빼고 왜 안 되는지 확인
+ * - 사람 승인 끼우기 — 프리빌트에는 interruptBefore 가 없다:
+ *     createAgent({ ..., middleware: [humanInTheLoopMiddleware({ interruptOn: { multiply: true } })] })
+ *     → 결과의 __interrupt__ 확인 후 agent.invoke(new Command({ resume }), config) 로 재개
+ *     (StateGraph 로 조립했다면 .compile({ interruptBefore: ["tools"] }) 쪽)
+ * - 체크포인터를 빼고 위 승인이 왜 안 되는지 확인
  */
