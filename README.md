@@ -1,100 +1,198 @@
-# 멀티 에이전트 시스템 워크북 (Node/TypeScript 실습 환경)
+# study — 학습 워크북 모노레포
 
-3년차 백엔드 개발자를 위한 멀티 에이전트 시스템 학습 워크북 + **실제로 돌려보는 실습 환경**.
-개념 문서는 [`docs/`](docs/)에, 손으로 돌려보는 코드는 [`src/`](src/)에 있다.
+학습 주제 하나가 패키지 하나다. 각 패키지는 **지식 문서**(읽는 것) · **문제**(푸는 것) · **정답 테스트**(판정하는 것)를 함께 담는다.
 
-## 이 레포의 구조 (연습문제 방식)
+이 파일은 **레포 규약의 단일 진실 원천**이다. 자료를 생성하는 하네스(`cc-system`의 `study-material-generator`)는 이 규약을 중복 서술하지 않고 여기를 참조한다. 규약이 바뀌면 여기만 고친다.
 
-`src/`는 **핵심 로직이 비어 있는 연습문제**다. 스캐폴드(환경·툴 정의·서버·하네스)는 작동하고,
-배워야 할 부분만 `🎯 TODO` 로 남아 있다. 직접 채워 넣어야 실행된다.
-막히면 `solutions/`의 완성본을 열어 대조하라.
+## 구조
 
 ```
-docs/                      # 학습 문서 (읽기) — 00~08, 90 암기, 91 용어, 99 참고
-src/                       # 🎯 연습문제 (여기를 채운다)
-├── shared/
-│   ├── env.ts             # ⚠️ 유일한 환경변수 주입 지점(dotenv/config) — 값만 export
-│   │                      #    .env 는 이 import 를 실행한 프로세스에만 로드된다.
-│   │                      #    그래서 다른 파일은 process.env 를 읽지 않고 여기 값을 import
-│   ├── llm.ts             # 공용 LLM 클라이언트(env 값 + 키 검증) — 그대로 사용
-│   └── check.ts           # 환경 점검 (npm run check)
-├── week0-agent-loop/      # 02장: 프레임워크 없이 에이전트 루프
-├── week1-langgraph/       # 03장: LangGraph + 체크포인터
-├── week3-multiagent/      # 04장: 광고 3전문가 협업 (앱 레이어)
-├── week5-eval/            # 05장: 평가셋 하네스
-├── week7-rag/             # 06장: 최소 RAG
-└── infra/                 # 08장: 에이전트를 독립 서비스로 (Fastify) + 오케스트레이터
-    └── llm-provider.ts    #        + LLM provider 추상화 (Gemini 주고 Claude 어댑터 직접 구현)
-solutions/                 # ✅ 완성본 (막힐 때만 열어보기 — src/ 와 동일 구조)
+study/
+├── package.json            워크스페이스 루트 (툴체인은 여기에 호이스팅)
+├── tsconfig.base.json      공통 컴파일러 설정
+├── README.md               ← 이 파일 (레포 규약)
+└── packages/
+    └── {주제-slug}/
+        ├── package.json    test:{과제번호} 스크립트
+        ├── tsconfig.json   base 상속
+        ├── docs/           지식 문서 — 00~09, 90 암기, 91 용어, 99 참고
+        ├── workbook/       서술형 문항 — 92 문제 / 93 정답
+        ├── src/            🎯 코딩 문제 (TODO 스켈레톤)
+        └── solutions/      ✅ 정답 = 테스트 코드 (src와 같은 파일명)
 ```
 
-**환경변수 규칙:** `.env` 는 `import "dotenv/config"` 를 실행한 프로세스에만 로드된다. 그래서 주입은 **`shared/env.ts` 한 곳**에서만 하고, 나머지 파일은 `process.env` 를 읽지 않고 거기서 export 된 값(`API_KEY`·`MODEL`·`BASE_URL`·`LLM_PROVIDER`·`ANTHROPIC_MODEL`)을 import 한다. 주차 실습은 보통 `shared/llm` 을 통해 받으면 키 검증까지 함께 얻는다. 새 환경변수를 추가할 땐 `env.ts` 에 export 를 하나 더 만드는 게 유일한 방법이다.
+### 현재 패키지
 
-**LLM provider:** 주차 실습은 **Gemini(무료 티어)** 를 OpenAI 호환 방식으로 쓴다. 여러 벤더(Gemini·Claude·OpenAI)를 인터페이스로 추상화하는 것은 [08장 연습문제](docs/08-agent-platform-infra.md)(`infra/llm-provider.ts`)에서 다룬다 — 거기서 Claude(cc) 어댑터를 직접 구현한다.
+| 패키지 | 주제 |
+|---|---|
+| `multi-agent-systems` | 멀티 에이전트 시스템 — LangGraph, 협업 패턴, 평가, RAG, 인프라 |
+| `stateful-context-design` | 축적된 상태 설계 — KV 캐시, 슬라이딩 윈도우, 이벤트 소싱을 관통하는 네 원리 |
 
-## 시작하기
+> `multi-agent-systems`는 이 규약이 정해지기 전에 만들어져 `solutions/`에 **완성 구현**이 들어 있다(테스트가 아님). 앞으로 만드는 패키지는 아래 규약을 따른다.
+
+---
+
+## 규약 1 — 문서화
+
+**한 파일은 한 가지 일만 한다.**
+
+| 파일 | 담는 것 | 담지 않는 것 |
+|---|---|---|
+| `docs/00-overview.md` | 학습 목표, 로드맵, 예상 시간 | 개념 설명 |
+| `docs/01`~`0N` | 핵심 원리 → 필수 지식 → 암기 필수 → 자가 진단 | 정답을 요구하는 문항 |
+| `docs/90-must-memorize.md` | 검색 없이 즉답할 항목만 (전체의 10~20%) | 부가 설명 |
+| `docs/91-glossary.md` | 용어를 레이어로 묶고 인과까지 | 가나다순 나열 |
+| `docs/99-references.md` | **실제로 확인한** 외부 URL만 | 추측 URL |
+| `workbook/92-workbook.md` | 서술형 문항 | **정답 (0건)** |
+| `workbook/93-solutions.md` | 그 정답·해설 + 📍 되짚기 | 문항 재기재 |
+
+**H1은 한글 우선, 파일명은 영문 slug.** 노션·다른 채널에 올릴 때 H1이 페이지 제목이 되고, 파일명은 도구·git 호환을 위해 영문을 유지한다.
+
+**자기완결성**: 핵심 내용은 이 문서만으로 이해 가능해야 한다. 공식 문서는 "더 깊이 알고 싶을 때" 가는 곳이고, "이해하려면 반드시 거쳐야 하는 경로"가 아니다.
+
+---
+
+## 규약 2 — 문제와 정답
+
+### 분리가 원칙이다
+
+**문제 파일에는 정답이 없다.** 접기(`<details>`)로 감추는 것은 분리가 아니다 — 렌더러가 지원하지 않으면 그대로 노출되고, 검색(⌘F)과 AI 요약은 접힌 내용까지 훑는다.
+
+| 문제 | 정답 |
+|---|---|
+| `workbook/92-workbook.md` | `workbook/93-solutions.md` |
+| `src/3-1-kv-calc.ts` | `solutions/3-1-kv-calc.ts` |
+
+**대응 키**: 서술형은 문항 번호(`1-3` → `## 1-3`), 코딩은 **파일명이 같다**.
+
+### 한 파일 = 한 문제
+
+코딩 문제는 파일 하나에 문제 하나만 정의한다. 파일명은 `{과제번호}-{slug}.ts`.
+
+```
+src/3-1-kv-calc.ts        ← 과제 3-1만
+src/3-2-swa-mask.ts       ← 과제 3-2만
+solutions/3-1-kv-calc.ts  ← 3-1의 테스트만
+```
+
+### 코딩 문제의 정답은 테스트 코드다
+
+참고 구현(완성 골격)을 주지 않는다. 읽으면 베끼게 되고 그 순간 과제가 독해로 바뀐다.
+
+| | 참고 구현을 줄 때 | 테스트를 줄 때 |
+|---|---|---|
+| 학습자 행동 | 읽고 대조 → 베끼기 | 자기 코드를 돌려 판정 |
+| 성공 판정 | 주관적 | **객관적**(통과/실패) |
+| 막혔을 때 | 답이 바로 보임 | 실패 메시지가 어디가 틀렸는지 가리킴 |
+
+**작성 규칙**
+- 테스트 항목이 문제 파일 상단의 성공 기준과 **1:1 대응**한다
+- 인터페이스(함수명·시그니처)만 못박고 내부 구조는 열어 둔다
+- 실패 메시지가 **무엇이 틀렸는지** 말한다 (`test 3 failed`는 정보가 없다)
+- `tsx` 외 의존성 없음 — 테스트 프레임워크(Jest·Vitest)를 요구하지 않는다
+- LLM 호출·네트워크·유료 API는 가짜로 대체한다
+- 각 정답 파일 끝에 `📍 되짚기` 주석으로 해당 문서 위치를 남긴다
+
+문제 스켈레톤에는 `🎯 TODO`를 남기고 `throw new Error('TODO: 함수명')`으로 시작한다 — 채우기 전에는 테스트가 실패하는 것이 정상이다.
+
+---
+
+## 규약 3 — 기술 스택
+
+학습 자료가 특정 기술을 다루는 게 아니라면 다음 기본값을 쓴다.
+
+| 층 | 기본값 |
+|---|---|
+| 런타임 | **Node.js** 20+ |
+| 언어 | **TypeScript** |
+| 실행 | `tsx` — 빌드 없이 `.ts`를 바로 돌린다 |
+| 서버가 필요하면 | **Fastify** 또는 **Express** |
+
+**이 기본값을 벗어나는 기술 선정이 필요하면 작업 전에 사용자에게 묻는다.** DB(Postgres? SQLite?), 프론트엔드(React? 바닐라?), 벡터 저장소 같은 선택은 임의로 정하지 않는다 — 학습자 환경과 어긋나면 과제가 실행조차 안 된다.
+
+예외는 둘뿐이다: **학습 주제가 이미 기술을 정하고 있다**(Rust 소유권 자료라면 Rust), **선택의 여지가 없다**(CUDA 커널).
+
+---
+
+## 규약 4 — 문제 풀이 방법
+
+### 풀이는 별도 브랜치에서 한다
+
+```
+sol/{패키지명}/{과제번호}
+```
 
 ```bash
-# 1) 의존성 설치
-npm install
-
-# 2) API 키 설정 (기본 provider = Gemini 무료 티어)
-cp .env.example .env
-#   .env 를 열어 GEMINI_API_KEY 를 채운다. 무료 키: https://aistudio.google.com/apikey
-#   GEMINI_MODEL 기본값은 gemini-3.1-flash-lite. (⚠️ gemini-2.5-* 는 신규 계정엔 404)
-
-# 3) 환경 점검 (여기가 ✅ 되면 세팅 완료 — 이후 에러는 '내 코드' 문제)
-npm run check
-
-# 4) 첫 실습 — src/week0-agent-loop/index.ts 의 🎯 TODO 를 채운 뒤 실행
-npm run week0
+git switch -c sol/stateful-context-design/3-1
+# src/3-1-kv-calc.ts의 🎯 TODO를 채운다
+npm run test:3-1 --workspace stateful-context-design
+git add -A && git commit -m "sol(stateful-context-design): 3-1 KV 캐시 계산기"
 ```
 
-> Node 20+ 필요. 모든 실행은 `tsx`로 TypeScript를 바로 돌린다(빌드 불필요).
-> `src/`는 연습문제라 채우기 전엔 `TODO` 에러가 난다 — 정상이다. `solutions/`에 정답이 있다.
+**main으로 머지하지 않는다.** main은 문제 상태(스켈레톤)를 유지한다 — 그래야 재도전할 수 있고, 다른 사람이 같은 문제를 풀 수 있고, 풀이가 문제를 오염시키지 않는다.
 
-## 실습 순서 (docs와 짝을 이룬다)
+풀이 브랜치는 남겨 둔다. 나중에 자기 풀이를 다시 보거나 접근을 비교할 때 쓴다.
 
-| 명령 | 문서 | 무엇을 하나 |
-|------|------|-------------|
-| `npm run week0` | [02장](docs/02-what-is-an-agent.md) | 프레임워크 없이 계산기 에이전트 루프. 에이전트가 `while` 루프임을 체감 |
-| `npm run week1` | [03장](docs/03-langgraph-basics.md) | 프리빌트 `createAgent`(`langchain`)로 같은 걸 다시. 체크포인터(`@langchain/langgraph`)로 대화 상태 유지 |
-| `npm run week3` | [04장](docs/04-multi-agent-patterns.md) | 분석가→광고 전략가→개발자 협업 (오케스트레이터 = 내 코드) |
-| `npm run week5` | [05장](docs/05-eval-and-observability.md) | 손으로 만든 평가셋으로 통과율 측정 |
-| `npm run week7` | [06장](docs/06-rag-when-needed.md) | 최소 RAG (검색→주입→생성) |
-| infra (아래) | [08장](docs/08-agent-platform-infra.md) | 에이전트를 독립 서비스로, 오케스트레이터가 HTTP로 호출 |
+### 순서
 
-각 파일 안의 `🎯 TODO` 를 채우면 실행된다. 채우기 전엔 `TODO` 에러가 나는 게 정상. 막히면 `solutions/`의 같은 파일을 열어 대조하라. 하단의 `🛠 더 해볼 것` 주석은 그 주차의 심화 과제다.
+1. `docs/`를 읽는다
+2. `workbook/92-workbook.md`의 서술형을 **자료를 덮고** 푼다 → `93`으로 대조
+3. 풀이 브랜치를 만든다
+4. `src/`의 `🎯 TODO`를 채운다
+5. `npm run test:{과제번호}`로 판정한다
+6. 실패 항목의 메시지를 읽고 고친다 — **`solutions/`를 열어 답을 찾지 않는다** (그건 테스트이므로 답이 없다)
+7. 통과하면 커밋
 
-### 08장 인프라 실습 (터미널 3개)
+---
+
+## 규약 5 — 패키지 추가
 
 ```bash
-npm run infra:analyst       # 터미널 1 — 분석 에이전트 :8001
-npm run infra:ad-expert     # 터미널 2 — 광고 전략가 :8002
-npm run infra:orchestrator  # 터미널 3 — 오케스트레이터가 둘을 HTTP로 호출
+mkdir -p packages/{주제-slug}/{docs,workbook,src,solutions}
 ```
 
-week3(앱 레이어, 함수 호출)와 결과를 비교해 보라 — **바뀐 건 "함수 호출 → HTTP 호출"뿐**이다.
+`package.json`:
+```json
+{
+  "name": "{주제-slug}",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "npm run test:3-1 && npm run test:3-2",
+    "test:3-1": "tsx solutions/3-1-{slug}.ts",
+    "typecheck": "tsc"
+  }
+}
+```
 
-그리고 provider 추상화 연습문제:
+`tsconfig.json`:
+```json
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src", "solutions"]
+}
+```
+
+그리고 위 "현재 패키지" 표에 한 줄 추가한다.
+
+---
+
+## 실행
 
 ```bash
-npm run infra:provider                       # 기본 Gemini
-LLM_PROVIDER=anthropic npm run infra:provider # Claude 어댑터 (직접 구현 후)
+npm install                                    # 루트에서 1회
+npm test                                       # 전체 패키지 테스트
+npm test --workspace stateful-context-design   # 한 패키지만
+npm run test:3-1 --workspace stateful-context-design   # 한 과제만
+npm run typecheck                              # 전체 타입 체크
+npm run packages                               # 패키지 목록
 ```
 
-## 핵심 관점 (docs 전반의 뼈대)
+## 자료 생성
 
-- **에이전트 = 프롬프트(역할) + 도구.** 협업 = 그걸 순서대로 부르고 결과를 넘기는 코드.
-- **LLM은 JSON 요청만, 실행은 언제나 당신 코드.** (이벤트가 아니라 요청/응답)
-- **다른 에이전트는 부르는 쪽에겐 그냥 또 하나의 툴.** 이 구조가 모든 층에서 재귀된다.
-- **오케스트레이션은 없앨 수 없다 — 위치(중앙집중↔분산)만 바뀐다.**
-- **앱 레이어로 충분한데 플랫폼부터 짓지 마라.** 승격 게이트는 [08장](docs/08-agent-platform-infra.md).
+새 학습 자료는 `cc-system`의 `study-material-generator` 스킬로 만든다. 그 스킬은 산출물 위치를 물을 때 이 레포를 후보로 제시하고, 형식은 위 규약을 따른다.
 
-## 스택
-
-Node 20+ · TypeScript(tsx) · `openai`(→ Gemini OpenAI 호환, week0·3·5·7) · `langchain`(프리빌트 `createAgent`) · `@langchain/langgraph`(StateGraph·체크포인터) · `@langchain/google`(week1 — 네이티브 Gemini `ChatGoogle`) · `fastify`.
-
-> **week1만 네이티브 provider인 이유:** OpenAI 호환 계층은 **단발 호출엔 충분하지만 멀티턴 툴 루프에서 깨진다.** LangChain 문서는 `openai` provider가 "공식 OpenAI 스펙 대상이며 프록시의 provider 고유 필드는 보존되지 않을 수 있다"고 경고하고, Gemini 문서는 호환 계층이 beta이며 직접 호출을 권하면서 thinking 모델의 `thought` 블록을 **받은 그대로 되돌려보내야 한다**고 못박는다. 실제로 `ChatOpenAI` 로 툴을 물리면 2턴째에 `thought_signature` 누락 400이 난다. week0의 손수 짠 루프는 응답 메시지를 그대로 히스토리에 넣으니 서명이 살아남아 문제가 없다 — 같은 엔드포인트인데 원시 SDK는 되고 프레임워크는 안 되는 이유. 자세한 인과는 [03장](docs/03-langgraph-basics.md).
-`@anthropic-ai/sdk`·`@langchain/anthropic`은 08장 provider 추상화 연습문제의 Claude(cc) 어댑터에 쓰인다.
-파이썬 라이브러리가 꼭 필요한 에이전트만 별도 서비스로 격리하는 폴리글랏 전략은 [08장](docs/08-agent-platform-infra.md) 참고.
+```
+/study {학습 대상}
+```
