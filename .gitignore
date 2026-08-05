@@ -5,3 +5,6 @@ dist/
 .DS_Store
 rag-index.json
 .turbo/
+
+# 검증관이 오답을 주입할 때 쓰는 임시 구현 디렉토리 (STUDY_TARGET=_probe)
+packages/*/_probe/

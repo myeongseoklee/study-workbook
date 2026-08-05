@@ -20,8 +20,9 @@ packages/coding-agent-architecture/
 ├── workbook/
 │   ├── 92-workbook.md         ← 문제 (1·2강 누적, 정답 0건)
 │   └── 93-solutions.md        ← 정답·해설
+├── tests/                     📋 명세 — 학습자에게 주어지는 Vitest 테스트
 ├── src/                       🎯 코딩 문제 (TODO 스켈레톤)
-└── solutions/                 ✅ 정답 = 테스트 코드
+└── solutions/                 ✅ 참고 구현 (통과한 뒤에 읽는다)
 ```
 
 > 문제와 정답이 파일로 갈라져 있다. 접기로 감추면 렌더러·검색·AI 요약으로 계속 새어 나가므로 분리가 원칙이다 (레포 [`README.md`](../../../README.md) § 규약 2).
@@ -34,7 +35,7 @@ packages/coding-agent-architecture/
 4. **모르는 용어는 `91-glossary.md`를 사전처럼** 옆에 열어두고 그때그때 찾기.
 5. **새 회차가 나오면 그 폴더를 같은 방식으로 이어서.** 아래 개념 색인이 "이 개념은 몇 화에 있는지" 짚어준다.
 6. **[`workbook/92-workbook.md`](../workbook/92-workbook.md)를 자료를 덮고 풀기.** 읽어서 아는 것과 꺼내 쓸 수 있는 것은 다르다. 정답은 [`93-solutions.md`](../workbook/93-solutions.md).
-7. **코딩 과제는 풀이 브랜치에서** `src/`의 `🎯 TODO`를 채우고 `npm run test:{번호}`로 판정한다.
+7. **코딩 과제는 풀이 브랜치에서.** `tests/`의 명세를 먼저 읽고 `src/`의 `🎯 TODO`를 채운 뒤 `pnpm test {번호}`로 판정한다.
 7. **실전·복습 직전엔 `must-memorize.md`만** 다시 훑기.
 
 ## 에피소드 목록

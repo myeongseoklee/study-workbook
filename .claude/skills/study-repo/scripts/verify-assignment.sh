@@ -1,66 +1,111 @@
 #!/usr/bin/env bash
-# 과제의 테스트가 실제로 판정 기능을 하는지 양방향 확인.
+# 과제의 명세가 실제로 판정 기능을 하는지 양방향 확인.
 #
-# 테스트가 "정답에서 통과"하는 것만 보면 절반이다. 아무것도 검사하지 않는
-# 테스트도 통과한다. 그래서 두 방향을 본다:
-#   ① 스켈레톤(🎯 TODO) 상태 → 실패해야 한다
-#   ② 정답 구현 주입 → 통과해야 한다
-# ②를 위한 정답 구현은 호출자가 파일로 준다(하네스의 author 에이전트가 작성).
+# "정답에서 통과한다"만 보면 절반이다. 아무것도 검사하지 않는 테스트도 통과한다.
+# 그래서 같은 테스트를 두 방향으로 돌린다:
+#   ① src/ (🎯 TODO 스켈레톤)  → 전부 실패해야 한다
+#   ② solutions/ (참고 구현)   → 전부 통과해야 한다
 #
-# 사용: verify-assignment.sh <패키지> <과제번호> [정답구현.ts]
-#   정답구현을 생략하면 ①만 확인한다.
+# ①에서 통과하는 항목이 있으면 그 테스트는 비어 있는 것이고,
+# ②에서 실패하는 항목이 있으면 명세가 성립 불가능한 것이다.
+#
+# 치환은 파일을 옮기지 않고 STUDY_TARGET 환경변수로 한다 (@study/testkit의
+# defineStudyConfig). 예전처럼 문제 파일을 덮었다 되돌리지 않으므로, 중간에
+# 죽어도 작업 트리가 오염되지 않는다.
+#
+# 사용: verify-assignment.sh <패키지> [과제번호]
+#   과제번호를 생략하면 패키지 전체를 검증한다.
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 PKG="${1:?패키지명이 필요하다 (예: stateful-context-design)}"
-NUM="${2:?과제번호가 필요하다 (예: 3-1)}"
-IMPL="${3:-}"
+NUM="${2:-}"
 
 PKG_DIR="$REPO/packages/$PKG"
 [ -d "$PKG_DIR" ] || { echo "✗ 패키지가 없다: $PKG"; exit 1; }
+[ -f "$PKG_DIR/vitest.config.ts" ] || {
+  echo "✗ $PKG/vitest.config.ts 가 없다 — defineStudyConfig가 없으면 양방향 치환이 안 된다"
+  exit 1
+}
 
-SRC=$(find "$PKG_DIR/src" -maxdepth 1 -name "${NUM}-*.ts" | head -1)
-[ -n "$SRC" ] || { echo "✗ src/${NUM}-*.ts 를 찾을 수 없다"; exit 1; }
-BASENAME=$(basename "$SRC")
-SOL="$PKG_DIR/solutions/$BASENAME"
-[ -f "$SOL" ] || { echo "✗ solutions/$BASENAME 이 없다 — 정답 테스트가 필요하다"; exit 1; }
-
-echo "과제 $PKG / $NUM  ($BASENAME)"
-echo
-
-# ── ① 스켈레톤 상태: 실패해야 한다 ─────────────────────────────────────────
-echo "① 스켈레톤 상태 — 실패해야 정상"
-if grep -q '🎯 TODO' "$SRC"; then
-  if (cd "$REPO" && npm run --silent "test:$NUM" --workspace "$PKG" >/tmp/skel.log 2>&1); then
-    echo "  ✗ 스켈레톤인데 테스트가 통과했다 — 테스트가 아무것도 검사하지 않는다"
-    echo "     (성공 기준을 실제로 검사하는 check()가 있는지 확인하라)"
-    exit 1
-  fi
-  echo "  ✓ 예상대로 실패 ($(grep -m1 'TODO' /tmp/skel.log | tr -d '\t' || echo '실패'))"
+# 과제번호가 주어졌으면 세 파일이 모두 있는지 먼저 본다.
+if [ -n "$NUM" ]; then
+  SRC=$(find "$PKG_DIR/src" -maxdepth 1 -name "${NUM}-*.ts" | head -1)
+  [ -n "$SRC" ] || { echo "✗ src/${NUM}-*.ts 를 찾을 수 없다"; exit 1; }
+  BASE=$(basename "$SRC" .ts)
+  for f in "tests/$BASE.test.ts" "solutions/$BASE.ts"; do
+    [ -f "$PKG_DIR/$f" ] || { echo "✗ $f 이 없다 — 과제는 세 파일이 한 벌이다"; exit 1; }
+  done
+  echo "과제 $PKG / $NUM  ($BASE)"
 else
-  echo "  △ src에 🎯 TODO가 없다 — 이미 채워진 상태이므로 ①을 건너뛴다"
-  echo "     (main 브랜치라면 규약 위반: 풀이는 sol/ 브랜치에서 한다)"
+  echo "패키지 전체 $PKG"
 fi
 echo
 
-# ── ② 정답 구현 주입: 통과해야 한다 ────────────────────────────────────────
-if [ -z "$IMPL" ]; then
-  echo "② 정답 구현이 주어지지 않아 건너뜀"
-  echo "   테스트가 통과 가능한지 확인하려면 구현 파일을 3번째 인자로 주라"
-  exit 0
-fi
-[ -f "$IMPL" ] || { echo "✗ 정답 구현 파일이 없다: $IMPL"; exit 1; }
+# vitest는 위치 인자를 테스트 파일명 부분 일치 필터로 쓴다.
+run() {
+  local target="$1"
+  ( cd "$PKG_DIR" && STUDY_TARGET="$target" pnpm exec vitest run ${NUM:+"$NUM"} --reporter=json 2>/dev/null )
+}
 
-echo "② 정답 구현 주입 — 통과해야 정상"
-BACKUP=$(mktemp)
-cp "$SRC" "$BACKUP"
-# 어떤 경로로 끝나도 원본을 되돌린다. 문제 파일이 채워진 채 남으면 규약 위반이 된다.
-trap 'cp "$BACKUP" "$SRC"; rm -f "$BACKUP"; echo; echo "  (문제 파일 원상 복구)"' EXIT
+# JSON 리포터에서 통과/실패 수를 뽑는다. 텍스트 파싱보다 안정적이다.
+counts() {
+  node -e '
+    let raw = "";
+    process.stdin.on("data", (c) => (raw += c));
+    process.stdin.on("end", () => {
+      const start = raw.indexOf("{");
+      if (start === -1) { console.log("0 0"); return; }
+      try {
+        const r = JSON.parse(raw.slice(start));
+        console.log(`${r.numPassedTests ?? 0} ${r.numFailedTests ?? 0}`);
+      } catch { console.log("0 0"); }
+    });
+  '
+}
 
-cp "$IMPL" "$SRC"
-if (cd "$REPO" && npm run --silent "test:$NUM" --workspace "$PKG" 2>&1 | tail -20); then
-  echo "  ✓ 정답 구현으로 전항 통과"
+FAILED=0
+
+# ── ① 스켈레톤: 전부 실패해야 한다 ─────────────────────────────────────────
+echo "① src/ (스켈레톤) — 전부 실패해야 정상"
+read -r SKEL_PASS SKEL_FAIL <<<"$(run src | counts)"
+if [ "$SKEL_PASS" -gt 0 ]; then
+  echo "  ✗ ${SKEL_PASS}개가 통과했다 — 그 테스트들은 아무것도 검사하지 않는다"
+  echo "     스켈레톤은 throw만 하므로, 통과했다면 assertion이 비었거나 상수만 보고 있다"
+  FAILED=1
+elif [ "$SKEL_FAIL" -eq 0 ]; then
+  echo "  ✗ 실행된 테스트가 0개다 — 파일명·경로를 확인하라"
+  FAILED=1
 else
-  echo "  ✗ 정답 구현인데 실패했다 — 테스트나 인터페이스가 어긋났다"
+  echo "  ✓ ${SKEL_FAIL}개 전부 실패"
+fi
+echo
+
+# ── ② 참고 구현: 전부 통과해야 한다 ────────────────────────────────────────
+echo "② solutions/ (참고 구현) — 전부 통과해야 정상"
+read -r SOL_PASS SOL_FAIL <<<"$(run solutions | counts)"
+if [ "$SOL_FAIL" -gt 0 ]; then
+  echo "  ✗ ${SOL_FAIL}개가 실패했다 — 명세가 성립 불가능하거나 참고 구현이 어긋났다"
+  echo "     상세:"
+  ( cd "$PKG_DIR" && STUDY_TARGET=solutions pnpm exec vitest run ${NUM:+"$NUM"} 2>&1 | grep -E "^\s+(×|→)" | head -20 ) || true
+  FAILED=1
+elif [ "$SOL_PASS" -eq 0 ]; then
+  echo "  ✗ 실행된 테스트가 0개다"
+  FAILED=1
+else
+  echo "  ✓ ${SOL_PASS}개 전부 통과"
+fi
+echo
+
+# ── ③ 두 방향의 개수가 맞는가 ──────────────────────────────────────────────
+if [ "$SKEL_FAIL" -ne "$SOL_PASS" ] && [ "$FAILED" -eq 0 ]; then
+  echo "③ ✗ 실패 ${SKEL_FAIL}개 ≠ 통과 ${SOL_PASS}개 — 두 방향에서 실행된 테스트 수가 다르다"
+  echo "     테스트가 STUDY_TARGET에 따라 분기하고 있는지 확인하라 (그래선 안 된다)"
+  FAILED=1
+fi
+
+if [ "$FAILED" -eq 0 ]; then
+  echo "✓ 양방향 검증 통과 (${SKEL_FAIL} 실패 / ${SOL_PASS} 통과)"
+else
   exit 1
 fi

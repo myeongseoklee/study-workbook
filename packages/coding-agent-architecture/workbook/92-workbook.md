@@ -157,15 +157,16 @@
 
 ## 파트 3. 재현 과제 (직접 만들기)
 
-> 코딩 과제는 **실행 가능한 파일**로 준비돼 있다. `src/`의 `🎯 TODO`를 채우고 `npm run test:{번호}`로 판정한다. 정답은 참고 구현이 아니라 **테스트 코드**(`solutions/`)이므로 열어도 답이 없다.
+> 코딩 과제는 **실행 가능한 파일**로 준비돼 있다. `tests/{번호}-{slug}.test.ts`가 무엇을 만들지 정의하니 **먼저 읽고**, `src/`의 `🎯 TODO`를 채운 뒤 `pnpm test {번호}`로 판정한다. `solutions/`에는 참고 구현이 있는데, 통과한 뒤에 여는 것이다 — 먼저 열면 과제가 독해로 바뀐다.
 > 코딩이 아닌 과제의 판정 체크리스트는 [93-solutions.md](93-solutions.md) 파트 3에 있다.
 
 풀이는 별도 브랜치에서 한다:
 
 ```bash
 git switch -c sol/coding-agent-architecture/3-1
-# src/3-1-agent-loop.ts의 🎯 TODO를 채운다
-npm run test:3-1 --workspace coding-agent-architecture
+cd packages/coding-agent-architecture
+# tests/3-1-agent-loop.test.ts 를 읽고 src/3-1-agent-loop.ts 의 🎯 TODO 를 채운다
+pnpm test 3-1
 ```
 
 ### 1강 과제

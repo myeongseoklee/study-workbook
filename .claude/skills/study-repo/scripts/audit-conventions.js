@@ -19,6 +19,24 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '../../../..');
 const findings = [];
 
+/**
+ * 주제 패키지가 아닌 것들. 규약 1·2는 "학습 자료"에 대한 규약이라
+ * 도구 패키지에 적용하면 거짓 위반만 쌓인다.
+ */
+const TOOL_PACKAGES = new Set(['testkit']);
+
+/**
+ * 규약 제정 이전에 만들어져 구조가 다른 패키지. README에 사유가 적혀 있고,
+ * 감사는 그 예외를 알고 있어야 한다 — 모르면 매번 같은 위반을 보고하고,
+ * 그러면 사람이 감사 전체를 무시하기 시작한다.
+ */
+const LEGACY_PACKAGES = new Map([
+	[
+		'multi-agent-systems',
+		'실습이 살아 있는 LLM API를 호출해 단위 테스트로 판정할 수 없다 (README 참조)',
+	],
+]);
+
 function add(severity, pkg, rule, detail) {
 	findings.push({ severity, pkg, rule, detail });
 }
@@ -31,12 +49,44 @@ function readIf(p) {
 	}
 }
 
+/**
+ * docs/ 아래의 마크다운을 모은다. 회차가 늘어나는 시리즈는 `ep01-`, `ep02-`
+ * 같은 하위 폴더로 나뉘므로 한 단계는 내려간다. 규약 1이 정하는 것은 파일의
+ * **역할**(00 개요 / 90 암기 / 99 참고)이지 평평한 배치가 아니다.
+ */
 function listMd(dir) {
+	const out = [];
+	let entries;
 	try {
-		return fs.readdirSync(dir).filter((f) => f.endsWith('.md')).sort();
+		entries = fs.readdirSync(dir, { withFileTypes: true });
 	} catch {
 		return [];
 	}
+	for (const e of entries) {
+		if (e.isFile() && e.name.endsWith('.md')) out.push(e.name);
+		else if (e.isDirectory()) {
+			for (const f of fs.readdirSync(path.join(dir, e.name))) {
+				if (f.endsWith('.md')) out.push(path.join(e.name, f));
+			}
+		}
+	}
+	return out.sort();
+}
+
+function listTs(dir, filter) {
+	try {
+		return fs.readdirSync(dir).filter(filter).sort();
+	} catch {
+		return [];
+	}
+}
+
+/** `export function foo` / `export const foo` / `export interface Foo` 등에서 이름만 뽑는다. */
+function exportedNames(body) {
+	const names = new Set();
+	const re = /^export\s+(?:declare\s+)?(?:async\s+)?(?:function|const|let|var|class|interface|type|enum)\s+([A-Za-z_$][\w$]*)/gm;
+	for (const m of body.matchAll(re)) names.add(m[1]);
+	return names;
 }
 
 // ── 규약 1: 문서화 ──────────────────────────────────────────────────────────
@@ -48,10 +98,11 @@ function auditDocs(pkg, root) {
 		add('error', pkg, '규약1', 'docs/에 마크다운이 없다');
 		return;
 	}
-	if (!files.includes('00-overview.md')) {
+	const hasRole = (name) => files.some((f) => path.basename(f) === name);
+	if (!hasRole('00-overview.md')) {
 		add('error', pkg, '규약1', 'docs/00-overview.md가 없다 — 로드맵 진입점이 필요하다');
 	}
-	if (!files.includes('99-references.md')) {
+	if (!hasRole('99-references.md')) {
 		add('warn', pkg, '규약1', 'docs/99-references.md가 없다 — 확인한 출처를 모을 곳이 없다');
 	}
 
@@ -102,7 +153,7 @@ function auditDocs(pkg, root) {
 	}
 }
 
-// ── 규약 2: 문제와 정답 ────────────────────────────────────────────────────
+// ── 규약 2: 서술형 워크북 ──────────────────────────────────────────────────
 function auditWorkbook(pkg, root) {
 	const wb = path.join(root, 'workbook');
 	if (!fs.existsSync(wb)) return; // 워크북은 선택
@@ -125,10 +176,28 @@ function auditWorkbook(pkg, root) {
 		}
 	}
 
-	// 번호 1:1 대응
-	const qNums = [...q.matchAll(/^\*\*(\d+-\d+)\.\*\*/gm)].map((m) => m[1]);
-	const aNums = [...a.matchAll(/^##\s+(\d+-\d+)/gm)].map((m) => m[1]);
-	const missing = qNums.filter((n) => !aNums.includes(n));
+	// 번호 1:1 대응.
+	//
+	// 번호 체계와 헤딩 깊이는 규약이 정하지 않는다 — `3-1`도 `1-A-2`도 쓰이고,
+	// 정답 헤딩은 파트가 있으면 H3, 없으면 H2가 된다. 대응이 맞는지만 본다.
+	// (초기 버전은 `## \d+-\d+`만 인정해서, H3로 쓴 자료를 "정답 없음"으로
+	//  잘못 보고했다. 감사가 규약보다 좁으면 진짜 위반이 소음에 묻힌다.)
+	// 헤딩은 `## 2-1`일 수도 `## 2-1 — 해설`일 수도 있다. 번호 뒤에 무엇이 오든
+	// 받되, 번호로 시작하지 않는 헤딩(`## 파트 1. 회수 연습`)은 걸러진다.
+	const ANSWER_HEADING = /^#{2,4}\s+([A-Za-z0-9]+(?:-[A-Za-z0-9]+)+)(?=[\s.:—-]|$)/gm;
+	// 문항은 `**1-1.** 본문` 또는 `**3-6. 제목**` 둘 다 쓰인다. 굵게 표시가 번호에서
+	// 끝나는지 제목까지 감싸는지는 규약이 정하지 않으므로 번호까지만 본다.
+	const qNums = [...q.matchAll(/^\*\*([A-Za-z0-9]+(?:-[A-Za-z0-9]+)+)\./gm)].map((m) => m[1]);
+	const aNums = [...a.matchAll(ANSWER_HEADING)].map((m) => m[1]);
+	// 코딩 과제는 93에 정답을 두지 않는다. 답은 tests/(명세)와 solutions/(참고 구현)이
+	// 담당하고, 92는 그 과제를 안내만 한다. 그러니 src/에 같은 번호의 파일이 있으면
+	// 93에 없는 것이 정상이다.
+	const codingNums = new Set(
+		listTs(path.join(root, 'src'), (f) => /^\d+-\d+-.+\.ts$/.test(f)).map(
+			(f) => f.match(/^(\d+-\d+)/)[1],
+		),
+	);
+	const missing = qNums.filter((n) => !aNums.includes(n) && !codingNums.has(n));
 	const extra = aNums.filter((n) => !qNums.includes(n));
 	if (missing.length) {
 		add('error', pkg, '규약2', `93에 정답 없는 문항: ${missing.join(', ')}`);
@@ -137,11 +206,12 @@ function auditWorkbook(pkg, root) {
 		add('error', pkg, '규약2', `92에 문항 없는 정답: ${extra.join(', ')}`);
 	}
 
-	// 93의 각 항목에 되짚기
-	const sections = a.split(/^##\s+/m).slice(1);
-	const noPointer = sections
+	// 93의 각 항목에 되짚기. 파트 구분용 헤딩(`## 파트 1. …`)은 항목이 아니므로 뺀다.
+	const noPointer = a
+		.split(/^(?=#{2,4}\s)/m)
+		.filter((s) => new RegExp(ANSWER_HEADING.source, 'm').test(s))
 		.filter((s) => !/📍 되짚기/.test(s))
-		.map((s) => s.split(/\s/)[0]);
+		.map((s) => s.match(new RegExp(ANSWER_HEADING.source, 'm'))[1]);
 	if (noPointer.length) {
 		add('warn', pkg, '규약2', `93에 되짚기 없는 항목: ${noPointer.join(', ')}`);
 	}
@@ -151,33 +221,52 @@ function auditWorkbook(pkg, root) {
 	if (!/92-workbook\.md/.test(a)) add('warn', pkg, '규약2', '93이 92를 링크하지 않는다');
 }
 
-// ── 규약 2: 코딩 문제 — 한 파일 한 문제 + solutions 미러 ───────────────────
+// ── 규약 2: 코딩 과제 — tests(명세) / src(문제) / solutions(참고 구현) ────────
 function auditCoding(pkg, root) {
 	const srcDir = path.join(root, 'src');
 	const solDir = path.join(root, 'solutions');
+	const testDir = path.join(root, 'tests');
 	if (!fs.existsSync(srcDir)) return;
 
-	const isAssignment = (f) => /^\d+-\d+-.+\.ts$/.test(f);
-	const src = fs.existsSync(srcDir) ? fs.readdirSync(srcDir).filter(isAssignment).sort() : [];
-	const sol = fs.existsSync(solDir) ? fs.readdirSync(solDir).filter(isAssignment).sort() : [];
+	const isAssignment = (f) => /^\d+-\d+-.+\.ts$/.test(f) && !f.endsWith('.test.ts');
+	const isSpec = (f) => /^\d+-\d+-.+\.test\.ts$/.test(f);
+
+	const src = listTs(srcDir, isAssignment);
+	const sol = listTs(solDir, isAssignment);
+	const specs = listTs(testDir, isSpec);
 
 	if (src.length === 0) return; // 코딩 과제 없는 패키지
 
-	// 미러 대응
+	const base = (f) => f.replace(/\.test\.ts$|\.ts$/, '');
+	const specBases = new Set(specs.map(base));
+	const solBases = new Set(sol.map(base));
+
+	// ── 세 파일이 한 벌인가
 	for (const f of src) {
-		if (!sol.includes(f)) {
-			add('error', pkg, '규약2', `solutions/${f}가 없다 — 문제와 같은 파일명으로 테스트를 둔다`);
+		const b = base(f);
+		if (!specBases.has(b)) {
+			add('error', pkg, '규약2', `tests/${b}.test.ts 가 없다 — 명세 없이는 무엇을 만들지 알 수 없다`);
+		}
+		if (!solBases.has(b)) {
+			add('error', pkg, '규약2', `solutions/${b}.ts 가 없다 — 참고 구현이 없으면 양방향 검증을 못 한다`);
 		}
 	}
+	const srcBases = new Set(src.map(base));
 	for (const f of sol) {
-		if (!src.includes(f)) {
-			add('error', pkg, '규약2', `src/${f}가 없다 — 정답만 있고 문제가 없다`);
+		if (!srcBases.has(base(f))) {
+			add('error', pkg, '규약2', `src/${base(f)}.ts 가 없다 — 참고 구현만 있고 문제가 없다`);
+		}
+	}
+	for (const f of specs) {
+		if (!srcBases.has(base(f))) {
+			add('error', pkg, '규약2', `src/${base(f)}.ts 가 없다 — 명세만 있고 문제가 없다`);
 		}
 	}
 
-	// 문제 파일: 한 파일 한 문제 + TODO 스켈레톤
+	// ── 문제 파일 (src): 한 파일 한 문제 + TODO 스켈레톤 + 명세 포인터
 	for (const f of src) {
 		const body = readIf(path.join(srcDir, f)) ?? '';
+		const b = base(f);
 		const nums = new Set([...body.matchAll(/과제\s+(\d+-\d+)/g)].map((m) => m[1]));
 		if (nums.size > 1) {
 			add('error', pkg, '규약2', `src/${f}에 과제 ${[...nums].join(', ')} — 한 파일에 한 문제만`);
@@ -185,63 +274,115 @@ function auditCoding(pkg, root) {
 		if (!/🎯 TODO/.test(body)) {
 			add('warn', pkg, '규약2', `src/${f}에 🎯 TODO가 없다 — 채울 지점이 표시되지 않았다`);
 		}
-		if (!/throw new Error\('TODO/.test(body)) {
+		if (!/throw new Error\(['"]TODO/.test(body)) {
 			add('warn', pkg, '규약2', `src/${f}가 throw로 시작하지 않는다 — 채우기 전에 테스트가 통과할 수 있다`);
 		}
-		if (!/성공 기준/.test(body)) {
-			add('warn', pkg, '규약2', `src/${f}에 성공 기준이 없다 — 테스트와 1:1 대응을 확인할 수 없다`);
+		if (!body.includes(`tests/${b}.test.ts`)) {
+			add('warn', pkg, '규약2', `src/${f}가 명세 파일(tests/${b}.test.ts)을 가리키지 않는다`);
+		}
+		// 이전 규격의 잔재. 성공 기준은 이제 테스트의 it() 설명이 담는다.
+		if (/^\s*\*\s*성공 기준/m.test(body)) {
+			add(
+				'warn',
+				pkg,
+				'규약2',
+				`src/${f}에 "성공 기준" 목록이 남아 있다 — 명세가 tests/로 옮겨졌으니 이중 관리가 된다`,
+			);
 		}
 	}
 
-	// 정답 파일: 테스트여야 한다
+	// ── 명세 파일 (tests): 실제로 판정하는가
+	for (const f of specs) {
+		const body = readIf(path.join(testDir, f)) ?? '';
+		const b = base(f);
+
+		if (!/from ['"]vitest['"]/.test(body)) {
+			add('error', pkg, '규약3', `tests/${f}가 vitest를 import하지 않는다`);
+		}
+		if (!new RegExp(`from ['"]\\.\\./src/${b}(?:\\.js)?['"]`).test(body)) {
+			add(
+				'error',
+				pkg,
+				'규약2',
+				`tests/${f}가 ../src/${b} 를 import하지 않는다 — 이 상대 경로가 있어야 STUDY_TARGET 치환이 걸린다`,
+			);
+		}
+		const assertions = (body.match(/\bexpect\(/g) || []).length;
+		if (assertions === 0) {
+			add('error', pkg, '규약2', `tests/${f}에 expect()가 없다 — 아무것도 검사하지 않는다`);
+		} else if (assertions < 3) {
+			add('warn', pkg, '규약2', `tests/${f}의 expect()가 ${assertions}개뿐 — 경계 조건이 빠졌을 수 있다`);
+		}
+		if (!/고치지 않는다/.test(body)) {
+			add('warn', pkg, '규약2', `tests/${f}에 "이 파일은 고치지 않는다"가 없다 — 명세를 고쳐 통과시키는 걸 막지 못한다`);
+		}
+		if (!/\bit\(/.test(body)) {
+			add('warn', pkg, '규약2', `tests/${f}에 it()이 없다 — 성질 단위로 나뉘지 않았다`);
+		}
+	}
+
+	// ── 참고 구현 (solutions): 테스트가 아니어야 하고, 인터페이스가 src와 같아야 한다
 	for (const f of sol) {
 		const body = readIf(path.join(solDir, f)) ?? '';
-		if (!/check\(/.test(body)) {
-			add('error', pkg, '규약2', `solutions/${f}가 테스트가 아니다 — 정답은 참고 구현이 아니라 테스트`);
+		const b = base(f);
+
+		// 규격이 뒤집혔다. 예전에는 solutions가 테스트였고, 지금은 구현이다.
+		if (/from ['"]vitest['"]/.test(body) || /^\s*function check\(/m.test(body)) {
+			add(
+				'error',
+				pkg,
+				'규약2',
+				`solutions/${f}가 아직 테스트다 — 판정은 tests/가 하고 solutions/는 참고 구현을 담는다`,
+			);
+		}
+		if (/from ['"]\.\.\/src\//.test(body)) {
+			add(
+				'error',
+				pkg,
+				'규약2',
+				`solutions/${f}가 ../src/를 import한다 — 참고 구현은 독립적이어야 STUDY_TARGET 치환의 대상이 된다`,
+			);
 		}
 		if (!/📍 되짚기/.test(body)) {
 			add('warn', pkg, '규약2', `solutions/${f}에 되짚기 주석이 없다`);
 		}
-		if (/from ['"]\.\.\/src\//.test(body) === false) {
-			add('warn', pkg, '규약2', `solutions/${f}가 src/를 import하지 않는다 — 학습자 구현을 판정하지 못한다`);
-		}
-		// 테스트 프레임워크 의존 금지
-		for (const dep of ['vitest', 'jest', '@jest/globals', 'mocha']) {
-			if (new RegExp(`from ['"]${dep}`).test(body)) {
-				add('error', pkg, '규약3', `solutions/${f}가 ${dep}에 의존한다 — tsx 외 의존성을 두지 않는다`);
-			}
-		}
-	}
 
-	// package.json 스크립트 대응
-	const pj = readIf(path.join(root, 'package.json'));
-	if (pj) {
-		const scripts = JSON.parse(pj).scripts ?? {};
-		for (const f of src) {
-			const num = f.match(/^(\d+-\d+)/)[1];
-			if (!scripts[`test:${num}`]) {
-				add('error', pkg, '규약5', `package.json에 test:${num} 스크립트가 없다`);
+		// 인터페이스 일치 — 여기가 어긋나면 STUDY_TARGET 치환이 조용히 깨진다.
+		const srcBody = readIf(path.join(srcDir, `${b}.ts`));
+		if (srcBody) {
+			const want = exportedNames(srcBody);
+			const have = exportedNames(body);
+			const missing = [...want].filter((n) => !have.has(n));
+			if (missing.length) {
+				add(
+					'error',
+					pkg,
+					'규약2',
+					`solutions/${f}에 없는 export: ${missing.join(', ')} — src와 인터페이스가 달라 치환 시 깨진다`,
+				);
 			}
 		}
-		if (!scripts.test) add('warn', pkg, '규약5', 'package.json에 test 스크립트가 없다');
-		if (!scripts.typecheck) add('warn', pkg, '규약5', 'package.json에 typecheck 스크립트가 없다');
 	}
 }
 
-// ── 규약 5: 패키지 설정 ────────────────────────────────────────────────────
-function auditPackageSetup(pkg, root) {
+// ── 규약 3·5: 패키지 설정 ──────────────────────────────────────────────────
+function auditPackageSetup(pkg, root, { isTool, isLegacy }) {
 	const pj = readIf(path.join(root, 'package.json'));
 	if (!pj) {
 		add('error', pkg, '규약5', 'package.json이 없다 — 워크스페이스가 인식하지 못한다');
 		return;
 	}
 	const j = JSON.parse(pj);
-	if (j.name !== pkg) {
+	const expectedName = isTool ? `@study/${pkg}` : pkg;
+	if (j.name !== expectedName && j.name !== pkg) {
 		add('warn', pkg, '규약5', `package.json name("${j.name}")이 디렉토리명과 다르다`);
 	}
 	if (j.type !== 'module') {
 		add('warn', pkg, '규약5', 'type: "module"이 아니다 — ESM import가 깨진다');
 	}
+
+	const scripts = j.scripts ?? {};
+	if (!scripts.typecheck) add('warn', pkg, '규약5', 'package.json에 typecheck 스크립트가 없다');
 
 	const ts = readIf(path.join(root, 'tsconfig.json'));
 	if (!ts) {
@@ -250,10 +391,39 @@ function auditPackageSetup(pkg, root) {
 		add('warn', pkg, '규약5', 'tsconfig.json이 ../../tsconfig.base.json을 상속하지 않는다');
 	}
 
+	if (isTool) return;
+
 	// README 현재 패키지 표에 등재
 	const readme = readIf(path.join(REPO, 'README.md')) ?? '';
 	if (!new RegExp('`' + pkg + '`').test(readme)) {
 		add('warn', pkg, '규약5', 'README.md "현재 패키지" 표에 없다');
+	}
+
+	if (isLegacy) return;
+
+	// 코딩 과제가 있는 패키지는 Vitest 배선이 되어 있어야 한다.
+	const hasAssignments = listTs(path.join(root, 'src'), (f) => /^\d+-\d+-.+\.ts$/.test(f)).length > 0;
+	if (!hasAssignments) return;
+
+	if (scripts.test !== 'vitest run') {
+		add('error', pkg, '규약5', `test 스크립트가 "vitest run"이 아니다 (현재: ${scripts.test ?? '없음'})`);
+	}
+	for (const stale of Object.keys(scripts).filter((s) => /^test:\d+-\d+$/.test(s))) {
+		add('warn', pkg, '규약5', `옛 규격의 스크립트가 남아 있다: ${stale} — 이제 vitest가 파일명으로 필터한다`);
+	}
+	if (!(j.devDependencies?.['@study/testkit'])) {
+		add('error', pkg, '규약3', 'devDependencies에 @study/testkit이 없다 — vitest.config.ts가 해석되지 않는다');
+	}
+
+	const vc = readIf(path.join(root, 'vitest.config.ts'));
+	if (!vc) {
+		add('error', pkg, '규약5', 'vitest.config.ts가 없다 — 양방향 검증(STUDY_TARGET) 치환이 걸리지 않는다');
+	} else if (!/defineStudyConfig/.test(vc)) {
+		add('error', pkg, '규약5', 'vitest.config.ts가 defineStudyConfig를 쓰지 않는다 — 치환 규칙이 패키지마다 갈린다');
+	}
+
+	if (ts && !/"tests"/.test(ts)) {
+		add('warn', pkg, '규약5', 'tsconfig.json의 include에 "tests"가 없다 — 명세가 타입 검사를 받지 않는다');
 	}
 }
 
@@ -280,31 +450,23 @@ function auditBranches(packages) {
 		if (!b.startsWith('sol/')) continue;
 		const parts = b.split('/');
 		if (parts.length !== 3 || !parts[1] || !parts[2]) {
-			add(
-				'warn',
-				'(repo)',
-				'규약4',
-				`브랜치 "${b}"가 sol/{패키지}/{과제} 3단 형식이 아니다`,
-			);
+			add('warn', '(repo)', '규약4', `브랜치 "${b}"가 sol/{패키지}/{과제} 3단 형식이 아니다`);
 			continue;
 		}
-		const pkg = parts[1];
-		if (!packages.includes(pkg)) {
-			add('warn', '(repo)', '규약4', `브랜치 "${b}"의 패키지 "${pkg}"가 존재하지 않는다`);
+		if (!packages.includes(parts[1])) {
+			add('warn', '(repo)', '규약4', `브랜치 "${b}"의 패키지 "${parts[1]}"가 존재하지 않는다`);
 		}
 	}
 
 	// 풀이가 main에 머지됐는지 — main에 TODO가 사라진 과제가 있으면 의심
 	for (const pkg of packages) {
+		if (LEGACY_PACKAGES.has(pkg) || TOOL_PACKAGES.has(pkg)) continue;
 		const srcDir = path.join(REPO, 'packages', pkg, 'src');
 		if (!fs.existsSync(srcDir)) continue;
-		const filled = fs
-			.readdirSync(srcDir)
-			.filter((f) => /^\d+-\d+-.+\.ts$/.test(f))
-			.filter((f) => {
-				const b = readIf(path.join(srcDir, f)) ?? '';
-				return /🎯 TODO/.test(b) === false;
-			});
+		const filled = listTs(srcDir, (f) => /^\d+-\d+-.+\.ts$/.test(f)).filter((f) => {
+			const b = readIf(path.join(srcDir, f)) ?? '';
+			return /🎯 TODO/.test(b) === false;
+		});
 		if (filled.length) {
 			add(
 				'error',
@@ -334,12 +496,24 @@ if (target && targets.length === 0) {
 	process.exit(1);
 }
 
+const exempted = [];
 for (const pkg of targets) {
 	const root = path.join(pkgRoot, pkg);
-	auditDocs(pkg, root);
-	auditWorkbook(pkg, root);
-	auditCoding(pkg, root);
-	auditPackageSetup(pkg, root);
+	const isTool = TOOL_PACKAGES.has(pkg);
+	const isLegacy = LEGACY_PACKAGES.has(pkg);
+
+	if (isTool) {
+		exempted.push(`${pkg} (도구 패키지 — 규약 1·2 미적용)`);
+	} else {
+		auditDocs(pkg, root);
+		auditWorkbook(pkg, root);
+		if (isLegacy) {
+			exempted.push(`${pkg} (${LEGACY_PACKAGES.get(pkg)})`);
+		} else {
+			auditCoding(pkg, root);
+		}
+	}
+	auditPackageSetup(pkg, root, { isTool, isLegacy });
 }
 if (!target) auditBranches(packages);
 
@@ -347,23 +521,29 @@ if (!target) auditBranches(packages);
 const errors = findings.filter((f) => f.severity === 'error');
 const warns = findings.filter((f) => f.severity === 'warn');
 
+if (exempted.length) {
+	console.log('예외 적용');
+	for (const e of exempted) console.log(`  · ${e}`);
+	console.log();
+}
+
 if (findings.length === 0) {
 	console.log(`✓ 규약 위반 없음 (검사: ${targets.join(', ')})`);
 	process.exit(0);
 }
 
-for (const group of [
+for (const [severity, label, list] of [
 	['error', '위반', errors],
 	['warn', '주의', warns],
 ]) {
-	const [, label, list] = group;
 	if (list.length === 0) continue;
-	console.log(`\n${label} ${list.length}건`);
+	console.log(`${label} ${list.length}건`);
 	for (const f of list) {
-		console.log(`  ${f.severity === 'error' ? '✗' : '△'} [${f.pkg}/${f.rule}] ${f.detail}`);
+		console.log(`  ${severity === 'error' ? '✗' : '△'} [${f.pkg}/${f.rule}] ${f.detail}`);
 	}
+	console.log();
 }
 
-console.log(`\n위반 ${errors.length} · 주의 ${warns.length}`);
+console.log(`위반 ${errors.length} · 주의 ${warns.length}`);
 console.log('규약 원문: README.md');
 process.exit(errors.length > 0 ? 1 : 0);
