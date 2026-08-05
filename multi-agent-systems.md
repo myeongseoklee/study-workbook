@@ -5,10 +5,10 @@
 
 ## 문서 (읽음)
 
-- [ ] 00-overview.md
-- [ ] 01-prerequisites.md
-- [ ] 02-what-is-an-agent.md
-- [ ] 03-langgraph-basics.md
+- [x] 00-overview.md
+- [x] 01-prerequisites.md
+- [x] 02-what-is-an-agent.md
+- [x] 03-langgraph-basics.md
 - [ ] 04-multi-agent-patterns.md
 - [ ] 05-eval-and-observability.md
 - [ ] 06-rag-when-needed.md
@@ -24,8 +24,8 @@
 
 ## 코딩 과제
 
-- [ ] 0-1  미확정
-- [ ] 1-1  미확정
+- [x] 0-1  통과 (6/6) · 2026-08-05
+- [x] 1-1  통과 (3/3) · 2026-08-05
 - [ ] 3-1  미확정
 - [ ] 5-1  미확정
 - [ ] 7-1  미확정
