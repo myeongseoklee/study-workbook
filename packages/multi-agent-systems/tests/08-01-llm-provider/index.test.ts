@@ -12,13 +12,18 @@ function stubAnthropicClient(response: { content: Array<{ type: string; text?: s
 }
 
 describe("anthropicProvider", () => {
-  it("name과 model을 노출한다", () => {
-    const { client } = stubAnthropicClient({ content: [{ type: "text", text: "..." }] });
-
+  it("선언한 model로 실제 호출한다 — 계약과 호출이 어긋나지 않는다", async () => {
+    const { client, create } = stubAnthropicClient({ content: [{ type: "text", text: "..." }] });
     const provider = anthropicProvider(client);
 
+    await provider.ask("s", "u");
+
+    // name·model 자체는 스캐폴딩이 채워 둔다. 검사할 값은 그 선언대로 **실제로
+    // 부르는가**이고, 그건 ask()를 구현해야 드러난다 — 선언과 호출이 갈라지면
+    // 벤더를 바꿔도 옛 모델을 계속 부르는 버그가 조용히 남는다.
     expect(provider.name).toBe("anthropic");
     expect(provider.model).toBe(ANTHROPIC_MODEL);
+    expect(create.calls[0][0].model).toBe(ANTHROPIC_MODEL);
   });
 
   it("system을 top-level 파라미터로, user를 messages[0].content로 보낸다", async () => {
