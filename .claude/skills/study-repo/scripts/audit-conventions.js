@@ -78,12 +78,26 @@ function auditDocs(pkg, root) {
 		}
 	}
 
-	// 암기 항목 비율 — 90이 있으면 카드 수를 센다
+	// 90에 암기 항목이 실제로 들어 있는지.
+	//
+	// 형식은 규약이 정하지 않는다 — 규약 1은 "검색 없이 즉답할 항목만"이라고만
+	// 말한다. 카드(###)로 쓰든 표로 쓰든 목록으로 쓰든 자료 성격에 맞으면 된다.
+	// 그래서 특정 마크업을 요구하지 않고 "항목이 하나라도 있는가"만 본다.
+	// (초기 버전은 ###을 강제했는데, 그건 한 자료의 형식을 전체 규약으로
+	//  착각한 오버피팅이었다. 스크립트가 규약보다 엄격하면 감사가 신뢰를 잃는다.)
 	const memo = readIf(path.join(docs, '90-must-memorize.md'));
 	if (memo) {
-		const cards = (memo.match(/^###\s/gm) || []).length;
-		if (cards === 0) {
-			add('warn', pkg, '규약1', '90-must-memorize.md에 항목(###)이 없다');
+		const items =
+			(memo.match(/^###\s/gm) || []).length + // 카드형
+			(memo.match(/^\|[^|]+\|/gm) || []).length + // 표 행 (헤더·구분선 포함)
+			(memo.match(/^\s*[-*]\s+\S/gm) || []).length; // 목록형
+		if (items === 0) {
+			add(
+				'warn',
+				pkg,
+				'규약1',
+				'90-must-memorize.md에 암기 항목이 없다 (카드·표·목록 어느 형식이든 없음)',
+			);
 		}
 	}
 }
@@ -256,14 +270,26 @@ function auditBranches(packages) {
 		return;
 	}
 
+	// 규약 4가 정하는 것은 **풀이 브랜치**의 명명이지, 레포의 모든 브랜치가
+	// sol/이어야 한다는 뜻이 아니다. 백업·실험·기능 브랜치는 규약 밖이므로
+	// 건드리지 않는다. sol/로 시작하는 것만 형식과 패키지 존재를 검증한다.
+	//
+	// 진짜 규약 위반은 "풀이가 main에 머지됐는가"이고, 그건 아래에서 파일
+	// 상태로 확인한다 — 브랜치 이름보다 그쪽이 실질이다.
 	for (const b of branches) {
-		if (b === 'main' || b === 'master') continue;
-		if (!b.startsWith('sol/')) {
-			add('warn', '(repo)', '규약4', `브랜치 "${b}"가 sol/{패키지}/{과제} 형식이 아니다`);
+		if (!b.startsWith('sol/')) continue;
+		const parts = b.split('/');
+		if (parts.length !== 3 || !parts[1] || !parts[2]) {
+			add(
+				'warn',
+				'(repo)',
+				'규약4',
+				`브랜치 "${b}"가 sol/{패키지}/{과제} 3단 형식이 아니다`,
+			);
 			continue;
 		}
-		const [, pkg] = b.split('/');
-		if (pkg && !packages.includes(pkg)) {
+		const pkg = parts[1];
+		if (!packages.includes(pkg)) {
 			add('warn', '(repo)', '규약4', `브랜치 "${b}"의 패키지 "${pkg}"가 존재하지 않는다`);
 		}
 	}
