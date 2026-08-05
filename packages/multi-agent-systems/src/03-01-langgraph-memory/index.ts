@@ -75,9 +75,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 }
 
 /*
- * 🛠 더 해볼 것 (docs/03):
- * - createAgent 대신 StateGraph 를 손수 조립 (Annotation.Root + append 리듀서 + 조건부 엣지)
- * - SqliteSaver 로 바꿔 재시작 후에도 상태가 남는지 확인
+ * 🛠 더 해볼 것
+ *
+ * 선택 문제(테스트 있음) — extra-1-graph-router.ts
+ *   조건부 엣지 판단과 append 리듀서. StateGraph를 손수 조립할 때의 두 조각이다.
+ *
+ * 관찰 과제(테스트 없음) — 돌려 보고 눈으로 확인하는 것들:
+ * - StateGraph 전체를 손수 조립 (Annotation.Root + 리듀서 + 조건부 엣지 + compile)
+ * - SqliteSaver 로 바꿔 프로세스를 껐다 켜도 상태가 남는지 확인
  * - 사람 승인 끼우기 — 프리빌트에는 interruptBefore 가 없다:
  *     createAgent({ ..., middleware: [humanInTheLoopMiddleware({ interruptOn: { multiply: true } })] })
  *     → 결과의 __interrupt__ 확인 후 agent.invoke(new Command({ resume }), config) 로 재개
