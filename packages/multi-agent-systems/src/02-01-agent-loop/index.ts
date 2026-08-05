@@ -5,7 +5,7 @@
  * runAgentLoop() 안을 직접 구현하라. (툴 정의·runTool은 이미 채워져 있다)
  *
  * 명세: tests/02-01-agent-loop/index.test.ts (먼저 읽어라)
- * 막히면 정답: solutions/02-01-agent-loop/index.ts
+ * 막히면 정답: solutions/02-01-agent-loop.ts
  */
 import OpenAI from "openai";
 import { client, MODEL } from "../../shared/llm";
@@ -77,13 +77,42 @@ export async function runAgentLoop(
   maxSteps: number
 ): Promise<string> {
   for (let step = 0; step < maxSteps; step++) {
-    // 🎯 TODO: 이 루프 안에 "에이전트 한 스텝"을 구현하라.
-    //   - 현재 대화(messages)와 tools를 모델에 보내 다음 행동을 받는다.
-    //   - 응답에 툴 호출이 있으면: 그 툴을 runTool로 실행하고, 결과를 대화에 다시 넣어 다음 스텝으로.
-    //   - 툴 호출이 없으면: 그게 최종 답이다. 반환하고 루프를 끝낸다.
-    //   핵심: 모델 응답도, 툴 실행 결과도 매번 messages에 쌓아야 모델이 맥락을 잃지 않는다.
-    //   개념: docs/01 '툴 호출 4단계' + docs/02. API 형식(OpenAI)이 막히면 solutions 참고.
-    throw new Error("TODO: week0 에이전트 루프를 구현하세요. 막히면 solutions/02-01-agent-loop/index.ts 참고");
+    const res = await chatClient.chat.completions.create({ model: MODEL, messages, tools });
+    const msg = res.choices[0].message;
+    messages.push(msg);
+
+    const toolCalls = msg.tool_calls ?? [];
+
+    if (toolCalls.length === 0) {
+      return msg.content ?? "";
+    }
+
+    const results = toolCalls.map((tool) => {
+      const { id, type } = tool;
+
+      let content: string;
+
+      try {
+        if (type === "function") {
+          content = String(runTool(tool.function.name, JSON.parse(tool.function.arguments)));
+        } else if (type === "custom") {
+          content = String(runTool(tool.custom.name, JSON.parse(tool.custom.input)));
+        } else {
+          const _exhaustive: never = tool;
+          throw new Error(`알 수 없는 tool_call type: ${(tool as any).type}`);
+        }
+      } catch (error) {
+        content = String(error);
+      }
+
+      return {
+        tool_call_id: id,
+        role: "tool" as const,
+        content,
+      };
+    });
+
+    messages.push(...results);
   }
 
   throw new Error("⛔ MAX_STEPS 초과 — 강제 종료");
