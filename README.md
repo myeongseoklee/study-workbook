@@ -27,6 +27,7 @@ study/
 |---|---|
 | `multi-agent-systems` | 멀티 에이전트 시스템 — LangGraph, 협업 패턴, 평가, RAG, 인프라 |
 | `stateful-context-design` | 축적된 상태 설계 — KV 캐시, 슬라이딩 윈도우, 이벤트 소싱을 관통하는 네 원리 |
+| `coding-agent-architecture` | 코딩 에이전트 만들기 — 에이전트 루프·도구·컨텍스트(1강)와 세션·컴팩션·기업 납품(2강). 회차가 늘어나는 시리즈라 `docs/`가 회차 폴더(`ep01-`, `ep02-`) + 누적 문서 구조다 |
 
 > `multi-agent-systems`는 이 규약이 정해지기 전에 만들어져 `solutions/`에 **완성 구현**이 들어 있다(테스트가 아님). 앞으로 만드는 패키지는 아래 규약을 따른다.
 
