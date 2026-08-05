@@ -71,6 +71,10 @@ importers:
       zod:
         specifier: ^4.4.3
         version: 4.4.3
+    devDependencies:
+      '@study/testkit':
+        specifier: workspace:*
+        version: link:../testkit
 
   packages/stateful-context-design:
     devDependencies:

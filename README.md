@@ -36,8 +36,6 @@ study/
 | `coding-agent-architecture` | 코딩 에이전트 만들기 — 에이전트 루프·도구·컨텍스트(1강)와 세션·컴팩션·기업 납품(2강). 회차가 늘어나는 시리즈라 `docs/`가 회차 폴더(`ep01-`, `ep02-`) + 누적 문서 구조다 |
 | `ecs-fargate-iac` | CloudFormation으로 ECS Fargate 읽기 — IaC·네트워크·ALB·IAM·시크릿·알람·배포 |
 
-> `multi-agent-systems`는 이 규약이 정해지기 전에 만들어졌다. 실습이 살아 있는 LLM API를 호출하는 성격이라 단위 테스트로 판정할 수 없어, `src/`(연습) ↔ `solutions/`(완성 구현) 두 폴더 구조를 그대로 둔다. `tests/`가 없는 유일한 주제 패키지다.
-
 ---
 
 ## 규약 1 — 문서화
@@ -149,6 +147,14 @@ pnpm test:solutions      # solutions/ 대상 → 전부 통과해야 정상
 ### @study/testkit
 
 과제 테스트가 반복해서 필요로 하는 것만 담는다. 새 헬퍼는 **두 패키지 이상에서 필요해진 뒤에** 넣는다.
+
+**이 판단은 "다른 패키지에 이미 비슷한 게 있는지 검색했는가"에 달려 있다.** 검색을 빠뜨리면 같은 것을 다른 이름으로 두 번 만들게 된다 — 그래서 로컬 테스트 더블(패키지 안의 fake·stub·scripted 헬퍼)을 추가하기 전에 먼저 찾아본다.
+
+```bash
+grep -rn "class Fake\|function scripted\|function stub\|function mock" packages --include="*.ts" | grep -v node_modules
+```
+
+`audit-conventions.js`가 이 검색의 일부를 대신한다 — `testkit` 밖의 테스트 더블 후보를 전부 나열하고, **정확히 같은 이름**이 두 패키지에 나타나면 위반으로 잡는다. 다만 이름이 다르면(`fakeModel` vs `stubModel`) 잡지 못한다 — 그건 여전히 위 grep을 사람이 눈으로 보고 판단해야 한다. 완전한 자동화가 아니라 **검색을 안 하고 지나칠 가능성을 줄이는 장치**다.
 
 | 도구 | 언제 쓰나 |
 |---|---|

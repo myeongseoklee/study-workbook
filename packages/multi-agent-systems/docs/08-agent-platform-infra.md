@@ -143,7 +143,7 @@ const result   = await devAgent(`이 전략 구현: ${strategy}`);
 
 ## 🛠 직접 해볼 것 — LLM Provider 추상화 (멀티 LLM)
 
-플랫폼은 특정 LLM 벤더에 묶이면 안 된다. 하나의 인터페이스 뒤에 여러 벤더를 어댑터로 두고, 설정으로 갈아끼운다 — 이게 폴리글랏 원칙의 "LLM 판(版)"이다. (실습 파일: `src/infra/llm-provider.ts`)
+플랫폼은 특정 LLM 벤더에 묶이면 안 된다. 하나의 인터페이스 뒤에 여러 벤더를 어댑터로 두고, 설정으로 갈아끼운다 — 이게 폴리글랏 원칙의 "LLM 판(版)"이다. (실습 파일: `src/8-1-llm-provider.ts`)
 
 - [ ] `LLMProvider` 인터페이스를 정한다: `{ name, model, ask(system, user): Promise<string> }`
 - [ ] **Gemini 어댑터**(OpenAI 호환)는 주어져 있다 — 읽고 구조를 파악

@@ -29,13 +29,13 @@ const TOOL_PACKAGES = new Set(['testkit']);
  * 규약 제정 이전에 만들어져 구조가 다른 패키지. README에 사유가 적혀 있고,
  * 감사는 그 예외를 알고 있어야 한다 — 모르면 매번 같은 위반을 보고하고,
  * 그러면 사람이 감사 전체를 무시하기 시작한다.
+ *
+ * multi-agent-systems는 한때 여기 있었다("살아 있는 LLM API를 호출해 단위 테스트로
+ * 판정할 수 없다"는 사유로) — 실제로는 대부분의 실습이 client/ask를 파라미터로 받는
+ * 순수 orchestration 함수였고, 모킹이 아니라 스텁 주입으로 얼마든지 판정 가능했다.
+ * 전면 tests/src/solutions 전환 후 이 항목은 제거했다.
  */
-const LEGACY_PACKAGES = new Map([
-	[
-		'multi-agent-systems',
-		'실습이 살아 있는 LLM API를 호출해 단위 테스트로 판정할 수 없다 (README 참조)',
-	],
-]);
+const LEGACY_PACKAGES = new Map([]);
 
 function add(severity, pkg, rule, detail) {
 	findings.push({ severity, pkg, rule, detail });
@@ -486,6 +486,13 @@ function auditBranches(packages) {
 //
 // 판정은 "문서용으로 허용된 값인가"로 한다. 실제 값과 예시값을 자동으로 가르는
 // 완벽한 규칙은 없으므로, 허용 목록을 명시하고 그 밖은 사람이 보게 한다.
+//
+// study-material-generator SKILL.md의 치환 대상 8종 중 이 함수가 다루는 것은
+// 계정 ID·공인 IP·리소스 ID·이메일·DB 엔드포인트·OIDC sub·SSID 7종이다.
+// **"내부 자격·공용 리소스 이름"(DB 유저명, 공용 보안그룹 이름 등)은 기계 검출 대상에서
+// 뺐다** — 회사마다 고유한 어휘라 허용 목록을 만들 수 없고, 일반 단어와 구분할 정규식이
+// 없다. 이 항목은 여전히 사람이 검토해야 한다. 이 함수가 "위반 없음"을 보고해도
+// 이 항목은 검사되지 않았다는 뜻이다.
 
 /** AWS 문서·이 레포가 예시로 쓰는 계정 ID. */
 const ALLOWED_ACCOUNT_IDS = new Set([
@@ -537,6 +544,32 @@ function isAllowedResourceId(id) {
 /** 문서에 써도 되는 이메일 도메인. */
 const SAFE_EMAIL = /@(example\.(com|org|net)|invalid|localhost|anthropic\.com)$/;
 
+/** 값이 전부 0인 UUID — 자리표시자로 관용적으로 쓰인다. */
+const NIL_UUID = '00000000-0000-0000-0000-000000000000';
+
+/** 관리형 DB·캐시가 쓰는 엔드포인트 접미사. 벤더가 늘면 이 표에 추가한다. */
+const MANAGED_DB_SUFFIXES = [
+	/\.rds\.amazonaws\.com$/,
+	/\.cache\.amazonaws\.com$/,
+	/\.database\.windows\.net$/, // Azure SQL
+	/\.documents\.azure\.com$/, // Azure Cosmos DB
+	/\.redis\.cache\.windows\.net$/, // Azure Cache for Redis
+];
+
+/**
+ * 조직명·리소스명이 자리표시자처럼 보이는지 — 특정 값을 허용 목록에 등록하는 대신
+ * "관용적으로 자리표시자에 쓰이는 표기 패턴"으로 판별한다. 안전 목록 방식은 문서마다
+ * 다른 관례(`OWNER/REPO`, `<org>`, `my-org`, `{{ORG}}`...)를 전부 등록해야 하고, 등록 안 된
+ * 새 관례가 나올 때마다 오탐을 낸다 — 실제로 GitHub 공식 문서의 `OWNER/REPO`가 그렇게 걸렸다.
+ */
+function looksLikePlaceholder(token) {
+	return (
+		/^[A-Z_][A-Z0-9_]*$/.test(token) || // ALL_CAPS 관례: OWNER, MY_ORG, ORG_NAME
+		/^[<{].*[>}]$/.test(token) || // <org>, {org}, {{org}}
+		/^(my|your|example|foo|bar|acme|test|sample|placeholder|org|company|x+)[-_]?/i.test(token)
+	);
+}
+
 function auditExportSafety(pkg, root) {
 	const files = [];
 	for (const sub of ['docs', 'workbook', 'src', 'solutions', 'tests']) {
@@ -560,11 +593,21 @@ function auditExportSafety(pkg, root) {
 		if (!body) continue;
 		const rel = path.relative(root, file);
 
-		// ① 12자리 계정 ID — ARN·ECR URI 같은 AWS 문맥에서만 본다 (맨숫자는 오탐이 많다)
+		// ① 12자리 계정 ID — ARN·ECR URI 문맥이면 확신도가 높아 error, 맨숫자로만
+		//    나오면 오탐(전화번호·금액 등) 가능성이 있어 warn으로 낮춰서라도 사람 눈에 띄게 한다.
+		//    (문맥 없이도 잡지 않으면 산문에 그대로 적힌 계정 ID를 놓친다 — 실제로 있었던 사고 형태다.)
+		const armMatchedIds = new Set();
 		for (const m of body.matchAll(/(?:arn:aws[a-z-]*:[a-z0-9-]*:[a-z0-9-]*:|(?<![\w.])(?=\d{12}\.dkr\.ecr))(\d{12})/g)) {
+			armMatchedIds.add(m[1]);
 			if (!ALLOWED_ACCOUNT_IDS.has(m[1])) {
 				add('error', pkg, '반출안전', `${rel}: 실제 계정 ID로 보이는 값 ${m[1]} — 예시 계정(111122223333)으로 치환한다`);
 			}
+		}
+		// 앞뒤에 문자·숫자가 더 붙어 있으면(도서 ID·상품 코드 등) 계정 ID가 아니라
+		// 더 긴 식별자의 일부다 — 경계를 `\d`가 아니라 `\w`로 넓게 잡아 그런 값은 뺀다.
+		for (const m of body.matchAll(/(?<!\w)(\d{12})(?!\w)/g)) {
+			if (armMatchedIds.has(m[1]) || ALLOWED_ACCOUNT_IDS.has(m[1])) continue;
+			add('warn', pkg, '반출안전', `${rel}: 문맥 없는 12자리 숫자 ${m[1]} — 계정 ID일 수 있다. 확인 후 치환하거나 허용 목록에 추가한다`);
 		}
 
 		// ② 공인 IP — 사설·문서용 대역 밖이면 실제 주소일 수 있다
@@ -579,14 +622,26 @@ function auditExportSafety(pkg, root) {
 			add('error', pkg, '반출안전', `${rel}: 공인 IP로 보이는 값 ${ip} — RFC 5737 대역(203.0.113.x 등)으로 치환한다`);
 		}
 
-		// ③ 리소스 ID — 실제 AWS ID는 16진수만 쓴다. hex 8자 이상만 대상으로 해
-		//    `igw-xxxx`·`subnet-public` 같은 설명용 표기를 오탐하지 않는다.
+		// ③ 리소스 ID — AWS만이 아니라 "짧은 소문자 접두사 + 긴 16진수" 관례를 쓰는
+		//    벤더 전반(AWS·일부 Azure·k8s)을 겨냥한다. AWS 리소스 타입을 하나씩 나열하면
+		//    새 리소스 타입이 나올 때마다 목록을 갱신해야 하므로, 접두사를 열어 둔다.
+		//    hex 8자 이상만 대상으로 해 `igw-xxxx`·`subnet-public` 같은 설명용 표기는 빠진다.
 		const seenId = new Set();
-		for (const m of body.matchAll(/\b((?:vpc|subnet|sg|i|ami|vol|eni|rtb|igw|nat|acl)-[0-9a-f]{8,})\b/g)) {
+		for (const m of body.matchAll(/\b([a-z]{1,6}-[0-9a-f]{8,})\b/g)) {
 			const id = m[1];
 			if (seenId.has(id) || isAllowedResourceId(id)) continue;
 			seenId.add(id);
 			add('warn', pkg, '반출안전', `${rel}: 리소스 ID ${id} — 실제 값이면 치환하고, 예시면 스크립트의 ALLOWED_RESOURCE_IDS에 추가한다`);
+		}
+
+		// ③-b UUID/GUID — Azure 구독 ID·GCP 요청 ID·k8s 오브젝트 UID 등 벤더 불문으로
+		//    쓰인다. 접두사가 없어 ③의 정규식으로는 못 잡으므로 별도로 본다.
+		const seenUuid = new Set();
+		for (const m of body.matchAll(/\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b/gi)) {
+			const id = m[1].toLowerCase();
+			if (seenUuid.has(id) || id === NIL_UUID) continue;
+			seenUuid.add(id);
+			add('warn', pkg, '반출안전', `${rel}: UUID/GUID ${id} — 실제 구독·리소스 ID면 치환한다 (예: ${NIL_UUID})`);
 		}
 
 		// ④ 이메일 — 조직 도메인이 붙은 주소
@@ -598,11 +653,37 @@ function auditExportSafety(pkg, root) {
 			add('error', pkg, '반출안전', `${rel}: 실제 이메일로 보이는 값 ${mail} — example.com 도메인으로 치환한다`);
 		}
 
-		// ⑤ DB·캐시 엔드포인트
-		for (const m of body.matchAll(/\b([\w-]+\.[\w-]+\.[a-z0-9-]+\.(?:rds|cache)\.amazonaws\.com)\b/g)) {
-			if (!/^example/.test(m[1])) {
-				add('error', pkg, '반출안전', `${rel}: 실제 DB·캐시 엔드포인트로 보이는 값 ${m[1]} — example로 시작하는 값으로 치환한다`);
+		// ⑤ DB·캐시 엔드포인트 — 완전 일반화(모든 3단 이상 호스트명)는 시도하지 않는다.
+		//    그러면 문서가 정당하게 인용하는 공개 API 호스트명(예: api.github.com)까지
+		//    걸려 오탐이 신호를 덮는다. 대신 관리형 DB 서비스가 쓰는 접미사 표(MANAGED_DB_SUFFIXES)를
+		//    벤더별로 넓혀 둔다 — AWS 하나만 보던 이전보다는 일반화됐지만, 여전히 알려진
+		//    벤더 접미사 기반이라 완전히 새로운 벤더는 표에 추가해야 잡힌다.
+		for (const m of body.matchAll(/\b([\w-]+(?:\.[\w-]+)+)\b/g)) {
+			const host = m[1];
+			if (!MANAGED_DB_SUFFIXES.some((re) => re.test(host))) continue;
+			if (!/^example/i.test(host)) {
+				add('error', pkg, '반출안전', `${rel}: 실제 DB·캐시 엔드포인트로 보이는 값 ${host} — example로 시작하는 값으로 치환한다`);
 			}
+		}
+
+		// ⑥ OIDC sub — GitHub Actions의 `repo:{org}/{repo}:environment:*` 클레임.
+		//    조직명이 실제 GitHub org면 그 자체로 어느 회사인지 특정된다. 판별은 특정
+		//    조직명을 허용 목록에 등록하는 게 아니라 looksLikePlaceholder()로 한다 (위 주석 참조).
+		for (const m of body.matchAll(/\brepo:([\w.-]+)\/([\w.-]+):/g)) {
+			if (!looksLikePlaceholder(m[1])) {
+				add(
+					'error',
+					pkg,
+					'반출안전',
+					`${rel}: OIDC sub의 조직명으로 보이는 값 "${m[1]}" — repo:my-org/my-service:environment:* 형태의 예시로 치환한다`,
+				);
+			}
+		}
+
+		// ⑦ SSID·와이파이 언급 — 실제 값인지는 기계로 판별 불가하지만, 이 단어가 나오면
+		//    사람이 값을 봐야 한다는 신호는 낼 수 있다.
+		if (/\bSSID\b/i.test(body) || /와이파이|Wi-?Fi\s*(이름|명)/.test(body)) {
+			add('warn', pkg, '반출안전', `${rel}: SSID/와이파이 언급 — 실제 네트워크 이름이 아닌지 확인한다`);
 		}
 	}
 
@@ -615,6 +696,67 @@ function auditExportSafety(pkg, root) {
 			add('warn', pkg, '반출안전', 'docs/00-overview.md에 예시 식별자가 있는데 치환 사실을 밝히지 않았다 — 독자가 실제 값으로 오해한다');
 		}
 	}
+}
+
+// ── 테스트 더블 중복 ─────────────────────────────────────────────────────────
+//
+// README 규약: "새 헬퍼는 두 패키지 이상에서 필요해진 뒤에 testkit에 넣는다."
+// 문제는 이 판단이 "다른 패키지에 이미 비슷한 게 있는지 검색했는가"에 달려 있는데,
+// 그 검색을 강제하는 장치가 지금까지 없었다 — 사람이 매번 기억해서 grep해야 했다.
+//
+// 완전한 해결은 아니다. 이름이 다르면(예: `fakeModel` vs `stubModel`) 잡지 못한다.
+// 그건 여전히 사람의 판단이 필요하다. 이 검사가 하는 일은 둘뿐이다:
+//   ① testkit 밖에 있는 테스트 더블 후보를 전부 한 번에 나열한다 (매번 손으로 grep할 필요를 없앤다)
+//   ② 정확히 같은 이름이 두 패키지에 나타나면 — 이건 사람이 못 보고 지나쳤을 확률이 높다 — 위반으로 잡는다
+//
+// 선언에 `export`를 요구하지 않는다. 테스트 더블은 대개 그 파일 안에서만 쓰이므로
+// export 없이 모듈 최상단 상수로 선언되는 게 실제로 더 흔하다(예:
+// multi-agent-systems/src/week3-multiagent/index.ts의 `stubPerformanceData`).
+// export만 봤다면 이런 경우를 전부 놓쳐 "0건"이 "중복 없음"이 아니라 "사각지대"가 된다.
+function auditTestDoubleDuplication(packages) {
+	const DOUBLE_NAME = /\b(?:fake|stub|scripted|mock)[A-Z]\w*|\bFake\w*|\bStub\w*|\bScripted\w*|\bMock\w*/g;
+	const found = new Map(); // 정규화된 이름 → [{pkg, file}]
+
+	for (const pkg of packages) {
+		if (TOOL_PACKAGES.has(pkg)) continue; // testkit 자신은 제외 — 거기 있는 게 정상 위치다
+		const root = path.join(pkgRoot, pkg);
+		for (const sub of ['src', 'solutions', 'tests']) {
+			const dir = path.join(root, sub);
+			let entries;
+			try {
+				entries = fs.readdirSync(dir, { withFileTypes: true, recursive: true });
+			} catch {
+				continue;
+			}
+			for (const e of entries) {
+				if (!e.isFile() || !e.name.endsWith('.ts')) continue;
+				const file = path.join(e.parentPath ?? e.path ?? dir, e.name);
+				const body = readIf(file);
+				if (!body) continue;
+				for (const m of body.matchAll(/\b(?:export\s+)?(?:declare\s+)?(?:async\s+)?(?:function|const|let|var|class)\s+([A-Za-z_$][\w$]*)/g)) {
+					const name = m[1];
+					if (!DOUBLE_NAME.test(name)) continue;
+					DOUBLE_NAME.lastIndex = 0;
+					const key = name.toLowerCase();
+					if (!found.has(key)) found.set(key, []);
+					found.get(key).push({ pkg, file: path.relative(REPO, file) });
+				}
+			}
+		}
+	}
+
+	if (found.size === 0) return;
+
+	const all = [...found.entries()].flatMap(([, sites]) => sites);
+	console.log(`테스트 더블 후보 ${all.length}건 (testkit 밖) — 새로 추가하기 전에 이 목록에서 비슷한 게 있는지 눈으로 확인하라`);
+	for (const [name, sites] of found) {
+		const pkgs = new Set(sites.map((s) => s.pkg));
+		for (const s of sites) console.log(`  · ${name}  [${s.pkg}] ${s.file}`);
+		if (pkgs.size > 1) {
+			add('error', '(전역)', '테스트더블중복', `"${name}"이 ${[...pkgs].join(', ')}에 각각 있다 — 같은 이름이 두 패키지에 나타나면 testkit으로 올릴 후보다`);
+		}
+	}
+	console.log();
 }
 
 // ── 실행 ───────────────────────────────────────────────────────────────────
@@ -634,6 +776,9 @@ if (target && targets.length === 0) {
 	console.error(`패키지 "${target}"를 찾을 수 없다. 있는 것: ${packages.join(', ')}`);
 	process.exit(1);
 }
+
+// 중복 탐지는 전체 패키지를 봐야 의미가 있다 — 특정 패키지만 감사 대상이어도 비교군은 전부다.
+auditTestDoubleDuplication(packages);
 
 const exempted = [];
 for (const pkg of targets) {

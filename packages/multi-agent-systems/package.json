@@ -5,16 +5,18 @@
   "type": "module",
   "description": "멀티 에이전트 시스템 학습 워크북 — Node/TypeScript 실습 환경",
   "scripts": {
-    "check": "tsx src/shared/check.ts",
-    "week0": "tsx src/week0-agent-loop/index.ts",
-    "week1": "tsx src/week1-langgraph/index.ts",
-    "week3": "tsx src/week3-multiagent/index.ts",
-    "week5": "tsx src/week5-eval/index.ts",
-    "week7": "tsx src/week7-rag/index.ts",
-    "infra:analyst": "tsx src/infra/analyst-agent.ts",
-    "infra:ad-expert": "tsx src/infra/ad-expert-agent.ts",
-    "infra:orchestrator": "tsx src/infra/orchestrator.ts",
-    "infra:provider": "tsx src/infra/llm-provider.ts",
+    "check": "tsx shared/check.ts",
+    "week0": "tsx src/0-1-agent-loop.ts",
+    "week1": "tsx src/1-1-langgraph-memory.ts",
+    "week3": "tsx src/3-1-multiagent-handoff.ts",
+    "week5": "tsx src/5-1-eval-harness.ts",
+    "week7": "tsx src/7-1-rag-retrieve.ts",
+    "infra:analyst": "tsx src/8-2-analyst-agent.ts",
+    "infra:ad-expert": "tsx src/8-3-ad-expert-agent.ts",
+    "infra:orchestrator": "tsx src/8-4-orchestrator.ts",
+    "infra:provider": "tsx src/8-1-llm-provider.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "typecheck": "tsc"
   },
   "dependencies": {
@@ -29,5 +31,8 @@
     "langchain": "^1.5.4",
     "openai": "^7.3.0",
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@study/testkit": "workspace:*"
   }
 }
