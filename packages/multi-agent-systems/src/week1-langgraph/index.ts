@@ -44,32 +44,15 @@ const model = new ChatGoogle({
 });
 const checkpointer = new MemorySaver(); // 재개/인터럽트의 전제
 
-const printTurnResult = (messages: { content: any }[], idx: number) => {
-  const lastMsg = messages.at(-1);
-  console.log(`Turn ${idx}:`, lastMsg.content);
-};
-
 async function main() {
   // 🎯 위 model·tools·checkpointer 로 ReAct 에이전트를 만들고, 같은 대화 세션(thread)으로 두 번 물어라.
   //   1) "(3 + 5) 곱하기 2는? 툴을 써서 계산해." → 답 출력
   //   2) 같은 thread 로 "방금 결과에 10을 더하면?" → 체크포인터가 이전 맥락을 기억하는지 확인
   //   힌트: createAgent({ model, tools, checkpointer }), 에이전트의 invoke, thread 를 지정하는 config (docs/03).
   //   막히면 solutions/week1-langgraph/index.ts.
-  const agent = createAgent({ tools: [add, multiply], model, checkpointer });
-  const threadId = `thread_${Date.now()}`;
-
-  const turn1 = await agent.invoke(
-    { messages: [{ role: "user", content: "(3 + 5) 곱하기 2는? 툴을 써서 계산해." }] },
-    { configurable: { thread_id: threadId } }
+  throw new Error(
+    "TODO: ReAct 에이전트 생성 + 같은 thread 로 2회 대화를 구현하세요. 막히면 solutions 참고"
   );
-  printTurnResult(turn1.messages, 1);
-
-  // 같은 thread → 체크포인터가 이전 맥락을 들고 있다
-  const turn2 = await agent.invoke(
-    { messages: [{ role: "user", content: "방금 결과에 10을 더하면?" }] },
-    { configurable: { thread_id: threadId } }
-  );
-  printTurnResult(turn2.messages, 2);
 }
 
 main().catch((e) => {
