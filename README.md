@@ -35,6 +35,7 @@ study/
 | `stateful-context-design` | 축적된 상태 설계 — KV 캐시, 슬라이딩 윈도우, 이벤트 소싱을 관통하는 네 원리 |
 | `coding-agent-architecture` | 코딩 에이전트 만들기 — 에이전트 루프·도구·컨텍스트(1강)와 세션·컴팩션·기업 납품(2강). 회차가 늘어나는 시리즈라 `docs/`가 회차 폴더(`ep01-`, `ep02-`) + 누적 문서 구조다 |
 | `ecs-fargate-iac` | CloudFormation으로 ECS Fargate 읽기 — IaC·네트워크·ALB·IAM·시크릿·알람·배포 |
+| `mcp-protocol` | MCP 프로토콜 정복 — 2026-07-28 개정판 공식 문서·명세 전체: 무상태 설계, MRTR, 전송, 인가, 보안 |
 
 ---
 

@@ -36,6 +36,12 @@ importers:
         specifier: workspace:*
         version: link:../testkit
 
+  packages/mcp-protocol:
+    devDependencies:
+      '@study/testkit':
+        specifier: workspace:*
+        version: link:../testkit
+
   packages/multi-agent-systems:
     dependencies:
       '@anthropic-ai/sdk':

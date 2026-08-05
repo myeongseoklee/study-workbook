@@ -1,0 +1,15 @@
+{
+  "name": "mcp-protocol",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP(Model Context Protocol) 프로토콜 정복 — 2026-07-28 개정판 공식 문서·명세 전체: 무상태 설계, MRTR, 전송, 인가, 보안",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@study/testkit": "workspace:*"
+  }
+}
