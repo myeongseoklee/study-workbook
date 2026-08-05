@@ -329,7 +329,7 @@ TPOT 문제의 처방: KV 양자화, 컨텍스트 단축, 배치 조정.
 
 ```bash
 cd packages/stateful-context-design
-pnpm test 3-1                        # 내 구현으로 판정
+pnpm test 03-01                        # 내 구현으로 판정
 pnpm test:solutions                  # 참고 구현으로 돌려 명세가 성립하는지 확인
 ```
 

@@ -28,15 +28,24 @@ PKG_DIR="$REPO/packages/$PKG"
   exit 1
 }
 
-# 과제번호가 주어졌으면 세 파일이 모두 있는지 먼저 본다.
+# 과제번호가 주어졌으면 세 폴더와 그 안의 index가 모두 있는지 먼저 본다.
+# (과제 하나가 폴더 하나다 — README § 규약 2)
 if [ -n "$NUM" ]; then
-  SRC=$(find "$PKG_DIR/src" -maxdepth 1 -name "${NUM}-*.ts" | head -1)
-  [ -n "$SRC" ] || { echo "✗ src/${NUM}-*.ts 를 찾을 수 없다"; exit 1; }
-  BASE=$(basename "$SRC" .ts)
-  for f in "tests/$BASE.test.ts" "solutions/$BASE.ts"; do
-    [ -f "$PKG_DIR/$f" ] || { echo "✗ $f 이 없다 — 과제는 세 파일이 한 벌이다"; exit 1; }
+  SRC=$(find "$PKG_DIR/src" -maxdepth 1 -type d -name "${NUM}-*" | head -1)
+  [ -n "$SRC" ] || { echo "✗ src/${NUM}-*/ 를 찾을 수 없다"; exit 1; }
+  BASE=$(basename "$SRC")
+  for d in "tests/$BASE" "solutions/$BASE"; do
+    [ -d "$PKG_DIR/$d" ] || { echo "✗ $d/ 이 없다 — 과제는 세 폴더가 한 벌이다"; exit 1; }
   done
-  echo "과제 $PKG / $NUM  ($BASE)"
+  for f in "tests/$BASE/index.test.ts" "src/$BASE/index.ts" "solutions/$BASE/index.ts"; do
+    [ -f "$PKG_DIR/$f" ] || { echo "✗ $f 이 없다 — 필수 문제는 index다"; exit 1; }
+  done
+  EXTRA=$(find "$PKG_DIR/src/$BASE" -maxdepth 1 -name 'extra-*.ts' | wc -l | tr -d ' ')
+  if [ "$EXTRA" -gt 0 ]; then
+    echo "과제 $PKG / $NUM  ($BASE)  · 선택 문제 ${EXTRA}개"
+  else
+    echo "과제 $PKG / $NUM  ($BASE)"
+  fi
 else
   echo "패키지 전체 $PKG"
 fi

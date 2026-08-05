@@ -460,7 +460,7 @@ CLI형은 **세션 하나만 감당**한다는 점이 앞의 세 형태와 결�
 
 ```bash
 cd packages/coding-agent-architecture
-pnpm test 3-1              # 내 구현으로 판정
+pnpm test e01-02-01              # 내 구현으로 판정
 ```
 
 실패 항목에는 `↳ 힌트`가 붙어 있다. 막히면 `solutions/`를 먼저 열지 말고 **힌트를 읽고 해당 문서로 돌아간다** — 참고 구현은 통과한 뒤 접근을 비교하는 용도다.

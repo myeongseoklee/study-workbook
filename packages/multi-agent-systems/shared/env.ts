@@ -8,7 +8,7 @@
  * 규칙: process.env 는 이 파일에서만 읽고, 나머지는 아래 export 를 import 해서 쓴다.
  *   - 주차 실습(week0·3·5·7)·환경점검 → shared/llm 을 통해 client·MODEL 을 받는다
  *   - week1(네이티브 Gemini provider) → shared/llm 에서 API_KEY·MODEL
- *   - 8-1-llm-provider(08장) → provider 전환이 연습 대상이라 이 파일을 직접 import
+ *   - 08-01-llm-provider(08장) → provider 전환이 연습 대상이라 이 파일을 직접 import
  *
  * shared/는 src/도 solutions/도 아닌 패키지 루트에 있다 — 둘 다 ../shared로 같은 파일을
  * 본다. src/ 안에 두면 solutions/*.ts가 ../src/를 참조하게 돼 독립성이 깨진다.

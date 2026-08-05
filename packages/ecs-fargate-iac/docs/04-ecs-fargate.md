@@ -462,15 +462,15 @@ Fargate 플랫폼 버전은 컨테이너를 돌리는 기반의 버전이다. `L
 
 ## 실습
 
-**과제 4-1 — 롤링 배포 범위·서킷 브레이커 계산기** (`src/4-1-rolling-deploy.ts`)
+**과제 04-01 — 롤링 배포 범위·서킷 브레이커 계산기** (`src/04-01-rolling-deploy/index.ts`)
 
 `DesiredCount`와 두 퍼센트로 배포 중 태스크 수 범위를 계산하고, 교착 여부를 판정하고, 서킷 브레이커 임계값을 구한다. 올림·내림 방향과 `clamp` 경계가 채점 대상이다.
 
-무엇을 만들지는 `tests/4-1-rolling-deploy.test.ts`가 정의한다. **먼저 읽고** `src/4-1-rolling-deploy.ts`의 `🎯 TODO`를 채운다.
+무엇을 만들지는 `tests/04-01-rolling-deploy/index.test.ts`가 정의한다. **먼저 읽고** `src/04-01-rolling-deploy/index.ts`의 `🎯 TODO`를 채운다.
 
 ```bash
 cd packages/ecs-fargate-iac
-pnpm test 4-1
+pnpm test 04-01
 ```
 
 ## 공식 문서

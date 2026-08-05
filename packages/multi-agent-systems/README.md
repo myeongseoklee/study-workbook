@@ -20,20 +20,20 @@ shared/                    # src/도 solutions/도 아닌 패키지 공용 스�
 ├── llm.ts                 # 공용 LLM 클라이언트(env 값 + 키 검증) — 그대로 사용
 └── check.ts               # 환경 점검 (npm run check)
 tests/                     # 📋 명세 — 이 파일은 고치지 않는다
-├── 0-1-agent-loop.test.ts
-├── 1-1-langgraph-memory.test.ts
+├── 02-01-agent-loop.test.ts
+├── 03-01-langgraph-memory.test.ts
 ├── scripted-chat-model.ts  # week1 테스트 전용 헬퍼(BaseChatModel 스텁) — 명세 아님
 └── ... (나머지도 src/ 파일명과 1:1)
 src/                       # 🎯 연습문제 (여기를 채운다)
-├── 0-1-agent-loop.ts      # 02장: 프레임워크 없이 에이전트 루프
-├── 1-1-langgraph-memory.ts # 03장: LangGraph + 체크포인터
-├── 3-1-multiagent-handoff.ts  # 04장: 광고 3전문가 협업 (앱 레이어)
-├── 5-1-eval-harness.ts    # 05장: 평가셋 하네스
-├── 7-1-rag-retrieve.ts    # 06장: 최소 RAG
-├── 8-1-llm-provider.ts    # 08장: LLM provider 추상화 (Gemini 주고 Claude 어댑터 직접 구현)
-├── 8-2-analyst-agent.ts   # 08장: 분석 에이전트를 독립 서비스로 (Fastify)
-├── 8-3-ad-expert-agent.ts # 08장: 광고 전략가를 독립 서비스로 (Fastify)
-└── 8-4-orchestrator.ts    # 08장: 오케스트레이터 (HTTP로 두 에이전트 호출)
+├── 02-01-agent-loop.ts      # 02장: 프레임워크 없이 에이전트 루프
+├── 03-01-langgraph-memory.ts # 03장: LangGraph + 체크포인터
+├── 04-01-multiagent-handoff.ts  # 04장: 광고 3전문가 협업 (앱 레이어)
+├── 05-01-eval-harness.ts    # 05장: 평가셋 하네스
+├── 06-01-rag-retrieve.ts    # 06장: 최소 RAG
+├── 08-01-llm-provider.ts    # 08장: LLM provider 추상화 (Gemini 주고 Claude 어댑터 직접 구현)
+├── 08-02-analyst-agent.ts   # 08장: 분석 에이전트를 독립 서비스로 (Fastify)
+├── 08-03-ad-expert-agent.ts # 08장: 광고 전략가를 독립 서비스로 (Fastify)
+└── 08-04-orchestrator.ts    # 08장: 오케스트레이터 (HTTP로 두 에이전트 호출)
 solutions/                 # ✅ 완성본 (막힐 때만 열어보기 — src/ 와 동일 구조, shared/는 같은 파일을 공유)
 ```
 
@@ -42,7 +42,7 @@ solutions/                 # ✅ 완성본 (막힐 때만 열어보기 — src/ 
 
 **환경변수 규칙:** `.env` 는 `import "dotenv/config"` 를 실행한 프로세스에만 로드된다. 그래서 주입은 **`shared/env.ts` 한 곳**에서만 하고, 나머지 파일은 `process.env` 를 읽지 않고 거기서 export 된 값(`API_KEY`·`MODEL`·`BASE_URL`·`LLM_PROVIDER`·`ANTHROPIC_MODEL`)을 import 한다. 주차 실습은 보통 `shared/llm` 을 통해 받으면 키 검증까지 함께 얻는다. 새 환경변수를 추가할 땐 `env.ts` 에 export 를 하나 더 만드는 게 유일한 방법이다.
 
-**LLM provider:** 주차 실습은 **Gemini(무료 티어)** 를 OpenAI 호환 방식으로 쓴다. 여러 벤더(Gemini·Claude·OpenAI)를 인터페이스로 추상화하는 것은 [08장 연습문제](docs/08-agent-platform-infra.md)(`8-1-llm-provider.ts`)에서 다룬다 — 거기서 Claude(cc) 어댑터를 직접 구현한다.
+**LLM provider:** 주차 실습은 **Gemini(무료 티어)** 를 OpenAI 호환 방식으로 쓴다. 여러 벤더(Gemini·Claude·OpenAI)를 인터페이스로 추상화하는 것은 [08장 연습문제](docs/08-agent-platform-infra.md)(`08-01-llm-provider.ts`)에서 다룬다 — 거기서 Claude(cc) 어댑터를 직접 구현한다.
 
 ## 시작하기
 
@@ -58,7 +58,7 @@ cp .env.example .env
 # 3) 환경 점검 (여기가 ✅ 되면 세팅 완료 — 이후 에러는 '내 코드' 문제)
 npm run check
 
-# 4) 첫 실습 — src/0-1-agent-loop.ts 의 🎯 TODO 를 채운 뒤 실행
+# 4) 첫 실습 — src/02-01-agent-loop/index.ts 의 🎯 TODO 를 채운 뒤 실행
 npm run week0
 ```
 

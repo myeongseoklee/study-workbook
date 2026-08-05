@@ -440,15 +440,15 @@ aws cloudformation deploy --capabilities CAPABILITY_NAMED_IAM ...
 
 ## 실습
 
-**과제 5-1 — IAM 정책 평가기** (`src/5-1-iam-policy-eval.ts`)
+**과제 05-01 — IAM 정책 평가기** (`src/05-01-iam-policy-eval/index.ts`)
 
 정책 문장 목록과 요청(주체·액션·리소스·컨텍스트)을 받아 허용/거부를 판정한다. 와일드카드 매칭, `Deny` 우선, `Condition` 평가, 암묵적 거부를 모두 다룬다.
 
-무엇을 만들지는 `tests/5-1-iam-policy-eval.test.ts`가 정의한다. **먼저 읽고** `src/5-1-iam-policy-eval.ts`의 `🎯 TODO`를 채운다.
+무엇을 만들지는 `tests/05-01-iam-policy-eval/index.test.ts`가 정의한다. **먼저 읽고** `src/05-01-iam-policy-eval/index.ts`의 `🎯 TODO`를 채운다.
 
 ```bash
 cd packages/ecs-fargate-iac
-pnpm test 5-1
+pnpm test 05-01
 ```
 
 ## 공식 문서

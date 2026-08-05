@@ -35,6 +35,7 @@
  *   progress.js path [패키지]               기록 파일 경로 (에이전트가 직접 편집할 때)
  *
  * 공통 플래그: --undo (mark 해제) · --force (check가 기존 _probe를 덮음)
+ *            --prune (init이 목록에 없는 옛 항목을 제거) · --no-push (save)
  *
  * 종료 코드는 **판정을 수행할 수 있었는지**다: 0 = 판정 완료(과제가 `막힘`이어도
  * 0이다 — 못 푼 것은 정상적인 학습 상태다), 1 = 판정 불가(파일·설정 문제).
@@ -143,26 +144,67 @@ function listWorkbookParts(pkg) {
 	return parts.length ? parts : [{ key: '워크북', label: '전체' }];
 }
 
-/** tests/ 파일명에서 과제 번호를 뽑는다. 번호 없는 파일(도구 테스트)은 제외. */
+/**
+ * 과제 목록. 과제 하나가 `tests/` 아래 폴더 하나다 (README § 규약 2).
+ *
+ * 폴더명은 `{문서번호}-{순번}-{slug}`이고, 회차 시리즈는 `e{회차}-` 접두가
+ * 붙는다. 번호는 폴더명에서 뽑되 slug는 버린다 — 사용자가 `check … 03-01`처럼
+ * 번호만으로 부르기 때문이다.
+ */
+const ASSIGN_DIR = /^((?:e\d+-)?\d+-\d+)-.+$/;
+
 function listAssignments(pkg) {
 	const dir = path.join(REPO, 'packages', pkg, 'tests');
-	let files;
+	let entries;
 	try {
-		files = fs.readdirSync(dir);
+		entries = fs.readdirSync(dir, { withFileTypes: true });
 	} catch {
 		return [];
 	}
-	const nums = files
-		.map((f) => f.match(/^(\d+-\d+)-.*\.test\.ts$/))
+	const nums = entries
+		.filter((e) => e.isDirectory())
+		.map((e) => e.name.match(ASSIGN_DIR))
 		.filter(Boolean)
 		.map((m) => m[1]);
 	return [...new Set(nums)].sort(cmpNum);
 }
 
+/** 번호로 과제 폴더명을 찾는다 (slug를 몰라도 되게). */
+function assignmentDir(pkg, num, kind = 'tests') {
+	const dir = path.join(REPO, 'packages', pkg, kind);
+	try {
+		return (
+			fs
+				.readdirSync(dir, { withFileTypes: true })
+				.find((e) => e.isDirectory() && e.name.startsWith(`${num}-`))?.name ?? null
+		);
+	} catch {
+		return null;
+	}
+}
+
+/** 그 과제의 선택 문제(extra-*) 개수. 진도의 필수 판정에는 쓰지 않는다. */
+function countExtras(pkg, num) {
+	const folder = assignmentDir(pkg, num, 'src');
+	if (!folder) return 0;
+	try {
+		return fs
+			.readdirSync(path.join(REPO, 'packages', pkg, 'src', folder))
+			.filter((f) => /^extra-.+\.ts$/.test(f)).length;
+	} catch {
+		return 0;
+	}
+}
+
+/** `e01-02-01` / `03-01` 모두 받는다. 회차가 있으면 그것이 최상위 정렬 키다. */
 function cmpNum(a, b) {
-	const [a1, a2] = a.split('-').map(Number);
-	const [b1, b2] = b.split('-').map(Number);
-	return a1 - b1 || a2 - b2;
+	const parse = (s) => {
+		const m = s.match(/^(?:e(\d+)-)?(\d+)-(\d+)$/);
+		return m ? [Number(m[1] ?? 0), Number(m[2]), Number(m[3])] : [0, 0, 0];
+	};
+	const [ae, ad, ai] = parse(a);
+	const [be, bd, bi] = parse(b);
+	return ae - be || ad - bd || ai - bi;
 }
 
 // ── 기록 파일 (섹션 단위 읽기·쓰기) ─────────────────────────────────────────
@@ -206,7 +248,7 @@ function sectionItems(sections, heading) {
 }
 
 // ── init ───────────────────────────────────────────────────────────────────
-function cmdInit() {
+function cmdInit(prune = false) {
 	// ① orphan 브랜치. 체크아웃 곡예 대신 plumbing으로 빈 커밋을 만든다 —
 	//    작업 트리를 건드리지 않으므로 지금 어느 브랜치에 있어도 안전하다.
 	if (!branchExists(BRANCH)) {
@@ -239,6 +281,7 @@ function cmdInit() {
 	}
 	let created = 0;
 	let added = 0;
+	const orphans = [];
 	for (const pkg of topicPackages()) {
 		const existed = fs.existsSync(recordPath(pkg));
 		if (!existed) {
@@ -246,9 +289,20 @@ function cmdInit() {
 			created++;
 		} else {
 			added += syncRecord(pkg);
+			orphans.push(...pruneOrphans(pkg, prune).map((k) => `${pkg}/${k}`));
 		}
 	}
 	console.log(`✓ 기록 파일 ${created}개 생성 · 항목 ${added}개 추가`);
+	if (orphans.length) {
+		// 과제·문서가 이름을 바꾸거나 사라지면 옛 항목이 남는다. 조용히 지우면
+		// 통과 기록이 함께 날아가므로 기본은 알리기만 하고, --prune일 때만 지운다.
+		console.log(
+			prune
+				? `✓ 목록에 없는 항목 ${orphans.length}개 제거: ${orphans.join(', ')}`
+				: `△ 목록에 없는 항목 ${orphans.length}개: ${orphans.join(', ')}\n` +
+						'  이름이 바뀐 과제라면 기록을 새 항목으로 옮긴 뒤 --prune으로 지운다',
+		);
+	}
 	console.log(`\n기록 위치: ${WT}`);
 	console.log('다음: progress.js status');
 }
@@ -323,6 +377,41 @@ ${numLines}
 ## 메모
 
 `;
+}
+
+/**
+ * 지금 목록에 없는 항목(이름이 바뀌거나 삭제된 문서·과제)을 찾는다.
+ * `prune`이면 실제로 지우고, 아니면 키만 돌려준다.
+ */
+function pruneOrphans(pkg, prune) {
+	const sections = readRecord(pkg);
+	if (!sections) return [];
+	const wanted = {
+		[SEC_DOCS]: new Set(listDocs(pkg)),
+		[SEC_WORKBOOK]: new Set(listWorkbookParts(pkg).map((p) => p.key)),
+		[SEC_ASSIGN]: new Set(listAssignments(pkg)),
+	};
+	const found = [];
+	let changed = false;
+	for (const [heading, keys] of Object.entries(wanted)) {
+		const sec = findSection(sections, heading);
+		if (!sec || keys.size === 0) continue; // 목록을 못 읽었으면 손대지 않는다
+		const keep = [];
+		for (const line of sec.lines) {
+			const item = parseItem(line);
+			if (item && !keys.has(item.key)) {
+				found.push(item.key);
+				if (prune) {
+					changed = true;
+					continue;
+				}
+			}
+			keep.push(line);
+		}
+		sec.lines = keep;
+	}
+	if (changed) writeRecord(pkg, sections);
+	return found;
 }
 
 /** 새로 생긴 문서·파트·과제를 기존 기록에 덧붙인다. 기존 체크 상태는 보존한다. */
@@ -430,12 +519,9 @@ function cmdCheck(pkg, num, force) {
 
 function checkOne(pkg, num, force) {
 	const pkgDir = path.join(REPO, 'packages', pkg);
-	const srcDir = path.join(pkgDir, 'src');
-	const srcFile = fs.existsSync(srcDir)
-		? fs.readdirSync(srcDir).find((f) => f.startsWith(`${num}-`) && f.endsWith('.ts'))
-		: null;
-	if (!srcFile) {
-		console.log(`${pkg} ${num}  ✗ src/${num}-*.ts 를 찾을 수 없다`);
+	const folder = assignmentDir(pkg, num, 'src');
+	if (!folder) {
+		console.log(`${pkg} ${num}  ✗ src/${num}-*/ 를 찾을 수 없다`);
 		return false;
 	}
 
@@ -452,11 +538,27 @@ function checkOne(pkg, num, force) {
 
 	let result;
 	try {
-		fs.mkdirSync(probeDir, { recursive: true });
-		// 체크아웃 없이 그 브랜치의 풀이 파일만 뽑아 놓는다.
-		const solution = git(`show ${branch}:packages/${pkg}/src/${srcFile}`);
-		fs.writeFileSync(path.join(probeDir, srcFile), `${solution}\n`);
-		result = runVitest(pkgDir, num);
+		// 체크아웃 없이 그 브랜치의 풀이 폴더를 통째로 뽑아 놓는다. index만
+		// 필요하지만 extra까지 함께 꺼내는 이유는, 선택 문제를 푼 사람의 index가
+		// 같은 폴더의 extra를 import할 수 있어서다.
+		fs.mkdirSync(path.join(probeDir, folder), { recursive: true });
+		const listing = gitOut(`ls-tree --name-only ${branch}:packages/${pkg}/src/${folder}`);
+		if (listing === null) {
+			// main의 배치가 바뀌었는데 풀이 브랜치가 옛 구조로 남아 있는 경우다.
+			// 판정을 못 하는 것이지 풀이가 틀린 게 아니므로, 무엇을 해야 하는지 알린다.
+			console.log(
+				`${pkg} ${num}  △ ${branch}에 src/${folder}/ 가 없다 — 그 브랜치가 옛 배치를 담고 있다.\n` +
+					`             풀이를 새 구조(src/${folder}/index.ts)로 옮긴 뒤 다시 check하라.`,
+			);
+			return true;
+		}
+		const files = listing.split('\n').filter((f) => f.endsWith('.ts'));
+		if (files.length === 0) die(`${branch}의 src/${folder}/ 에 .ts 파일이 없다`);
+		for (const f of files) {
+			const body = git(`show ${branch}:packages/${pkg}/src/${folder}/${f}`);
+			fs.writeFileSync(path.join(probeDir, folder, f), `${body}\n`);
+		}
+		result = runVitest(pkgDir, `${num}/index`);
 	} finally {
 		fs.rmSync(probeDir, { recursive: true, force: true });
 	}
@@ -518,16 +620,16 @@ function recordAssignment(pkg, num, ok, label) {
 }
 
 // ── status ─────────────────────────────────────────────────────────────────
-/** 무료 신호(브랜치 유무·TODO 잔존)로 아직 확정 안 된 과제의 상태를 추정한다. */
+/**
+ * 무료 신호(브랜치 유무·TODO 잔존)로 아직 확정 안 된 과제의 상태를 추정한다.
+ * 필수 문제(`index.ts`)만 본다 — 진도의 완료 판정은 index가 기준이다.
+ */
 function inferAssignment(pkg, num) {
 	const branch = `sol/${pkg}/${num}`;
 	if (!branchExists(branch)) return '미시작';
-	const srcDir = path.join(REPO, 'packages', pkg, 'src');
-	const srcFile = fs.existsSync(srcDir)
-		? fs.readdirSync(srcDir).find((f) => f.startsWith(`${num}-`) && f.endsWith('.ts'))
-		: null;
-	if (!srcFile) return '진행중';
-	const body = gitOut(`show ${branch}:packages/${pkg}/src/${srcFile}`);
+	const folder = assignmentDir(pkg, num, 'src');
+	if (!folder) return '진행중';
+	const body = gitOut(`show ${branch}:packages/${pkg}/src/${folder}/index.ts`);
 	if (body === null) return '진행중';
 	return /🎯 TODO|TODO:/.test(body) ? '진행중' : '미확인';
 }
@@ -554,7 +656,9 @@ function cmdStatus(filter) {
 		);
 
 		const tally = { 통과: 0, 막힘: 0, 미확인: 0, 진행중: 0, 미시작: 0 };
+		let extras = 0;
 		for (const num of listAssignments(pkg)) {
+			extras += countExtras(pkg, num);
 			const tail = recorded.get(num) ?? '';
 			if (tail.startsWith('통과')) tally.통과++;
 			else if (tail.startsWith('막힘')) tally.막힘++;
@@ -569,7 +673,8 @@ function cmdStatus(filter) {
 		console.log(
 			`${pkg.padEnd(26)} 문서 ${String(docs.filter((d) => d.done).length).padStart(2)}/${String(docs.length).padEnd(2)}` +
 				` · 워크북 ${parts.filter((p) => p.done).length}/${parts.length}` +
-				` · 과제 ${tally.통과}/${total}${detail ? `  (${detail})` : ''}`,
+				` · 과제 ${tally.통과}/${total}${extras ? ` (+선택 ${extras})` : ''}` +
+				`${detail ? `  (${detail})` : ''}`,
 		);
 	}
 	const dirty = gitOut('status --porcelain', WT);
@@ -634,7 +739,7 @@ if (flags.has('--help') || cmd === 'help') {
 
 switch (cmd) {
 	case 'init':
-		cmdInit();
+		cmdInit(flags.has('--prune'));
 		break;
 	case undefined:
 	case 'status':

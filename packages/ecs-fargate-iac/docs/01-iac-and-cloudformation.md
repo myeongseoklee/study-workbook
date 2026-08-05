@@ -395,15 +395,15 @@ Outputs:
 
 ## 실습
 
-**과제 1-1 — CFN 의존성 순서 계산기** (`src/1-1-cfn-dep-order.ts`)
+**과제 01-01 — CFN 의존성 순서 계산기** (`src/01-01-cfn-dep-order/index.ts`)
 
 `!Ref`·`!GetAtt`·`DependsOn`으로 표현된 의존을 받아 CloudFormation이 리소스를 만드는 순서를 계산한다. 순환 의존을 감지하는 것까지가 과제다.
 
-무엇을 만들지는 `tests/1-1-cfn-dep-order.test.ts`가 정의한다. **먼저 읽고** `src/1-1-cfn-dep-order.ts`의 `🎯 TODO`를 채운다.
+무엇을 만들지는 `tests/01-01-cfn-dep-order/index.test.ts`가 정의한다. **먼저 읽고** `src/01-01-cfn-dep-order/index.ts`의 `🎯 TODO`를 채운다.
 
 ```bash
 cd packages/ecs-fargate-iac
-pnpm test 1-1
+pnpm test 01-01
 ```
 
 ## 공식 문서

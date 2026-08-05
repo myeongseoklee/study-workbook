@@ -163,15 +163,15 @@
 풀이는 별도 브랜치에서 한다:
 
 ```bash
-git switch -c sol/coding-agent-architecture/3-1
+git switch -c sol/coding-agent-architecture/e01-02-01
 cd packages/coding-agent-architecture
-# tests/3-1-agent-loop.test.ts 를 읽고 src/3-1-agent-loop.ts 의 🎯 TODO 를 채운다
-pnpm test 3-1
+# tests/e01-02-01-agent-loop/index.test.ts 를 읽고 src/e01-02-01-agent-loop/index.ts 의 🎯 TODO 를 채운다
+pnpm test e01-02-01
 ```
 
 ### 1강 과제
 
-**3-1. 에이전트 루프** — `src/3-1-agent-loop.ts`
+**3-1. 에이전트 루프** — `src/e01-02-01-agent-loop/index.ts`
 
 턴 안의 이터레이션을 돌리는 최소 루프를 만든다. 도구 결과가 다음 호출의 입력이 되고, 종료 조건이 있고, 도구 에러에 경로가 있어야 한다.
 
@@ -179,7 +179,7 @@ pnpm test 3-1
 - 소요 예상: 30~40분
 - 막히면: [`../docs/ep01-concepts/02-agent-loop.md`](../docs/ep01-concepts/02-agent-loop.md)
 
-**3-2. KV 세션 산수** — `src/3-2-kv-session-budget.ts`
+**3-2. KV 세션 산수** — `src/e01-06-01-kv-session-budget/index.ts`
 
 노드 메모리·모델 크기·세션당 캐시로 동시 세션 수와 수용 인원을 계산한다. 1강의 하드웨어 산수를 코드로 옮기는 과제다.
 
@@ -188,21 +188,21 @@ pnpm test 3-1
 
 ### 2강 과제
 
-**3-3. 기반 컨텍스트 조립기** — `src/3-3-context-assembler.ts`
+**3-3. 기반 컨텍스트 조립기** — `src/e02-03-01-context-assembler/index.ts`
 
 도구·스킬 목록을 계산 결과로 만들고, 이름 충돌 우선순위를 한 곳에 명시하고, 5% 예산을 검사한다.
 
 - 소요 예상: 40~60분
 - 막히면: [`../docs/ep02-business-agent/03-context-assembly.md`](../docs/ep02-business-agent/03-context-assembly.md)
 
-**3-4. 컴팩션 트리거 판정기** — `src/3-4-compaction-trigger.ts`
+**3-4. 컴팩션 트리거 판정기** — `src/e02-04-01-compaction-trigger/index.ts`
 
 80% 임계값과 응답 여유를 반영해 판정하고, 판정 지점을 턴 시작뿐 아니라 도구 결과 보고에도 둔다.
 
 - 소요 예상: 30~45분
 - 막히면: [`../docs/ep02-business-agent/04-compaction.md`](../docs/ep02-business-agent/04-compaction.md) § 문제 1
 
-**3-5. 마지막 컴팩트 기준 재생기** — `src/3-5-compact-replay.ts`
+**3-5. 마지막 컴팩트 기준 재생기** — `src/e02-04-02-compact-replay/index.ts`
 
 append-only 로그에서 마지막 컴팩트 이후만 잘라 모델 입력을 만든다. 로그 자체는 건드리지 않는다.
 

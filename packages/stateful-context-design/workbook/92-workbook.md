@@ -108,12 +108,12 @@
 **테스트가 문제와 함께 주어집니다.** 각 과제의 `tests/{번호}-{slug}.test.ts`가 무엇을 만들지 정의하고, 그것을 통과시키는 것이 과제입니다. 명세를 읽지 않고 짐작으로 코드를 쓰는 것은 학습이 아니라 추측이니, **먼저 테스트를 읽으세요.**
 
 ```bash
-git switch -c sol/stateful-context-design/3-1
+git switch -c sol/stateful-context-design/03-01
 cd packages/stateful-context-design
 
-# 1) tests/3-1-kv-calc.test.ts 를 읽는다  ← 여기가 문제 정의다
-# 2) src/3-1-kv-calc.ts 의 🎯 TODO 를 채운다
-pnpm test 3-1                 # 감시 모드: pnpm test:watch 3-1
+# 1) tests/03-01-kv-calc/index.test.ts 를 읽는다  ← 여기가 문제 정의다
+# 2) src/03-01-kv-calc/index.ts 의 🎯 TODO 를 채운다
+pnpm test 03-01                 # 감시 모드: pnpm test:watch 03-01
 ```
 
 실패하면 메시지의 `↳ 힌트`를 읽으세요. 어디를 의심해야 하는지가 거기 적혀 있습니다.
@@ -122,23 +122,23 @@ pnpm test 3-1                 # 감시 모드: pnpm test:watch 3-1
 
 ---
 
-**3-1.** KV 캐시 계산기. 모델 구성값을 받아 캐시 크기를 계산하고, 주어진 GPU 메모리에서 가능한 (컨텍스트 길이 × 배치) 조합을 산출한다.
+**3-1.** KV 캐시 계산기. 모델 구성값을 받아 캐시 크기를 계산하고, 주어진 GPU 메모리에서 가능한 (컨텍스트 길이 × 배치) 조합을 산출한다. (과제 `03-01`)
 
-- 명세: `tests/3-1-kv-calc.test.ts` · 스켈레톤: `src/3-1-kv-calc.ts`
+- 명세: `tests/03-01-kv-calc/index.test.ts` · 스켈레톤: `src/03-01-kv-calc/index.ts`
 - 핵심 함정: 공식의 항 누락(`× 2`, `× layers`), 내림 처리, 배치가 1에 못 미치는 조합
 - 소요 예상: 20~30분
 - 막히면: `03-kv-cache.md` § 필수 지식 2
 
-**3-2.** 슬라이딩 윈도우 + attention sink의 마스크 생성기. 실제 어텐션 계산은 필요 없고, 어떤 위치가 보이는지만 판정한다.
+**3-2.** 슬라이딩 윈도우 + attention sink의 마스크 생성기. 실제 어텐션 계산은 필요 없고, 어떤 위치가 보이는지만 판정한다. (과제 `07-01`)
 
-- 명세: `tests/3-2-swa-mask.test.ts` · 스켈레톤: `src/3-2-swa-mask.ts`
+- 명세: `tests/07-01-swa-mask/index.test.ts` · 스켈레톤: `src/07-01-swa-mask/index.ts`
 - 핵심 함정: 창 경계(`i − W < j`인지 `≤`인지), 세 규칙의 적용 **순서**
 - 소요 예상: 20분
 - 막히면: `07-sliding-window.md` § 필수 지식 1
 
-**3-3.** 프롬프트 캐시 프리픽스 안정성 검사기. 같은 논리적 요청을 두 번 만들었을 때 프리픽스가 바이트 단위로 같은지 판정한다.
+**3-3.** 프롬프트 캐시 프리픽스 안정성 검사기. 같은 논리적 요청을 두 번 만들었을 때 프리픽스가 바이트 단위로 같은지 판정한다. (과제 `06-01`)
 
-- 명세: `tests/3-3-prefix-check.test.ts` · 스켈레톤: `src/3-3-prefix-check.ts`
+- 명세: `tests/06-01-prefix-check/index.test.ts` · 스켈레톤: `src/06-01-prefix-check/index.ts`
 - 핵심 함정: 직렬화를 "정규화"해서 실제로 캐시를 깨뜨리는 차이를 지워버리는 것
 - 소요 예상: 25~35분
 - 막히면: `06-prompt-caching.md` § 필수 지식 1~2

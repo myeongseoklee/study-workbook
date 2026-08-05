@@ -48,9 +48,15 @@ export function defineStudyConfig(packageUrl: string) {
 			root: packageRoot,
 			include: ['tests/**/*.test.ts'],
 			alias: [
-				// 테스트 파일에는 평범한 상대 경로(`../src/3-1-kv-calc`)만 보인다.
+				// 테스트 파일에는 평범한 상대 경로(`../../src/03-01-kv-calc`)만 보인다.
 				// 치환은 여기서만 일어나므로 학습자가 새로 배울 문법이 없다.
-				{ find: /^\.\.\/src\//, replacement: `${implDir}/` },
+				//
+				// `../`의 개수를 고정하지 않는 이유: 과제가 폴더가 되면서 테스트가
+				// `tests/{과제}/index.test.ts`로 한 단계 내려갔고, 경로가 `../../src/`가
+				// 됐다. 개수를 박아두면 깊이가 바뀔 때 alias가 조용히 빗나가고 —
+				// 치환이 안 되면 늘 `src/`를 보므로 **`STUDY_TARGET=solutions`가
+				// 무력화된 것을 아무도 모른 채 양방향 검증이 통과한다.**
+				{ find: /^(?:\.\.\/)+src\//, replacement: `${implDir}/` },
 			],
 		},
 	});

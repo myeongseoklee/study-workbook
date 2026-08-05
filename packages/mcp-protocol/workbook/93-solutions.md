@@ -145,25 +145,25 @@ DNS 리바인딩 — 악성 웹페이지가 도메인 해석을 바꿔 브라우
 코딩 과제의 판정자는 `tests/`다 — 여기에는 정답 코드를 다시 적지 않는다. 각 과제를 통과한 **뒤에** `solutions/`의 같은 파일명을 열어 접근을 비교하라(먼저 열면 과제가 독해로 바뀐다). 참고 구현이 "왜 그 형태인지"는 각 solutions 파일 상단 주석에 있다.
 
 ### 3-1
-- 판정: `pnpm test 3-1` · 참고 구현: `solutions/3-1-message-rules.ts`
+- 판정: `pnpm test 03-01` · 참고 구현: `solutions/03-01-message-rules/index.ts`
 - 비교 포인트: id의 "존재"와 "유효성"을 분리했는가, 부재/미지 분기가 명시적인가, 대역 경계가 상수 비교로 읽히는가
 
 📍 되짚기: `docs/03-messages-meta.md` / 카드 4·5·6
 
 ### 3-2
-- 판정: `pnpm test 3-2` · 참고 구현: `solutions/3-2-version-gate.ts`
+- 판정: `pnpm test 04-01` · 참고 구현: `solutions/04-01-version-gate/index.ts`
 - 비교 포인트: 검사 순서가 주석으로 정당화돼 있는가, judgeStdioProbe가 코드 하나가 아니라 **대역 집합**으로 판정하는가
 
 📍 되짚기: `docs/04-lifecycle-versioning.md` / 카드 7·8
 
 ### 3-3
-- 판정: `pnpm test 3-3` · 참고 구현: `solutions/3-3-tool-server.ts`
+- 판정: `pnpm test 06-01` · 참고 구현: `solutions/06-01-tool-server/index.ts`
 - 비교 포인트: 네 실패 경로의 목적지, 정렬을 등록 시점에 한 번 하는지 요청마다 하는지, 와이어에 handler가 새지 않는 직렬화
 
 📍 되짚기: `docs/06-tools.md` / 카드 14
 
 ### 3-4
-- 판정: `pnpm test 3-4` · 참고 구현: `solutions/3-4-mrtr-state.ts`
+- 판정: `pnpm test 08-01` · 참고 구현: `solutions/08-01-mrtr-state/index.ts`
 - 비교 포인트: 검증 5단계의 순서(무결성 → 주체 → 요청 → 만료), 만료 경계 부등호, "다섯 단계를 다 통과해도 단일 사용은 보장되지 않는다"는 주석
 
 📍 되짚기: `docs/08-mrtr-client-features.md` / 카드 15

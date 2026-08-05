@@ -76,23 +76,23 @@
 
 > 해설: [93-solutions.md](93-solutions.md) 파트 3. 코딩 과제의 **명세는 `tests/`에 있다** — 문제와 함께 주어지는 실행 가능한 정의다. 풀이 순서: 브랜치 생성 → `tests/`를 읽는다 → `src/`의 🎯 TODO를 채운다 → `pnpm test {과제번호}` → 통과 후에만 `solutions/`와 비교.
 
-**3-1.** 메시지 분류기와 에러 대역.
-- 명세: `tests/3-1-message-rules.test.ts` · 스켈레톤: `src/3-1-message-rules.ts`
+**3-1.** 메시지 분류기와 에러 대역. (과제 `03-01`)
+- 명세: `tests/03-01-message-rules/index.test.ts` · 스켈레톤: `src/03-01-message-rules/index.ts`
 - 핵심 함정: null id의 처리, 부재 vs 미지의 resultType, 음수 대역의 부등호 방향
 - 소요 예상: 25~40분 · 막히면: `docs/03-messages-meta.md`
 
-**3-2.** 버전·능력 게이트와 세대(era) 판정.
-- 명세: `tests/3-2-version-gate.test.ts` · 스켈레톤: `src/3-2-version-gate.ts`
+**3-2.** 버전·능력 게이트와 세대(era) 판정. (과제 `04-01`)
+- 명세: `tests/04-01-version-gate/index.test.ts` · 스켈레톤: `src/04-01-version-gate/index.ts`
 - 핵심 함정: 세 거부(-32602/-32022/-32021)의 검사 순서, 빈 능력 선언 `{}` vs 부재, 폴백을 특정 코드에 걸기
 - 소요 예상: 30~45분 · 막히면: `docs/04-lifecycle-versioning.md`
 
-**3-3.** 최소 도구 서버 코어 (tools/list + tools/call).
-- 명세: `tests/3-3-tool-server.test.ts` · 스켈레톤: `src/3-3-tool-server.ts`
+**3-3.** 최소 도구 서버 코어 (tools/list + tools/call). (과제 `06-01`)
+- 명세: `tests/06-01-tool-server/index.test.ts` · 스켈레톤: `src/06-01-tool-server/index.ts`
 - 핵심 함정: 네 가지 실패의 목적지(−32602 / isError / −32603 / −32601)가 전부 다르다, 결정적 정렬, handler 유출
 - 소요 예상: 40~60분 · 막히면: `docs/06-tools.md` § 오류의 2계층
 
-**3-4.** MRTR requestState의 봉인과 검증.
-- 명세: `tests/3-4-mrtr-state.test.ts` · 스켈레톤: `src/3-4-mrtr-state.ts`
+**3-4.** MRTR requestState의 봉인과 검증. (과제 `08-01`)
+- 명세: `tests/08-01-mrtr-state/index.test.ts` · 스켈레톤: `src/08-01-mrtr-state/index.ts`
 - 핵심 함정: 검증 순서(무결성이 내용 검사보다 먼저), 만료 경계(now === expiresAt), 불투명성
 - 소요 예상: 30~45분 · 막히면: `docs/08-mrtr-client-features.md` § requestState 보안
 

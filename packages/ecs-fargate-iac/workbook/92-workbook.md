@@ -12,11 +12,11 @@
 
 | 과제 | 무엇을 만드는가 | 명세 (먼저 읽는다) | 판정 |
 |---|---|---|---|
-| `src/1-1-cfn-dep-order.ts` | CloudFormation 의존성 순서 계산기 | `tests/1-1-cfn-dep-order.test.ts` | `pnpm test 1-1` |
-| `src/2-1-sg-reachability.ts` | 보안 그룹 도달성 판정기 | `tests/2-1-sg-reachability.test.ts` | `pnpm test 2-1` |
-| `src/4-1-rolling-deploy.ts` | 롤링 배포 범위·서킷 브레이커 계산기 | `tests/4-1-rolling-deploy.test.ts` | `pnpm test 4-1` |
-| `src/5-1-iam-policy-eval.ts` | IAM 정책 평가기 | `tests/5-1-iam-policy-eval.test.ts` | `pnpm test 5-1` |
-| `src/7-1-alarm-eval.ts` | CloudWatch 알람 상태 평가기 | `tests/7-1-alarm-eval.test.ts` | `pnpm test 7-1` |
+| `src/01-01-cfn-dep-order/index.ts` | CloudFormation 의존성 순서 계산기 | `tests/01-01-cfn-dep-order/index.test.ts` | `pnpm test 01-01` |
+| `src/02-01-sg-reachability/index.ts` | 보안 그룹 도달성 판정기 | `tests/02-01-sg-reachability/index.test.ts` | `pnpm test 02-01` |
+| `src/04-01-rolling-deploy/index.ts` | 롤링 배포 범위·서킷 브레이커 계산기 | `tests/04-01-rolling-deploy/index.test.ts` | `pnpm test 04-01` |
+| `src/05-01-iam-policy-eval/index.ts` | IAM 정책 평가기 | `tests/05-01-iam-policy-eval/index.test.ts` | `pnpm test 05-01` |
+| `src/07-01-alarm-eval/index.ts` | CloudWatch 알람 상태 평가기 | `tests/07-01-alarm-eval/index.test.ts` | `pnpm test 07-01` |
 
 **무엇을 만들지는 `tests/`가 정의한다.** 명세를 읽지 않고 짐작으로 코드를 쓰는 것은 학습이 아니라 추측이니 먼저 읽어라. 실패하면 메시지의 `↳ 힌트`가 어디를 의심할지 알려준다.
 

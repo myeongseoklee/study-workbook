@@ -21,9 +21,9 @@ study/
         ├── vitest.config.ts  defineStudyConfig 한 줄
         ├── docs/           지식 문서 — 00~09, 90 암기, 91 용어, 99 참고
         ├── workbook/       서술형 문항 — 92 문제 / 93 정답
-        ├── tests/          📋 명세 — 학습자에게 **주어지는** Vitest 테스트
-        ├── src/            🎯 문제 — TODO 스켈레톤 (학습자가 채운다)
-        └── solutions/      ✅ 참고 구현 (src와 같은 파일명)
+        ├── tests/{과제}/   📋 명세 — index.test.ts(필수) + extra-*.test.ts(선택)
+        ├── src/{과제}/      🎯 문제 — index.ts(필수) + extra-*.ts(선택)
+        └── solutions/{과제}/ ✅ 참고 구현 (같은 폴더·파일명)
 ```
 
 ### 현재 패키지
@@ -68,19 +68,49 @@ study/
 | | 문제 | 정답 |
 |---|---|---|
 | 서술형 | `workbook/92-workbook.md` | `workbook/93-solutions.md` |
-| 코딩 | `src/3-1-kv-calc.ts` | `solutions/3-1-kv-calc.ts` |
+| 코딩 | `src/03-01-kv-calc/` | `solutions/03-01-kv-calc/` |
 
-**대응 키**: 서술형은 문항 번호(`1-3` → `## 1-3`), 코딩은 **파일명이 같다**.
+**대응 키**: 서술형은 문항 번호(`1-3` → `## 1-3`), 코딩은 **폴더·파일명이 같다**.
 
-### 한 파일 = 한 문제
+### 과제 번호는 문서 번호를 따른다
 
-코딩 문제는 파일 하나에 문제 하나만 정의한다. 파일명은 `{과제번호}-{slug}.ts`이고, 세 폴더에서 **같은 이름**을 쓴다.
+**`{문서번호}-{순번}`, 숫자 칸은 모두 두 자리다.** `03-01-kv-calc`는 "`docs/03-*`에서 나온 첫 번째 과제"라는 뜻이다.
+
+이 규칙이 없으면 과제 번호가 워크북 파트 번호(파트 3의 1번 → `3-1`)나 강의 주차(week0 → `0-1`)를 따라가고, 그러면 **번호만 보고 어느 문서로 돌아갈지 알 수 없다.** 막혔을 때 돌아갈 곳을 번호가 스스로 알려주는 것이 이 규약의 목적이다.
+
+두 자리로 패딩하는 이유는 문서가 `10`·`11`·`12`까지 가는 패키지가 있어서 한 자리로는 표현이 안 되고, 섞이면 정렬이 어긋나기 때문이다.
+
+**회차 시리즈**(문서가 `ep01-…/`, `ep02-…/` 하위 폴더로 나뉘는 패키지)는 회차마다 문서 번호가 `00`부터 다시 시작해 겹친다. 그래서 `e{회차}-` 접두를 붙인다: `e01-02-01-agent-loop`는 "1강의 `02-*` 문서에서 나온 첫 과제"다.
+
+| 문서 | 과제 |
+|---|---|
+| `docs/03-kv-cache.md` | `03-01-kv-calc` |
+| `docs/08-agent-platform-infra.md` (과제 4개) | `08-01-…` ~ `08-04-…` |
+| `docs/ep02-business-agent/04-compaction.md` (과제 2개) | `e02-04-01-…`, `e02-04-02-…` |
+
+워크북 파트 3의 **문항 번호**(`3-1`, `3-2`)는 워크북 안의 좌표라서 과제 번호와 별개다. 두 좌표가 한눈에 보이도록 워크북은 과제 번호를 함께 적는다: `**3-1. 메시지 분류기** — 과제 `03-01``.
+
+### 한 과제 = 한 폴더, 필수는 `index.ts`
+
+과제 하나가 폴더 하나다. 세 곳(`tests`·`src`·`solutions`)에서 **같은 폴더명**을 쓰고, 그 안의 파일명도 같다.
 
 ```
-tests/3-1-kv-calc.test.ts   📋 명세 — 주어진다
-src/3-1-kv-calc.ts          🎯 스켈레톤 — 학습자가 채운다
-solutions/3-1-kv-calc.ts    ✅ 참고 구현
+tests/03-01-kv-calc/
+├── index.test.ts              📋 필수 문제의 명세
+└── extra-1-quantization.test.ts  📋 선택 문제의 명세
+src/03-01-kv-calc/
+├── index.ts                   🎯 필수 — 학습자가 채운다
+└── extra-1-quantization.ts    🎯 선택
+solutions/03-01-kv-calc/       ✅ 참고 구현 (같은 파일명)
 ```
+
+**`index`는 필수, `extra-*`는 선택이다.** 진도는 `index`만 보고 완료를 판정한다 — 필수를 통과했으면 그 과제는 끝난 것이고, `extra`는 말 그대로 선택이라 별도로 센다(`과제 2/9 (+선택 3)`).
+
+폴더로 나누는 이유: 이전에는 "더 해볼 것"을 문제 파일의 주석으로 적어 뒀는데, **주석은 실행되지 않으니 손을 대기 어렵다.** 판정할 테스트도 없어서 했는지 안 했는지도 남지 않는다. 선택 문제도 정규 문제와 같은 세 벌(명세·스켈레톤·참고 구현)을 갖춰야 실제로 풀 수 있다.
+
+**선택 문제로 승격할 수 있는 것은 판정 가능한 것뿐이다.** "품질이 얼마나 나빠지는지 비교해 보라" 같은 관찰형 과제는 테스트를 붙일 수 없으므로 파일로 만들지 않고 워크북 파트 3에 체크리스트와 함께 남긴다 — 판정 없는 파일은 "했는지" 알 수 없고, 테스트를 문제와 함께 준다는 이 규약의 전제도 깨진다.
+
+`import.meta.url` 데모 블록(`// 직접 실행하면 …`)은 선택 문제가 아니다. 결과를 눈으로 보는 편의 장치이므로 `index.ts`에 그대로 둔다.
 
 ### 테스트는 문제와 함께 주어진다
 
@@ -121,7 +151,7 @@ pnpm test:solutions      # solutions/ 대상 → 전부 통과해야 정상
 
 한 방향만 확인하면 **아무것도 검사하지 않는 테스트**가 통과한다. 스켈레톤에서 통과하는 항목이 있다면 그 테스트는 비어 있는 것이고, 정답에서 실패하는 항목이 있다면 명세가 성립 불가능한 것이다.
 
-치환은 `@study/testkit`의 `defineStudyConfig`가 처리한다. 테스트 파일에는 평범한 상대 경로(`../src/3-1-kv-calc`)만 보이고, `STUDY_TARGET=solutions`일 때 그것이 `solutions/`로 바뀐다.
+치환은 `@study/testkit`의 `defineStudyConfig`가 처리한다. 테스트 파일에는 평범한 상대 경로(`../../src/03-01-kv-calc`)만 보이고, `STUDY_TARGET=solutions`일 때 그것이 `solutions/`로 바뀐다. 폴더를 가리키면 그 안의 `index.ts`로 해석된다 — 그래서 필수 문제의 import 경로에는 `/index`를 적지 않는다.
 
 문제 스켈레톤에는 `🎯 TODO`를 남기고 `throw new Error('TODO: 함수명')`으로 시작한다 — 채우기 전에는 테스트가 실패하는 것이 정상이다.
 
@@ -177,11 +207,11 @@ sol/{패키지명}/{과제번호}
 ```
 
 ```bash
-git switch -c sol/stateful-context-design/3-1
+git switch -c sol/stateful-context-design/03-01
 cd packages/stateful-context-design
-# tests/3-1-kv-calc.test.ts를 읽고 src/3-1-kv-calc.ts의 🎯 TODO를 채운다
-pnpm test 3-1          # 또는 감시 모드로: pnpm test:watch 3-1
-git add -A && git commit -m "sol(stateful-context-design): 3-1 KV 캐시 계산기"
+# tests/03-01-kv-calc/index.test.ts를 읽고 src/03-01-kv-calc/index.ts의 🎯 TODO를 채운다
+pnpm test 03-01        # 또는 감시 모드로: pnpm test:watch 03-01
+git add -A && git commit -m "sol(stateful-context-design): 03-01 KV 캐시 계산기"
 ```
 
 **main으로 머지하지 않는다.** main은 문제 상태(스켈레톤)를 유지한다 — 그래야 재도전할 수 있고, 다른 사람이 같은 문제를 풀 수 있고, 풀이가 문제를 오염시키지 않는다.
@@ -193,8 +223,8 @@ git add -A && git commit -m "sol(stateful-context-design): 3-1 KV 캐시 계산�
 1. `docs/`를 읽는다
 2. `workbook/92-workbook.md`의 서술형을 **자료를 덮고** 푼다 → `93`으로 대조
 3. 풀이 브랜치를 만든다
-4. **`tests/`를 먼저 읽는다** — 무엇을 만들지가 거기 있다
-5. `src/`의 `🎯 TODO`를 채운다
+4. **`tests/{과제}/index.test.ts`를 먼저 읽는다** — 무엇을 만들지가 거기 있다
+5. `src/{과제}/index.ts`의 `🎯 TODO`를 채운다 (여유가 되면 `extra-*`도)
 6. 패키지 디렉토리에서 `pnpm test {과제번호}`로 판정한다. 실패 메시지의 `↳ 힌트`를 읽는다
    (루트에서는 `pnpm --filter {패키지} test {과제번호}` — 루트 `pnpm test`는 turbo를 거치므로 과제 번호를 넘길 수 없다)
 7. 통과하면 커밋. 그러고 나서 `solutions/`를 열어 접근을 비교한다 — 먼저 열면 과제가 독해로 바뀐다
@@ -316,7 +346,7 @@ S=.claude/skills/study-progress/scripts/progress.js
 node $S init                          # 브랜치·worktree·기록 파일 준비 (멱등 — 동기화 겸용)
 node $S status                        # 진도 요약 (읽기 전용)
 node $S mark mcp-protocol docs 00-03  # 문서 읽음 (범위·부분일치·목록, --undo로 해제)
-node $S check mcp-protocol 3-1        # 과제를 실제로 돌려 확정
+node $S check mcp-protocol 03-01      # 과제를 실제로 돌려 확정
 node $S save "오늘 한 것"              # 커밋 + push
 ```
 
@@ -340,7 +370,7 @@ pnpm typecheck                  # 전체 타입 체크
 pnpm packages                   # 패키지 목록
 
 pnpm --filter stateful-context-design test        # 한 패키지만
-pnpm --filter stateful-context-design test 3-1    # 한 과제만 (파일명 부분 일치)
+pnpm --filter stateful-context-design test 03-01  # 한 과제만 (경로 부분 일치)
 pnpm --filter stateful-context-design test:watch  # 감시 모드
 ```
 

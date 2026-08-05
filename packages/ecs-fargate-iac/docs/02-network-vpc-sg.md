@@ -387,15 +387,15 @@ AWS에 등록되는 `Description`과 `GroupDescription`은 허용 문자가 제�
 
 ## 실습
 
-**과제 2-1 — 보안 그룹 도달성 판정기** (`src/2-1-sg-reachability.ts`)
+**과제 02-01 — 보안 그룹 도달성 판정기** (`src/02-01-sg-reachability/index.ts`)
 
 보안 그룹과 규칙 집합을 받아 "A에서 B의 포트 P로 트래픽이 갈 수 있는가"를 판정한다. 이그레스와 인그레스를 모두 확인하고, 상태 저장 성질 때문에 응답 방향은 검사하지 않는 것까지가 과제다.
 
-무엇을 만들지는 `tests/2-1-sg-reachability.test.ts`가 정의한다. **먼저 읽고** `src/2-1-sg-reachability.ts`의 `🎯 TODO`를 채운다.
+무엇을 만들지는 `tests/02-01-sg-reachability/index.test.ts`가 정의한다. **먼저 읽고** `src/02-01-sg-reachability/index.ts`의 `🎯 TODO`를 채운다.
 
 ```bash
 cd packages/ecs-fargate-iac
-pnpm test 2-1
+pnpm test 02-01
 ```
 
 ## 공식 문서

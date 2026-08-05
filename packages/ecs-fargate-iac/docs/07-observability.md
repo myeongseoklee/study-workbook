@@ -392,15 +392,15 @@ running → Minimum   (도는 개수는 최소로 본다)
 
 ## 실습
 
-**과제 7-1 — CloudWatch 알람 평가기** (`src/7-1-alarm-eval.ts`)
+**과제 07-01 — CloudWatch 알람 평가기** (`src/07-01-alarm-eval/index.ts`)
 
 데이터 포인트 시퀀스(정상·위반·결손)와 알람 설정을 받아 최종 상태를 판정한다. M out of N, 네 가지 결손 처리, "실제 데이터가 충분하면 결손 설정을 쓰지 않는다"는 규칙까지 구현한다.
 
-무엇을 만들지는 `tests/7-1-alarm-eval.test.ts`가 정의한다. **먼저 읽고** `src/7-1-alarm-eval.ts`의 `🎯 TODO`를 채운다.
+무엇을 만들지는 `tests/07-01-alarm-eval/index.test.ts`가 정의한다. **먼저 읽고** `src/07-01-alarm-eval/index.ts`의 `🎯 TODO`를 채운다.
 
 ```bash
 cd packages/ecs-fargate-iac
-pnpm test 7-1
+pnpm test 07-01
 ```
 
 ## 공식 문서

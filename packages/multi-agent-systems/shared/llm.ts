@@ -8,7 +8,7 @@ import { API_KEY, BASE_URL, MODEL } from "./env";
 // 기본 provider = Google Gemini (무료 티어). 키: https://aistudio.google.com/apikey
 //
 // 여러 provider(Gemini·Claude·OpenAI)를 어댑터 인터페이스로 추상화하는 것은
-// 08장 연습문제다 → src/8-1-llm-provider.ts (Claude "cc" 어댑터를 직접 구현)
+// 08장 연습문제다 → src/08-01-llm-provider/index.ts (Claude "cc" 어댑터를 직접 구현)
 //
 // ⚠️ 환경변수는 shared/env.ts 에서만 주입된다(dotenv/config) — 여기서도 값을 import 해 쓴다.
 //    실습 파일들은 이 모듈을 통해 client·MODEL·API_KEY 를 받으면 키 검증까지 함께 얻는다.

@@ -81,6 +81,22 @@ function listTs(dir, filter) {
 	}
 }
 
+/**
+ * 과제 폴더 목록. 폴더명은 `{문서번호}-{순번}-{slug}`이고 회차 시리즈는
+ * `e{회차}-` 접두가 붙는다 (README § 규약 2).
+ */
+function listAssignmentDirs(dir) {
+	try {
+		return fs
+			.readdirSync(dir, { withFileTypes: true })
+			.filter((e) => e.isDirectory() && /^(?:e\d+-)?\d+-\d+-.+$/.test(e.name))
+			.map((e) => e.name)
+			.sort();
+	} catch {
+		return [];
+	}
+}
+
 /** `export function foo` / `export const foo` / `export interface Foo` 등에서 이름만 뽑는다. */
 function exportedNames(body) {
 	const names = new Set();
@@ -190,12 +206,15 @@ function auditWorkbook(pkg, root) {
 	const qNums = [...q.matchAll(/^\*\*([A-Za-z0-9]+(?:-[A-Za-z0-9]+)+)\./gm)].map((m) => m[1]);
 	const aNums = [...a.matchAll(ANSWER_HEADING)].map((m) => m[1]);
 	// 코딩 과제는 93에 정답을 두지 않는다. 답은 tests/(명세)와 solutions/(참고 구현)이
-	// 담당하고, 92는 그 과제를 안내만 한다. 그러니 src/에 같은 번호의 파일이 있으면
-	// 93에 없는 것이 정상이다.
+	// 담당하고, 92는 그 과제를 안내만 한다.
+	//
+	// 문항 번호만으로는 코딩 과제인지 알 수 없다 — 워크북 파트 3의 문항 번호(`3-1`)와
+	// 과제 번호(`03-01`)는 서로 다른 좌표계다(README § 규약 2). 그래서 문항이 과제를
+	// 가리키는지(`(과제 `03-01`)` 병기 또는 `src/`·`tests/` 경로)로 판정한다.
 	const codingNums = new Set(
-		listTs(path.join(root, 'src'), (f) => /^\d+-\d+-.+\.ts$/.test(f)).map(
-			(f) => f.match(/^(\d+-\d+)/)[1],
-		),
+		[...q.matchAll(/^\*\*([A-Za-z0-9]+(?:-[A-Za-z0-9]+)+)\.[^\n]*$/gm)]
+			.filter((m) => /과제 `|src\/|tests\//.test(m[0]))
+			.map((m) => m[1]),
 	);
 	const missing = qNums.filter((n) => !aNums.includes(n) && !codingNums.has(n));
 	const extra = aNums.filter((n) => !qNums.includes(n));
@@ -222,144 +241,138 @@ function auditWorkbook(pkg, root) {
 }
 
 // ── 규약 2: 코딩 과제 — tests(명세) / src(문제) / solutions(참고 구현) ────────
+//
+// 과제 하나가 **폴더 하나**다. 폴더 안에서 `index`는 필수 문제이고 `extra-*`는
+// 선택 문제다(README § 규약 2). 그래서 검사는 두 층으로 나뉜다: 세 곳(tests·src·
+// solutions)에 같은 **폴더**가 있는가, 그리고 그 폴더 안의 각 **파일**이 세 벌로
+// 짝을 맞추는가.
 function auditCoding(pkg, root) {
-	const srcDir = path.join(root, 'src');
-	const solDir = path.join(root, 'solutions');
-	const testDir = path.join(root, 'tests');
-	if (!fs.existsSync(srcDir)) return;
+	const dirs = { src: path.join(root, 'src'), sol: path.join(root, 'solutions'), test: path.join(root, 'tests') };
+	if (!fs.existsSync(dirs.src)) return;
 
-	const isAssignment = (f) => /^\d+-\d+-.+\.ts$/.test(f) && !f.endsWith('.test.ts');
-	const isSpec = (f) => /^\d+-\d+-.+\.test\.ts$/.test(f);
-
-	const src = listTs(srcDir, isAssignment);
-	const sol = listTs(solDir, isAssignment);
-	const specs = listTs(testDir, isSpec);
-
-	if (src.length === 0) return; // 코딩 과제 없는 패키지
-
-	const base = (f) => f.replace(/\.test\.ts$|\.ts$/, '');
-	const specBases = new Set(specs.map(base));
-	const solBases = new Set(sol.map(base));
-
-	// ── 세 파일이 한 벌인가
-	for (const f of src) {
-		const b = base(f);
-		if (!specBases.has(b)) {
-			add('error', pkg, '규약2', `tests/${b}.test.ts 가 없다 — 명세 없이는 무엇을 만들지 알 수 없다`);
+	const assignments = listAssignmentDirs(dirs.test);
+	if (assignments.length === 0) {
+		// 평평한 옛 배치가 남아 있으면 알린다 — 조용히 0건 통과로 넘어가면
+		// 마이그레이션이 끝난 것처럼 보인다.
+		if (listTs(dirs.src, (f) => /^(?:e\d+-)?\d+-\d+-.+\.ts$/.test(f)).length > 0) {
+			add('error', pkg, '규약2', 'src/에 평평한 과제 파일이 있다 — 과제는 폴더 하나여야 한다(폴더+index)');
 		}
-		if (!solBases.has(b)) {
-			add('error', pkg, '규약2', `solutions/${b}.ts 가 없다 — 참고 구현이 없으면 양방향 검증을 못 한다`);
-		}
-	}
-	const srcBases = new Set(src.map(base));
-	for (const f of sol) {
-		if (!srcBases.has(base(f))) {
-			add('error', pkg, '규약2', `src/${base(f)}.ts 가 없다 — 참고 구현만 있고 문제가 없다`);
-		}
-	}
-	for (const f of specs) {
-		if (!srcBases.has(base(f))) {
-			add('error', pkg, '규약2', `src/${base(f)}.ts 가 없다 — 명세만 있고 문제가 없다`);
-		}
+		return;
 	}
 
-	// ── 문제 파일 (src): 한 파일 한 문제 + TODO 스켈레톤 + 명세 포인터
-	for (const f of src) {
-		const body = readIf(path.join(srcDir, f)) ?? '';
-		const b = base(f);
-		const nums = new Set([...body.matchAll(/과제\s+(\d+-\d+)/g)].map((m) => m[1]));
-		if (nums.size > 1) {
-			add('error', pkg, '규약2', `src/${f}에 과제 ${[...nums].join(', ')} — 한 파일에 한 문제만`);
-		}
-		if (!/🎯 TODO/.test(body)) {
-			add('warn', pkg, '규약2', `src/${f}에 🎯 TODO가 없다 — 채울 지점이 표시되지 않았다`);
-		}
-		if (!/throw new Error\(['"]TODO/.test(body)) {
-			add('warn', pkg, '규약2', `src/${f}가 throw로 시작하지 않는다 — 채우기 전에 테스트가 통과할 수 있다`);
-		}
-		if (!body.includes(`tests/${b}.test.ts`)) {
-			add('warn', pkg, '규약2', `src/${f}가 명세 파일(tests/${b}.test.ts)을 가리키지 않는다`);
-		}
-		// 이전 규격의 잔재. 성공 기준은 이제 테스트의 it() 설명이 담는다.
-		if (/^\s*\*\s*성공 기준/m.test(body)) {
-			add(
-				'warn',
-				pkg,
-				'규약2',
-				`src/${f}에 "성공 기준" 목록이 남아 있다 — 명세가 tests/로 옮겨졌으니 이중 관리가 된다`,
-			);
-		}
-	}
-
-	// ── 명세 파일 (tests): 실제로 판정하는가
-	for (const f of specs) {
-		const body = readIf(path.join(testDir, f)) ?? '';
-		const b = base(f);
-
-		if (!/from ['"]vitest['"]/.test(body)) {
-			add('error', pkg, '규약3', `tests/${f}가 vitest를 import하지 않는다`);
-		}
-		if (!new RegExp(`from ['"]\\.\\./src/${b}(?:\\.js)?['"]`).test(body)) {
-			add(
-				'error',
-				pkg,
-				'규약2',
-				`tests/${f}가 ../src/${b} 를 import하지 않는다 — 이 상대 경로가 있어야 STUDY_TARGET 치환이 걸린다`,
-			);
-		}
-		const assertions = (body.match(/\bexpect\(/g) || []).length;
-		if (assertions === 0) {
-			add('error', pkg, '규약2', `tests/${f}에 expect()가 없다 — 아무것도 검사하지 않는다`);
-		} else if (assertions < 3) {
-			add('warn', pkg, '규약2', `tests/${f}의 expect()가 ${assertions}개뿐 — 경계 조건이 빠졌을 수 있다`);
-		}
-		if (!/고치지 않는다/.test(body)) {
-			add('warn', pkg, '규약2', `tests/${f}에 "이 파일은 고치지 않는다"가 없다 — 명세를 고쳐 통과시키는 걸 막지 못한다`);
-		}
-		if (!/\bit\(/.test(body)) {
-			add('warn', pkg, '규약2', `tests/${f}에 it()이 없다 — 성질 단위로 나뉘지 않았다`);
-		}
-	}
-
-	// ── 참고 구현 (solutions): 테스트가 아니어야 하고, 인터페이스가 src와 같아야 한다
-	for (const f of sol) {
-		const body = readIf(path.join(solDir, f)) ?? '';
-		const b = base(f);
-
-		// 규격이 뒤집혔다. 예전에는 solutions가 테스트였고, 지금은 구현이다.
-		if (/from ['"]vitest['"]/.test(body) || /^\s*function check\(/m.test(body)) {
-			add(
-				'error',
-				pkg,
-				'규약2',
-				`solutions/${f}가 아직 테스트다 — 판정은 tests/가 하고 solutions/는 참고 구현을 담는다`,
-			);
-		}
-		if (/from ['"]\.\.\/src\//.test(body)) {
-			add(
-				'error',
-				pkg,
-				'규약2',
-				`solutions/${f}가 ../src/를 import한다 — 참고 구현은 독립적이어야 STUDY_TARGET 치환의 대상이 된다`,
-			);
-		}
-		if (!/📍 되짚기/.test(body)) {
-			add('warn', pkg, '규약2', `solutions/${f}에 되짚기 주석이 없다`);
+	for (const a of assignments) {
+		// ── 세 폴더가 한 벌인가
+		for (const [key, label] of [['src', 'src'], ['sol', 'solutions']]) {
+			if (!fs.existsSync(path.join(dirs[key], a))) {
+				add('error', pkg, '규약2', `${label}/${a}/ 가 없다 — 과제는 세 폴더가 한 벌이다`);
+			}
 		}
 
-		// 인터페이스 일치 — 여기가 어긋나면 STUDY_TARGET 치환이 조용히 깨진다.
-		const srcBody = readIf(path.join(srcDir, `${b}.ts`));
-		if (srcBody) {
-			const want = exportedNames(srcBody);
-			const have = exportedNames(body);
-			const missing = [...want].filter((n) => !have.has(n));
-			if (missing.length) {
-				add(
-					'error',
-					pkg,
-					'규약2',
-					`solutions/${f}에 없는 export: ${missing.join(', ')} — src와 인터페이스가 달라 치환 시 깨진다`,
-				);
+		// ── 필수 문제(index)가 세 곳에 있는가
+		const trio = [
+			['test', `tests/${a}/index.test.ts`],
+			['src', `src/${a}/index.ts`],
+			['sol', `solutions/${a}/index.ts`],
+		];
+		for (const [key, rel] of trio) {
+			const f = path.join(root, rel);
+			if (!fs.existsSync(f)) add('error', pkg, '규약2', `${rel} 가 없다 — 필수 문제는 index다`);
+		}
+
+		// ── 선택 문제(extra-*)도 세 벌이어야 한다
+		const extras = {
+			test: listTs(path.join(dirs.test, a), (f) => /^extra-.+\.test\.ts$/.test(f)).map((f) =>
+				f.replace(/\.test\.ts$/, ''),
+			),
+			src: listTs(path.join(dirs.src, a), (f) => /^extra-.+\.ts$/.test(f) && !f.endsWith('.test.ts')).map((f) =>
+				f.replace(/\.ts$/, ''),
+			),
+			sol: listTs(path.join(dirs.sol, a), (f) => /^extra-.+\.ts$/.test(f) && !f.endsWith('.test.ts')).map((f) =>
+				f.replace(/\.ts$/, ''),
+			),
+		};
+		const allExtras = new Set([...extras.test, ...extras.src, ...extras.sol]);
+		for (const e of allExtras) {
+			if (!extras.test.includes(e)) add('error', pkg, '규약2', `tests/${a}/${e}.test.ts 가 없다 — 선택 문제도 명세가 있어야 푼다`);
+			if (!extras.src.includes(e)) add('error', pkg, '규약2', `src/${a}/${e}.ts 가 없다 — 명세만 있고 문제가 없다`);
+			if (!extras.sol.includes(e)) add('error', pkg, '규약2', `solutions/${a}/${e}.ts 가 없다 — 양방향 검증을 못 한다`);
+		}
+
+		// ── 문제 파일 (src): TODO 스켈레톤 + 명세 포인터
+		for (const name of ['index', ...extras.src]) {
+			const rel = `src/${a}/${name}.ts`;
+			const body = readIf(path.join(root, rel));
+			if (body === null) continue;
+			if (!/🎯 TODO/.test(body)) {
+				add('warn', pkg, '규약2', `${rel}에 🎯 TODO가 없다 — 채울 지점이 표시되지 않았다`);
+			}
+			if (!/throw new Error\(['"]TODO/.test(body)) {
+				add('warn', pkg, '규약2', `${rel}가 throw로 시작하지 않는다 — 채우기 전에 테스트가 통과할 수 있다`);
+			}
+			const spec = name === 'index' ? `tests/${a}/index.test.ts` : `tests/${a}/${name}.test.ts`;
+			if (!body.includes(spec)) {
+				add('warn', pkg, '규약2', `${rel}가 명세 파일(${spec})을 가리키지 않는다`);
+			}
+			if (/^\s*\*\s*성공 기준/m.test(body)) {
+				add('warn', pkg, '규약2', `${rel}에 "성공 기준" 목록이 남아 있다 — 명세가 tests/로 옮겨졌으니 이중 관리가 된다`);
+			}
+		}
+
+		// ── 명세 파일 (tests): 실제로 판정하는가
+		for (const name of ['index', ...extras.test]) {
+			const rel = `tests/${a}/${name}.test.ts`;
+			const body = readIf(path.join(root, rel));
+			if (body === null) continue;
+
+			if (!/from ['"]vitest['"]/.test(body)) {
+				add('error', pkg, '규약3', `${rel}가 vitest를 import하지 않는다`);
+			}
+			// 폴더가 한 단계 깊어져 경로는 `../../src/…`다. 이 상대 경로가 있어야
+			// STUDY_TARGET 치환이 걸린다 — 깊이가 어긋나면 치환이 조용히 빗나가고
+			// 늘 src/를 보게 되므로 양방향 검증이 무력화된다.
+			const want = name === 'index' ? `../../src/${a}` : `../../src/${a}/${name}`;
+			if (!new RegExp(`from ['"]${want.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\.js)?['"]`).test(body)) {
+				add('error', pkg, '규약2', `${rel}가 ${want} 를 import하지 않는다 — 이 상대 경로가 있어야 STUDY_TARGET 치환이 걸린다`);
+			}
+			const assertions = (body.match(/\bexpect\(/g) || []).length;
+			if (assertions === 0) {
+				add('error', pkg, '규약2', `${rel}에 expect()가 없다 — 아무것도 검사하지 않는다`);
+			} else if (assertions < 3) {
+				add('warn', pkg, '규약2', `${rel}의 expect()가 ${assertions}개뿐 — 경계 조건이 빠졌을 수 있다`);
+			}
+			if (name === 'index' && !/고치지 않는다/.test(body)) {
+				add('warn', pkg, '규약2', `${rel}에 "이 파일은 고치지 않는다"가 없다 — 명세를 고쳐 통과시키는 걸 막지 못한다`);
+			}
+			if (!/\bit\(/.test(body)) {
+				add('warn', pkg, '규약2', `${rel}에 it()이 없다 — 성질 단위로 나뉘지 않았다`);
+			}
+		}
+
+		// ── 참고 구현 (solutions): 테스트가 아니어야 하고, 인터페이스가 src와 같아야 한다
+		for (const name of ['index', ...extras.sol]) {
+			const rel = `solutions/${a}/${name}.ts`;
+			const body = readIf(path.join(root, rel));
+			if (body === null) continue;
+
+			if (/from ['"]vitest['"]/.test(body) || /^\s*function check\(/m.test(body)) {
+				add('error', pkg, '규약2', `${rel}가 아직 테스트다 — 판정은 tests/가 하고 solutions/는 참고 구현을 담는다`);
+			}
+			if (/from ['"](?:\.\.\/)+src\//.test(body)) {
+				add('error', pkg, '규약2', `${rel}가 src/를 import한다 — 참고 구현은 독립적이어야 STUDY_TARGET 치환의 대상이 된다`);
+			}
+			if (name === 'index' && !/📍 되짚기/.test(body)) {
+				add('warn', pkg, '규약2', `${rel}에 되짚기 주석이 없다`);
+			}
+
+			// 인터페이스 일치 — 여기가 어긋나면 STUDY_TARGET 치환이 조용히 깨진다.
+			const srcBody = readIf(path.join(dirs.src, a, `${name}.ts`));
+			if (srcBody) {
+				const want = exportedNames(srcBody);
+				const have = exportedNames(body);
+				const missing = [...want].filter((n) => !have.has(n));
+				if (missing.length) {
+					add('error', pkg, '규약2', `${rel}에 없는 export: ${missing.join(', ')} — src와 인터페이스가 달라 치환 시 깨진다`);
+				}
 			}
 		}
 	}
