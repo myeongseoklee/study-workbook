@@ -5,17 +5,9 @@
  * 아니라 여러 입력이 겹친 계산 결과이고, 같은 이름이 여러 곳에 있으면 우선순위
  * 규칙이 필요하다.
  *
- * 판정:  npm run test:3-3
+ * 명세:  tests/3-3-context-assembler.test.ts ← **먼저 읽어라.** 무엇을 만들지는 거기 있다
+ * 판정:  pnpm test 3-3
  * 막히면: docs/ep02-business-agent/03-context-assembly.md
- *
- * 성공 기준 (테스트가 검사하는 항목)
- *  - SCOPE_PRIORITY가 코드 한 곳에 명시돼 있다 (규칙이 흩어지면 유지가 안 된다)
- *  - resolveSkills: 같은 이름이 여러 스코프에 있으면 하나만 남고, 그 선택이
- *    SCOPE_PRIORITY를 따른다
- *  - resolveSkills: 이름이 겹치지 않는 스킬은 모두 살아남는다
- *  - resolveTools: (전체 − 퍼미션 차단) ∩ (스킬 허용) 을 계산한다
- *  - resolveTools: 스킬 허용 목록이 없으면 한정하지 않는다 (전체 − 차단)
- *  - exceedsBudget: 기반 컨텍스트가 컨텍스트 윈도우의 5%를 넘으면 true
  */
 
 /** 스킬·도구가 존재할 수 있는 위치. */

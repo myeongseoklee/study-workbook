@@ -1,123 +1,98 @@
 /**
- * 과제 3-1의 정답 — 테스트 코드
+ * 과제 3-1의 참고 구현.
  *
- * 참고 구현은 주지 않는다. 당신의 구현을 돌려 판정한다.
+ * 판정은 `tests/3-1-agent-loop.test.ts`가 한다.
  *
- * 실행: npm run test:3-1
- *
- * 각 check는 src/3-1-agent-loop.ts 상단의 성공 기준과 1:1로 대응한다.
+ * 📍 되짚기: docs/ep01-concepts/02-agent-loop.md § 필수 지식 — 세 가지 기본 요소
  */
-import { runTurn, type ModelStep, type ModelContext } from '../src/3-1-agent-loop.js';
 
-let pass = 0;
-let total = 0;
+/** 모델의 한 번의 응답. 도구를 부르거나, 끝내거나. */
+export type ModelStep =
+	| { type: 'tool'; tool: string; input: string }
+	| { type: 'done'; answer: string };
 
-function check(label: string, cond: boolean, detail = ''): void {
-	total++;
-	if (cond) pass++;
-	console.log(`${cond ? '✓' : '✗'} ${label}${!cond && detail ? `\n    ${detail}` : ''}`);
+/** 이터레이션마다 모델에게 넘기는 것: 최초 요청 + 지금까지의 관찰 결과들. */
+export interface ModelContext {
+	request: string;
+	observations: string[];
 }
 
-// 기준 1 — 도구 결과가 다음 호출의 입력으로 들어간다.
-//   모델은 "직전 관찰 결과"를 그대로 도구에 넘긴다. 결과가 전달되지 않으면
-//   inc가 받는 값이 누적되지 않는다.
-const seen: string[] = [];
-const chained = runTurn({
-	request: 'chain',
-	model: (ctx: ModelContext): ModelStep =>
-		ctx.observations.length < 3
-			? { type: 'tool', tool: 'inc', input: ctx.observations.at(-1) ?? '0' }
-			: { type: 'done', answer: ctx.observations.join(',') },
-	tools: {
-		inc: (x) => {
-			seen.push(x);
-			return String(Number(x) + 1);
-		},
-	},
-	maxIterations: 10,
-});
-check(
-	'도구 결과가 다음 입력으로 전달됨',
-	seen.join(',') === '0,1,2',
-	`도구가 받은 입력: [${seen.join(',')}] — 기대 [0,1,2]. 관찰 결과를 컨텍스트에 쌓아 다음 호출에 넘겨야 합니다`,
-);
+export interface LoopOptions {
+	request: string;
+	model: (ctx: ModelContext) => ModelStep;
+	tools: Record<string, (input: string) => string>;
+	maxIterations: number;
+}
 
-// 기준 2 — done을 반환하면 그 시점에 멈추고 최종 응답을 돌려준다
-check(
-	'done 시점에 멈추고 answer를 반환',
-	chained.answer === '1,2,3' && chained.exhausted === false,
-	`answer="${chained.answer}", exhausted=${chained.exhausted} — 기대 answer="1,2,3", exhausted=false`,
-);
+export interface LoopResult {
+	answer: string;
+	/** 각 이터레이션에서 어떤 도구를 불러 무엇을 얻었는지. */
+	trace: Array<{ tool: string; result: string }>;
+	/** maxIterations에 걸려 끝났는가. */
+	exhausted: boolean;
+}
 
-// 기준 3 — maxIterations에 도달하면 멈춘다 (모델이 영원히 done을 안 줄 때)
-const runaway = runTurn({
-	request: 'runaway',
-	model: (): ModelStep => ({ type: 'tool', tool: 'noop', input: 'x' }),
-	tools: { noop: () => 'ok' },
-	maxIterations: 4,
-});
-check(
-	'maxIterations에서 종료 (무한 루프 불가)',
-	runaway.trace.length === 4 && runaway.exhausted === true,
-	`trace ${runaway.trace.length}회, exhausted=${runaway.exhausted} — 기대 4회, exhausted=true`,
-);
+/**
+ * 턴 하나를 실행한다.
+ *
+ * 루프의 뼈대는 짧다. 관찰 결과를 쌓고, 그걸 모델에게 주고, 모델이 시키는 대로
+ * 도구를 부른다. 코드는 몇 번 돌지도 어떤 도구를 부를지도 정하지 않는다 —
+ * 그것이 "제어 흐름을 모델이 잡는다"는 말의 실체다.
+ *
+ * 에러 처리가 이 과제의 핵심이다. 도구 실패는 예외 상황이 아니라 **정상적인
+ * 관찰 결과**다. 파일이 없거나 명령이 실패하는 건 늘 있는 일이고, 사람이라면
+ * 메시지를 읽고 다음 수를 고친다. 모델에게도 같은 기회를 줘야 하므로, throw를
+ * 밖으로 흘리지 않고 문자열로 바꿔 관찰 결과에 넣는다.
+ *
+ * 없는 도구 이름도 같은 경로를 탄다. 모델은 도구 이름을 지어낼 수 있고, 그건
+ * 도구가 실패한 것과 구분해 다룰 이유가 없다.
+ */
+export function runTurn(opts: LoopOptions): LoopResult {
+	const { request, model, tools, maxIterations } = opts;
+	const observations: string[] = [];
+	const trace: Array<{ tool: string; result: string }> = [];
 
-// 기준 4 — 도구 에러를 삼키지 않고 관찰 결과로 모델에게 돌려준다
-const observedErrors: string[] = [];
-const withError = runTurn({
-	request: 'error path',
-	model: (ctx: ModelContext): ModelStep => {
-		observedErrors.push(...ctx.observations);
-		return ctx.observations.length === 0
-			? { type: 'tool', tool: 'boom', input: 'x' }
-			: { type: 'done', answer: 'recovered' };
-	},
-	tools: {
-		boom: () => {
-			throw new Error('tool exploded');
-		},
-	},
-	maxIterations: 5,
-});
-check(
-	'도구 에러가 관찰 결과로 모델에게 전달됨',
-	withError.answer === 'recovered' && observedErrors.some((o) => o.includes('exploded')),
-	`answer=${withError.answer}, 관찰=[${observedErrors.join(' | ')}] — 에러를 throw로 흘리거나 조용히 삼키면 모델이 고칠 기회를 잃습니다`,
-);
+	for (let i = 0; i < maxIterations; i++) {
+		const step = model({ request, observations });
 
-// 기준 5 — 없는 도구를 불러도 프로그램이 죽지 않는다 (같은 에러 경로)
-let crashed = false;
-let missingResult = '';
-try {
-	const r = runTurn({
-		request: 'unknown tool',
-		model: (ctx: ModelContext): ModelStep =>
-			ctx.observations.length === 0
-				? { type: 'tool', tool: 'nope', input: 'x' }
-				: { type: 'done', answer: 'handled' },
-		tools: {},
+		if (step.type === 'done') {
+			return { answer: step.answer, trace, exhausted: false };
+		}
+
+		const tool = tools[step.tool];
+		let result: string;
+		if (!tool) {
+			result = `error: 알 수 없는 도구 '${step.tool}'`;
+		} else {
+			try {
+				result = tool(step.input);
+			} catch (error) {
+				result = `error: ${error instanceof Error ? error.message : String(error)}`;
+			}
+		}
+
+		observations.push(result);
+		trace.push({ tool: step.tool, result });
+	}
+
+	return {
+		answer: `이터레이션 상한(${maxIterations})에 도달해 중단`,
+		trace,
+		exhausted: true,
+	};
+}
+
+// 직접 실행하면 도구를 두 번 부르고 끝내는 가짜 모델을 돌려본다 (선택 — 테스트와 무관).
+if (import.meta.url === `file://${process.argv[1]}`) {
+	const result = runTurn({
+		request: '3에서 시작해 두 번 증가시켜라',
+		model: (ctx) =>
+			ctx.observations.length < 2
+				? { type: 'tool', tool: 'inc', input: String(ctx.observations.length + 3) }
+				: { type: 'done', answer: `관찰: ${ctx.observations.join(' → ')}` },
+		tools: { inc: (x) => String(Number(x) + 1) },
 		maxIterations: 5,
 	});
-	missingResult = r.answer;
-} catch {
-	crashed = true;
+	console.log(result.answer);
+	console.log('trace:', result.trace.map((t) => `${t.tool}=${t.result}`).join(', '));
 }
-check(
-	'없는 도구 호출도 에러 경로로 처리',
-	!crashed && missingResult === 'handled',
-	crashed ? '예외가 밖으로 튀어나왔습니다' : `answer=${missingResult} — 모델에게 알리고 계속해야 합니다`,
-);
-
-// 기준 6 — trace에 도구명과 결과가 순서대로 남는다
-check(
-	'trace에 도구명·결과가 순서대로 기록됨',
-	chained.trace.length === 3 &&
-		chained.trace.every((t) => t.tool === 'inc') &&
-		chained.trace.map((t) => t.result).join(',') === '1,2,3',
-	`실제: ${JSON.stringify(chained.trace)} — 기대 inc 3회, 결과 1,2,3`,
-);
-
-console.log(`\n${pass}/${total} 통과`);
-process.exit(pass === total ? 0 : 1);
-
-// 📍 되짚기: docs/ep01-concepts/02-agent-loop.md § 필수 지식 — 세 가지 기본 요소

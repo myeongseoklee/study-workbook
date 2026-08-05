@@ -1,98 +1,55 @@
 /**
- * 과제 3-5의 정답 — 테스트 코드
+ * 과제 3-5의 참고 구현.
  *
- * 참고 구현은 주지 않는다. 당신의 구현을 돌려 판정한다.
+ * 판정은 `tests/3-5-compact-replay.test.ts`가 한다.
  *
- * 실행: npm run test:3-5
- *
- * 각 check는 src/3-5-compact-replay.ts 상단의 성공 기준과 1:1로 대응한다.
+ * 📍 되짚기: docs/ep02-business-agent/04-compaction.md § 컴팩트 레코드와 불변 리스트
  */
-import { buildModelInput, type Entry } from '../src/3-5-compact-replay.js';
 
-let pass = 0;
-let total = 0;
+export type EntryKind = 'request' | 'tool_call' | 'tool_result' | 'response' | 'compact';
 
-function check(label: string, cond: boolean, detail = ''): void {
-	total++;
-	if (cond) pass++;
-	console.log(`${cond ? '✓' : '✗'} ${label}${!cond && detail ? `\n    ${detail}` : ''}`);
+export interface Entry {
+	kind: EntryKind;
+	/** 어느 엔트리인지 식별하기 위한 표식. 테스트가 순서를 확인할 때 쓴다. */
+	id: string;
 }
 
-const base: Entry[] = [{ kind: 'request', id: 'base' }];
-const ids = (es: Entry[]): string => es.map((e) => e.id).join(',');
+/**
+ * 모델에게 보낼 입력을 만든다.
+ *
+ * 로그는 append-only인데 컴팩션은 "앞을 버린다". 이 충돌은 로그를 지워서가
+ * 아니라 **읽는 범위를 옮겨서** 풀린다. 컴팩트 레코드가 스냅샷 구분점이 되고,
+ * 로그 자체는 감사 기록으로 온전히 남는다 — 이벤트 소싱에서 스냅샷이 하는 일과
+ * 정확히 같다.
+ *
+ * 두 가지 경계에 주의한다.
+ *
+ *  - 컴팩트 레코드 **자체를 포함**한다. 그 안에 잘라낸 앞부분의 요약이 들어
+ *    있어서, 빼면 앞 대화의 맥락이 통째로 사라진다.
+ *  - **마지막** 컴팩트를 찾는다. 컴팩트는 세션이 길어지면 여러 번 일어나고,
+ *    유효한 스냅샷은 늘 가장 최근 것 하나다.
+ */
+export function buildModelInput(log: Entry[], baseContext: Entry[]): Entry[] {
+	let cut = 0;
+	for (let i = log.length - 1; i >= 0; i--) {
+		if (log[i]?.kind === 'compact') {
+			cut = i;
+			break;
+		}
+	}
 
-// 기준 1 — 컴팩트가 없으면 전체를 쓴다
-const noCompact: Entry[] = [
-	{ kind: 'request', id: 'r1' },
-	{ kind: 'response', id: 'a1' },
-];
-check(
-	'컴팩트가 없으면 전체 로그',
-	ids(buildModelInput(noCompact, base)) === 'base,r1,a1',
-	`실제: ${ids(buildModelInput(noCompact, base))} — 컴팩트가 없을 때 빈 배열을 반환했는지 확인`,
-);
+	return [...baseContext, ...log.slice(cut)];
+}
 
-// 기준 2 — 컴팩트가 하나면 그 이후만 (컴팩트 레코드 포함)
-const one: Entry[] = [
-	{ kind: 'request', id: 'r1' },
-	{ kind: 'response', id: 'a1' },
-	{ kind: 'compact', id: 'c1' },
-	{ kind: 'request', id: 'r2' },
-];
-check(
-	'컴팩트 이후만 쓴다 (컴팩트 레코드 자체는 포함)',
-	ids(buildModelInput(one, base)) === 'base,c1,r2',
-	`기대 base,c1,r2 / 실제 ${ids(buildModelInput(one, base))} — 컴팩트 레코드는 요약을 담고 있으므로 포함해야 합니다`,
-);
-
-// 기준 3 — 컴팩트가 여러 개면 마지막 기준
-const many: Entry[] = [
-	{ kind: 'request', id: 'r1' },
-	{ kind: 'compact', id: 'c1' },
-	{ kind: 'request', id: 'r2' },
-	{ kind: 'compact', id: 'c2' },
-	{ kind: 'request', id: 'r3' },
-	{ kind: 'response', id: 'a3' },
-];
-check(
-	'컴팩트가 여러 개면 마지막 것 기준',
-	ids(buildModelInput(many, base)) === 'base,c2,r3,a3',
-	`기대 base,c2,r3,a3 / 실제 ${ids(buildModelInput(many, base))} — 첫 컴팩트를 찾았다면 findLast 방향을 확인하세요`,
-);
-
-// 기준 4 — 컴팩트가 마지막 항목이어도 동작한다
-const trailing: Entry[] = [
-	{ kind: 'request', id: 'r1' },
-	{ kind: 'compact', id: 'c1' },
-];
-check(
-	'컴팩트가 로그 끝에 있어도 동작',
-	ids(buildModelInput(trailing, base)) === 'base,c1',
-	`기대 base,c1 / 실제 ${ids(buildModelInput(trailing, base))}`,
-);
-
-// 기준 5 — baseContext가 항상 앞
-check(
-	'baseContext가 맨 앞에 온다',
-	buildModelInput(many, base)[0]?.id === 'base',
-	'기반 컨텍스트가 앞에 붙지 않았습니다 — 프리픽스 캐시는 앞부분이 불변이어야 삽니다',
-);
-
-// 기준 6 — 입력을 변형하지 않는다
-const original: Entry[] = [
-	{ kind: 'request', id: 'r1' },
-	{ kind: 'compact', id: 'c1' },
-	{ kind: 'request', id: 'r2' },
-];
-const snapshot = ids(original);
-buildModelInput(original, base);
-check(
-	'입력 로그를 변형하지 않는다',
-	ids(original) === snapshot,
-	`로그가 ${snapshot} → ${ids(original)}로 변했습니다 — splice 대신 slice를 쓰세요. 로그는 감사 기록입니다`,
-);
-
-console.log(`\n${pass}/${total} 통과`);
-process.exit(pass === total ? 0 : 1);
-
-// 📍 되짚기: docs/ep02-business-agent/04-compaction.md § 컴팩트 레코드와 불변 리스트
+// 직접 실행하면 컴팩트 2개가 든 로그를 재생해 본다 (선택 — 테스트와 무관).
+if (import.meta.url === `file://${process.argv[1]}`) {
+	const log: Entry[] = [
+		{ kind: 'request', id: 'r1' },
+		{ kind: 'compact', id: 'c1' },
+		{ kind: 'request', id: 'r2' },
+		{ kind: 'compact', id: 'c2' },
+		{ kind: 'request', id: 'r3' },
+	];
+	const out = buildModelInput(log, [{ kind: 'request', id: 'base' }]);
+	console.log(out.map((e) => e.id).join(' → '));
+}

@@ -4,16 +4,9 @@
  * 온프레미스 로컬 LLM에서 "개발자 몇 명을 수용할 수 있는가"는 감이 아니라
  * 산수다. 노드 메모리에서 모델 적재분을 빼고, 남은 것을 세션당 KV 캐시로 나눈다.
  *
- * 판정:  npm run test:3-2
+ * 명세:  tests/3-2-kv-session-budget.test.ts ← **먼저 읽어라.** 무엇을 만들지는 거기 있다
+ * 판정:  pnpm test 3-2
  * 막히면: docs/ep01-concepts/06-local-llm.md § KV 캐시 산수
- *
- * 성공 기준 (테스트가 검사하는 항목)
- *  - modelFootprintGb: 파라미터 수(B)와 비트폭으로 적재 용량을 계산한다
- *  - concurrentSessions: (노드 − 모델) / 세션당 캐시, 내림
- *  - concurrentSessions: 모델이 노드보다 크면 0 (음수를 반환하지 않는다)
- *  - developerCapacity: 1인당 동시 세션 수로 나눈다, 내림
- *  - QUANT_FLOOR_BITS·PARAM_FLOOR_B 두 하한이 상수로 명시돼 있다
- *  - meetsFloors: 두 하한을 모두 만족해야 true (하나만 만족하면 false)
  */
 
 /** 양자화 하한 — 이 아래는 원본 분포에서 벗어나 사실상 다른 모델이 된다. */

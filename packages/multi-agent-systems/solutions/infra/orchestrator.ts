@@ -15,7 +15,10 @@ const AGENT_URLS = ["http://localhost:8001", "http://localhost:8002"];
 async function discover() {
   const cards: Record<string, any> = {};
   for (const base of AGENT_URLS) {
-    const card = await (await fetch(`${base}/.well-known/agent.json`)).json();
+    const card = (await (await fetch(`${base}/.well-known/agent.json`)).json()) as {
+      name: string;
+      capabilities: string[];
+    };
     cards[card.name] = card;
     console.log(`🔎 발견: ${card.name} — ${card.capabilities.join(", ")}`);
   }
@@ -29,7 +32,7 @@ async function invoke(base: string, query: string): Promise<string> {
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ query }),
   });
-  const { result } = await res.json();
+  const { result } = (await res.json()) as { result: string };
   return result;
 }
 
@@ -55,3 +58,7 @@ main().catch((e) => {
   console.error("에이전트 서버(:8001, :8002)가 떠 있는지 확인하세요.\n", e);
   process.exit(1);
 });
+
+// 이 파일을 모듈로 만든다. import/export가 하나도 없으면 TypeScript가 전역 스크립트로
+// 취급해서, src와 solutions의 같은 이름들이 서로 충돌한다.
+export {};

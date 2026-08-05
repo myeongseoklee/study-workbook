@@ -1,104 +1,69 @@
 /**
- * 과제 3-2의 정답 — 테스트 코드
+ * 과제 3-2의 참고 구현.
  *
- * 참고 구현은 주지 않는다. 당신의 구현을 돌려 판정한다.
+ * 판정은 `tests/3-2-kv-session-budget.test.ts`가 한다.
  *
- * 실행: npm run test:3-2
- *
- * 각 check는 src/3-2-kv-session-budget.ts 상단의 성공 기준과 1:1로 대응한다.
+ * 📍 되짚기: docs/ep01-concepts/06-local-llm.md § KV 캐시 산수 / § 두 개의 마지노선
  */
-import {
-	QUANT_FLOOR_BITS,
-	PARAM_FLOOR_B,
-	modelFootprintGb,
-	concurrentSessions,
-	developerCapacity,
-	meetsFloors,
-} from '../src/3-2-kv-session-budget.js';
 
-let pass = 0;
-let total = 0;
+/** 양자화 하한 — 이 아래는 원본 분포에서 벗어나 사실상 다른 모델이 된다. */
+export const QUANT_FLOOR_BITS = 5;
 
-function check(label: string, cond: boolean, detail = ''): void {
-	total++;
-	if (cond) pass++;
-	console.log(`${cond ? '✓' : '✗'} ${label}${!cond && detail ? `\n    ${detail}` : ''}`);
+/** 모델 크기 하한(단위: B, 십억 파라미터) — 이 아래는 제품 수준 코딩이 안 된다. */
+export const PARAM_FLOOR_B = 200;
+
+/**
+ * 모델 적재에 필요한 GB.
+ *
+ * 파라미터 하나가 차지하는 바이트는 `bits / 8`이다. 그래서 1B 파라미터를
+ * 8비트로 적재하면 정확히 1GB — 이 대응 덕분에 십억 단위와 GB 단위가
+ * 그대로 맞물리고, 식에서 단위 변환이 사라진다.
+ */
+export function modelFootprintGb(paramsB: number, bits: number): number {
+	return (paramsB * bits) / 8;
 }
 
-// 기준 1 — 파라미터 수와 비트폭으로 적재 용량을 계산한다.
-//   1B 파라미터를 8비트로 적재하면 약 1GB다.
-const q5 = modelFootprintGb(460, 5);
-check(
-	'460B Q5 ≈ 287.5GB',
-	Math.abs(q5 - 287.5) < 0.6,
-	`실제 ${q5} — 파라미터당 바이트 = bits/8 입니다`,
-);
-const fp16 = modelFootprintGb(70, 16);
-check(
-	'70B fp16 = 140GB (비트폭 항이 작동)',
-	Math.abs(fp16 - 140) < 0.6,
-	`실제 ${fp16} — 비트폭을 상수로 굳혔는지 확인하세요`,
-);
+/**
+ * 노드에서 모델을 적재한 뒤 열 수 있는 풀 컨텍스트 세션 수.
+ *
+ * 모델은 한 번만 올라가고 세션마다 복제되지 않는다. 그래서 뺄셈이 먼저,
+ * 나눗셈이 나중이다. 남은 것이 음수면 세션이 0개인 것이지 −5개가 아니다.
+ */
+export function concurrentSessions(
+	nodeMemoryGb: number,
+	modelGb: number,
+	sessionCacheGb: number,
+): number {
+	const remaining = nodeMemoryGb - modelGb;
+	if (remaining <= 0) return 0;
+	return Math.floor(remaining / sessionCacheGb);
+}
 
-// 기준 2 — (노드 − 모델) / 세션당 캐시, 내림
-const sessions = concurrentSessions(500, 287.5, 10);
-check(
-	'500GB 노드에 287.5GB 모델 → 세션 21개',
-	sessions === 21,
-	`실제 ${sessions} — (500−287.5)/10 = 21.25 → 내림 21. Math.floor를 빠뜨렸는지 확인`,
-);
+/**
+ * 1인이 동시에 여는 세션 수를 감안한 수용 인원.
+ *
+ * 내림인 이유는 사람을 쪼갤 수 없기 때문이다. 2.86명을 3명으로 올리면 세 번째
+ * 사람은 자기 세션 중 하나를 못 연다.
+ */
+export function developerCapacity(sessions: number, sessionsPerDeveloper: number): number {
+	return Math.floor(sessions / sessionsPerDeveloper);
+}
 
-// 기준 3 — 모델이 노드보다 크면 0 (음수 금지)
-const impossible = concurrentSessions(100, 200, 10);
-check(
-	'모델이 노드보다 크면 0',
-	impossible === 0,
-	`실제 ${impossible} — 음수 세션은 존재하지 않습니다`,
-);
+/**
+ * 이 구성이 두 하한을 모두 통과하는가.
+ *
+ * AND인 것이 중요하다. 크기만 보면 460B Q4가 통과하고, 양자화만 보면 30B Q8이
+ * 통과한다. 둘 다 실제로는 쓸 수 없는 구성이다.
+ */
+export function meetsFloors(paramsB: number, bits: number): boolean {
+	return paramsB >= PARAM_FLOOR_B && bits >= QUANT_FLOOR_BITS;
+}
 
-// 기준 4 — 1인당 동시 세션 수로 나눈다, 내림
-const devs = developerCapacity(21, 7);
-check(
-	'세션 21개, 1인 7세션 → 개발자 3명',
-	devs === 3,
-	`실제 ${devs} — 21/7 = 3`,
-);
-check(
-	'나머지는 버린다 (20/7 = 2명)',
-	developerCapacity(20, 7) === 2,
-	`실제 ${developerCapacity(20, 7)} — 2.86명을 3명으로 올리면 안 됩니다`,
-);
-
-// 기준 5 — 두 하한이 상수로 명시돼 있다
-check(
-	'QUANT_FLOOR_BITS = 5 (Q5 하한)',
-	QUANT_FLOOR_BITS === 5,
-	`실제 ${QUANT_FLOOR_BITS} — Q4는 원본 분포에서 벗어나 사실상 다른 모델입니다`,
-);
-check(
-	'PARAM_FLOOR_B = 200 (약 200B 하한)',
-	PARAM_FLOOR_B === 200,
-	`실제 ${PARAM_FLOOR_B} — 30B·120B로는 제품 수준 코딩이 안 됩니다`,
-);
-
-// 기준 6 — 두 하한을 모두 만족해야 true
-check(
-	'460B Q5 → 통과',
-	meetsFloors(460, 5) === true,
-	'두 하한을 모두 넘는데 false가 나왔습니다',
-);
-check(
-	'120B Q5 → 실패 (크기 하한 미달)',
-	meetsFloors(120, 5) === false,
-	'모델 크기 하한을 검사하지 않았습니다',
-);
-check(
-	'460B Q4 → 실패 (양자화 하한 미달)',
-	meetsFloors(460, 4) === false,
-	'양자화 하한을 검사하지 않았습니다 — 크기만 보면 Q4도 통과합니다',
-);
-
-console.log(`\n${pass}/${total} 통과`);
-process.exit(pass === total ? 0 : 1);
-
-// 📍 되짚기: docs/ep01-concepts/06-local-llm.md § KV 캐시 산수 / § 두 개의 마지노선
+// 직접 실행하면 강의의 예시 구성을 계산해 본다 (선택 — 테스트와 무관).
+if (import.meta.url === `file://${process.argv[1]}`) {
+	const modelGb = modelFootprintGb(460, 5);
+	const sessions = concurrentSessions(500, modelGb, 10);
+	console.log(`모델 적재: ${modelGb.toFixed(0)}GB`);
+	console.log(`동시 세션: ${sessions}개 → 개발자 ${developerCapacity(sessions, 7)}명`);
+	console.log(`하한 통과: ${meetsFloors(460, 5)}`);
+}

@@ -5,12 +5,11 @@
   "type": "module",
   "description": "코딩 에이전트 만들기 — 에이전트 루프·도구·컨텍스트(1강)와 세션·컴팩션·기업 납품(2강)",
   "scripts": {
-    "test": "npm run test:3-1 && npm run test:3-2 && npm run test:3-3 && npm run test:3-4 && npm run test:3-5",
-    "test:3-1": "tsx solutions/3-1-agent-loop.ts",
-    "test:3-2": "tsx solutions/3-2-kv-session-budget.ts",
-    "test:3-3": "tsx solutions/3-3-context-assembler.ts",
-    "test:3-4": "tsx solutions/3-4-compaction-trigger.ts",
-    "test:3-5": "tsx solutions/3-5-compact-replay.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@study/testkit": "workspace:*"
   }
 }

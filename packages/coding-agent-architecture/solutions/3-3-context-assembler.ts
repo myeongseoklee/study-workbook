@@ -1,99 +1,94 @@
 /**
- * 과제 3-3의 정답 — 테스트 코드
+ * 과제 3-3의 참고 구현.
  *
- * 참고 구현(완성 골격)은 주지 않는다. 읽으면 베끼게 되고 그 순간 과제가
- * 독해로 바뀐다. 대신 당신의 구현을 돌려 판정한다.
+ * 판정은 `tests/3-3-context-assembler.test.ts`가 한다.
  *
- * 실행: npm run test:3-3
- *
- * 각 check는 src/3-3-context-assembler.ts 상단의 성공 기준과 1:1로 대응한다.
+ * 📍 되짚기: docs/ep02-business-agent/03-context-assembly.md § 왜 리스트를 "계산"해야 하는가
  */
-import {
-	SCOPE_PRIORITY,
-	resolveSkills,
-	resolveTools,
-	exceedsBudget,
-	type Scope,
-} from '../src/3-3-context-assembler.js';
 
-let pass = 0;
-let total = 0;
+/** 스킬·도구가 존재할 수 있는 위치. */
+export type Scope = 'system' | 'global' | 'project';
 
-function check(label: string, cond: boolean, detail = ''): void {
-	total++;
-	if (cond) pass++;
-	console.log(`${cond ? '✓' : '✗'} ${label}${!cond && detail ? `\n    ${detail}` : ''}`);
+/**
+ * 이름이 충돌할 때 누가 이기는가.
+ *
+ * 여기 쓴 순서 자체가 정답인 것은 아니다 — 프로젝트가 시스템을 덮어쓰는
+ * 설계도 흔하다. 중요한 것은 규칙이 **한 곳에** 있다는 사실이고, 해소 코드가
+ * 이 배열을 읽는다는 점이다. 규칙이 여러 함수에 흩어지면 나중에 순서를
+ * 바꿀 때 어디를 고쳐야 하는지 알 수 없게 된다.
+ */
+export const SCOPE_PRIORITY: readonly Scope[] = ['project', 'global', 'system'];
+
+export interface Skill {
+	name: string;
+	scope: Scope;
+	/** 이 스킬이 쓸 수 있는 도구를 한정한다. 비어 있으면 한정하지 않는다. */
+	allowedTools?: string[];
 }
 
-// 기준 1 — SCOPE_PRIORITY가 명시돼 있다
-const scopes: Scope[] = ['system', 'global', 'project'];
-check(
-	'SCOPE_PRIORITY에 세 스코프가 모두 명시됨',
-	SCOPE_PRIORITY.length === 3 && scopes.every((s) => SCOPE_PRIORITY.includes(s)),
-	`실제: [${SCOPE_PRIORITY.join(', ')}] — system·global·project 세 개를 순서대로 넣어야 합니다`,
-);
+/**
+ * 스코프별 스킬 목록을 하나로 합친다. 같은 이름은 SCOPE_PRIORITY에 따라 하나만 남긴다.
+ *
+ * 입력 순서에 기대지 않는 것이 핵심이다. "먼저 온 것을 남긴다"나 "나중 것으로
+ * 덮어쓴다"는 둘 다 입력 순서에 의존하는 규칙이라, 소스를 모으는 순서가 바뀌면
+ * 결과가 조용히 달라진다.
+ *
+ * SCOPE_PRIORITY에 없는 스코프가 섞여 들어오면 indexOf가 −1을 준다. 그대로 쓰면
+ * 가장 우선순위가 높은 것으로 취급되므로, 알 수 없는 스코프는 맨 뒤로 보낸다.
+ */
+export function resolveSkills(sources: Skill[]): Skill[] {
+	const rank = (scope: Scope): number => {
+		const index = SCOPE_PRIORITY.indexOf(scope);
+		return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+	};
 
-// 기준 2 — 이름 충돌 시 하나만 남고, 그 선택이 SCOPE_PRIORITY를 따른다
-const winner = SCOPE_PRIORITY[0];
-const loser = SCOPE_PRIORITY[SCOPE_PRIORITY.length - 1];
-const conflict = resolveSkills([
-	{ name: 'dup', scope: loser as Scope },
-	{ name: 'dup', scope: winner as Scope },
-]);
-check(
-	'같은 이름은 하나만 남는다',
-	conflict.length === 1,
-	`실제 ${conflict.length}개: ${JSON.stringify(conflict)} — 이름 해소를 하지 않았습니다`,
-);
-check(
-	'남는 쪽이 SCOPE_PRIORITY 앞선 스코프',
-	conflict.length === 1 && conflict[0]?.scope === winner,
-	`기대 scope=${winner}, 실제 ${conflict[0]?.scope} — 입력 순서가 아니라 SCOPE_PRIORITY를 봐야 합니다`,
-);
+	const winners = new Map<string, Skill>();
+	for (const skill of sources) {
+		const current = winners.get(skill.name);
+		if (!current || rank(skill.scope) < rank(current.scope)) {
+			winners.set(skill.name, skill);
+		}
+	}
+	return [...winners.values()];
+}
 
-// 기준 3 — 겹치지 않는 스킬은 모두 살아남는다
-const mixed = resolveSkills([
-	{ name: 'a', scope: 'global' },
-	{ name: 'b', scope: 'project' },
-	{ name: 'a', scope: 'system' },
-	{ name: 'c', scope: 'system' },
-]);
-check(
-	'겹치지 않는 스킬은 모두 유지 (a, b, c)',
-	mixed.length === 3 && ['a', 'b', 'c'].every((n) => mixed.some((s) => s.name === n)),
-	`실제 ${mixed.length}개: ${mixed.map((s) => s.name).join(',')} — 충돌하지 않는 것까지 지웠는지 확인`,
-);
+/**
+ * 실제로 모델에게 넘길 도구 목록.
+ *
+ * 세 입력이 겹쳐 결과가 정해진다. 퍼미션 차단은 **빼기**이고 스킬 허용은
+ * **교집합**인데, 둘의 성격이 다르다는 게 요점이다 — 차단은 언제나 적용되지만,
+ * 허용 목록은 없을 수도 있다. `undefined`(한정하지 않음)와 `[]`(아무것도
+ * 허용하지 않음)를 같게 다루면 스킬이 붙는 순간 도구가 전부 사라진다.
+ */
+export function resolveTools(
+	allTools: string[],
+	blockedByPermission: string[],
+	skillAllowedTools?: string[],
+): string[] {
+	const blocked = new Set(blockedByPermission);
+	const allowed = skillAllowedTools ? new Set(skillAllowedTools) : undefined;
 
-// 기준 4 — resolveTools: (전체 − 차단) ∩ 스킬 허용
-const tools = resolveTools(['read', 'write', 'bash', 'web'], ['bash'], ['read', 'bash', 'web']);
-check(
-	'퍼미션 차단과 스킬 한정이 모두 반영됨',
-	tools.length === 2 && tools.includes('read') && tools.includes('web'),
-	`기대 [read, web], 실제 [${tools.join(', ')}] — 차단(bash)과 한정(write 제외)이 함께 걸려야 합니다`,
-);
+	return allTools.filter((tool) => !blocked.has(tool) && (!allowed || allowed.has(tool)));
+}
 
-// 기준 5 — 스킬 허용 목록이 없으면 한정하지 않는다
-const unbounded = resolveTools(['read', 'write', 'bash'], ['bash']);
-check(
-	'스킬 허용 목록이 없으면 (전체 − 차단)',
-	unbounded.length === 2 && unbounded.includes('read') && unbounded.includes('write'),
-	`기대 [read, write], 실제 [${unbounded.join(', ')}] — undefined를 "아무것도 허용 안 함"으로 처리했는지 확인`,
-);
+/**
+ * 기반 컨텍스트가 예산(컨텍스트 윈도우의 5%)을 넘었는가.
+ *
+ * 절대 토큰 수가 아니라 비율로 판정하는 이유는, 같은 기반 컨텍스트라도 윈도우가
+ * 크면 부담이 아니기 때문이다. 넘으면 주인공인 실제 작업이 자리를 잃는다.
+ */
+export function exceedsBudget(baseTokens: number, contextWindow: number): boolean {
+	return baseTokens / contextWindow > 0.05;
+}
 
-// 기준 6 — 5% 예산. 경계값은 초과가 아니다.
-const win = 262_144;
-check(
-	'5% 초과를 잡아낸다',
-	exceedsBudget(Math.floor(win * 0.06), win) === true,
-	'6%를 초과로 판정하지 못했습니다',
-);
-check(
-	'5% 이하는 초과가 아니다 (경계 포함)',
-	exceedsBudget(Math.floor(win * 0.05), win) === false && exceedsBudget(Math.floor(win * 0.04), win) === false,
-	'정확히 5%이거나 그 이하인데 초과로 판정했습니다 — 부등호 방향을 확인하세요',
-);
-
-console.log(`\n${pass}/${total} 통과`);
-process.exit(pass === total ? 0 : 1);
-
-// 📍 되짚기: docs/ep02-business-agent/03-context-assembly.md § 왜 리스트를 "계산"해야 하는가
+// 직접 실행하면 조립 결과 요약을 출력한다 (선택 — 테스트와 무관).
+if (import.meta.url === `file://${process.argv[1]}`) {
+	const skills = resolveSkills([
+		{ name: 'web-scaffold', scope: 'global' },
+		{ name: 'web-scaffold', scope: 'project' },
+		{ name: 'deploy', scope: 'system' },
+	]);
+	console.log('스킬:', skills.map((s) => `${s.name}(${s.scope})`).join(', '));
+	console.log('도구:', resolveTools(['read', 'write', 'bash'], ['bash'], ['read', 'bash']).join(', '));
+	console.log('예산 초과:', exceedsBudget(20_000, 262_144));
+}

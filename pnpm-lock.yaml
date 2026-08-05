@@ -24,9 +24,17 @@ importers:
         specifier: ^4.1.10
         version: 4.1.10(@types/node@26.1.2)(vite@8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(tsx@4.23.6))
 
-  packages/coding-agent-architecture: {}
+  packages/coding-agent-architecture:
+    devDependencies:
+      '@study/testkit':
+        specifier: workspace:*
+        version: link:../testkit
 
-  packages/ecs-fargate-iac: {}
+  packages/ecs-fargate-iac:
+    devDependencies:
+      '@study/testkit':
+        specifier: workspace:*
+        version: link:../testkit
 
   packages/multi-agent-systems:
     dependencies:
