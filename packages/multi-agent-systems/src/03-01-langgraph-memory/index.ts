@@ -5,7 +5,7 @@
  * 툴 정의·모델·체크포인터는 채워져 있다. 에이전트를 만들고 invoke 하는 부분을 구현하라.
  *
  * 명세: tests/03-01-langgraph-memory/index.test.ts (먼저 읽어라)
- * 막히면 정답: solutions/03-01-langgraph-memory/index.ts
+ * 막히면 정답: solutions/03-01-langgraph-memory.ts
  * 실행: npm run week1
  */
 // v1부터 프리빌트 에이전트는 langchain 패키지의 createAgent 로 옮겨졌다
@@ -41,12 +41,23 @@ export async function runTwoTurnChat(
   tools: unknown[],
   checkpointer: BaseCheckpointSaver
 ): Promise<{ first: string; second: string }> {
-  // 🎯 TODO: 위 model·tools·checkpointer 로 ReAct 에이전트를 만들고, 같은 대화 세션(thread)으로 두 번 물어라.
-  //   1) "(3 + 5) 곱하기 2는? 툴을 써서 계산해." → 답
-  //   2) 같은 thread 로 "방금 결과에 10을 더하면?" → 체크포인터가 이전 맥락을 기억하는지 확인
-  //   힌트: createAgent({ model, tools, checkpointer }), 에이전트의 invoke, thread 를 지정하는 config (docs/03).
-  //   막히면 solutions/03-01-langgraph-memory/index.ts.
-  throw new Error("TODO: ReAct 에이전트 생성 + 같은 thread 로 2회 대화를 구현하세요. 막히면 solutions 참고");
+  const agent = createAgent({ tools: tools as any, model, checkpointer });
+  const threadId = `thread_${Date.now()}`;
+
+  const turn1 = await agent.invoke(
+    { messages: [{ role: "user", content: "(3 + 5) 곱하기 2는? 툴을 써서 계산해." }] },
+    { configurable: { thread_id: threadId } }
+  );
+  const first = String(turn1.messages.at(-1)?.content ?? "");
+
+  // 같은 thread → 체크포인터가 이전 맥락을 들고 있다
+  const turn2 = await agent.invoke(
+    { messages: [{ role: "user", content: "방금 결과에 10을 더하면?" }] },
+    { configurable: { thread_id: threadId } }
+  );
+  const second = String(turn2.messages.at(-1)?.content ?? "");
+
+  return { first, second };
 }
 
 async function main() {
