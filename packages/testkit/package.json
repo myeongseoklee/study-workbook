@@ -1,0 +1,25 @@
+{
+  "name": "@study/testkit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "과제 테스트 공용 도구 — 실패 힌트 부착, 표준출력 캡처, 결정적 대본 함수, Vitest 설정 팩토리",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "default": "./dist/config.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "typecheck": "tsc"
+  },
+  "peerDependencies": {
+    "vitest": ">=4"
+  }
+}

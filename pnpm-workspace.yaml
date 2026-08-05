@@ -1,0 +1,7 @@
+packages:
+  - 'packages/*'
+
+# esbuild는 설치 시 플랫폼 바이너리를 내려받는 스크립트를 돌린다.
+# Vitest·tsx가 이것에 의존하므로 명시적으로 허용한다.
+onlyBuiltDependencies:
+  - esbuild

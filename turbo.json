@@ -1,0 +1,24 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "test": {
+      // ^build가 두 가지를 한다. (1) @study/testkit을 먼저 빌드해 두고,
+      // (2) testkit 소스가 바뀌면 소비 패키지의 테스트 캐시를 무효화한다.
+      // Turborepo는 내부 의존 패키지의 파일을 자동으로 해시에 넣지 않으므로,
+      // 이 선언이 없으면 testkit을 고쳐도 캐시된 옛 결과가 나온다.
+      "dependsOn": ["^build"],
+      "env": ["STUDY_TARGET"],
+      "inputs": ["$TURBO_DEFAULT$", "!docs/**", "!workbook/**", "!README.md"],
+      "outputs": []
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "!docs/**", "!workbook/**", "!README.md"],
+      "outputs": []
+    }
+  }
+}

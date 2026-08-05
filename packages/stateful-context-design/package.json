@@ -5,10 +5,11 @@
   "type": "module",
   "description": "축적된 상태 설계 — KV 캐시·슬라이딩 윈도우·이벤트 소싱을 관통하는 네 원리",
   "scripts": {
-    "test": "npm run test:3-1 && npm run test:3-2 && npm run test:3-3",
-    "test:3-1": "tsx solutions/3-1-kv-calc.ts",
-    "test:3-2": "tsx solutions/3-2-swa-mask.ts",
-    "test:3-3": "tsx solutions/3-3-prefix-check.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@study/testkit": "workspace:*"
   }
 }

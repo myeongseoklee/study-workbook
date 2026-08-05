@@ -1,85 +1,47 @@
 /**
- * 과제 3-2의 정답 — 테스트 코드
+ * 과제 3-2의 참고 구현.
  *
- * 실행: npm run test:3-2
+ * 판정은 `tests/3-2-swa-mask.test.ts`가 한다.
  *
- * 이 과제의 함정은 **경계 조건**이다. `i - W < j`를 `i - W <= j`로 쓰면
- * 창이 W+1이 되는데, 눈으로는 거의 구별되지 않는다. "창 경계 정확" 항목이
- * 그것만 콕 집어 잡는다.
+ * 📍 되짚기: docs/07-sliding-window.md § 필수 지식 1 / docs/90-must-memorize.md 카드 16
  */
-import { visible, render } from '../src/3-2-swa-mask.js';
 
-let pass = 0;
-let total = 0;
-
-function check(label: string, cond: boolean, detail = ''): void {
-	total++;
-	if (cond) pass++;
-	console.log(`${cond ? '✓' : '✗'} ${label}${!cond && detail ? `\n    ${detail}` : ''}`);
+/**
+ * 토큰 i가 토큰 j를 볼 수 있는가.
+ *
+ * 세 규칙이 겹치는데 **순서가 곧 의미**다.
+ *
+ *  1. causal이 먼저다. 미래는 무슨 일이 있어도 못 본다 — sink도 이걸 뚫지 못한다.
+ *  2. 그다음 sink 예외. 앞쪽 nSink개는 창이 지나가도 남는다.
+ *  3. 마지막이 창 조건. `i - W < j`이지 `<=`가 아니다 — j가 정확히 W개만
+ *     살아남아야 한다.
+ *
+ * 2번과 3번을 바꿔 쓰면 sink가 무력해지고, 1번을 뒤로 미루면 미래가 보인다.
+ */
+export function visible(i: number, j: number, W: number, nSink = 0): boolean {
+	if (j > i) return false;
+	if (j < nSink) return true;
+	return i - W < j;
 }
 
-// 기준 1 — (i, j, W, nSink)로 가시성을 반환한다
-check(
-	'boolean을 반환',
-	typeof visible(3, 2, 4, 0) === 'boolean',
-	`반환 타입: ${typeof visible(3, 2, 4, 0)}`,
-);
-
-// 기준 2 — causal: 미래는 못 본다
-check('미래 차단 (j > i)', visible(2, 5, 4) === false, 'j > i인데 true를 반환했습니다');
-check('자기 자신은 봄 (j === i)', visible(5, 5, 4) === true);
-
-// 기준 3 — 창 조건이 경계까지 정확한가 (i − W < j)
-check('창 안은 보임', visible(9, 6, 4) === true, 'W=4, i=9 → j=6은 창 안(6 > 5)');
-check('창 밖은 차단', visible(9, 5, 4) === false, 'W=4, i=9 → j=5는 창 밖(5 ≤ 5)');
-check(
-	'창 경계 정확',
-	visible(9, 4, 4) === false && visible(9, 6, 4) === true,
-	'경계가 i-W < j 인지 i-W <= j 인지 확인 — 하나 차이로 창 크기가 달라집니다',
-);
-
-// 기준 4 — sink 예외: 창을 벗어나도 보인다
-check(
-	'sink는 창 밖에서도 보임',
-	visible(50, 0, 4, 2) === true,
-	'i=50이면 j=0은 창을 한참 벗어나지만 sink이므로 보여야 합니다',
-);
-check(
-	'sink 범위 밖은 여전히 차단',
-	visible(50, 2, 4, 2) === false,
-	'nSink=2면 j=0,1만 sink입니다',
-);
-
-// 기준 5 — sink가 causal을 뚫지 않는다
-check(
-	'sink가 causal을 뚫지 않음',
-	visible(1, 0, 4, 2) === true && visible(0, 1, 4, 2) === false,
-	'미래 토큰이 sink라도 볼 수 없어야 합니다',
-);
-
-// 기준 6 — W=4, nSink=2, n=10 렌더링에서 sink 열이 모든 행에 채워진다
-const captured: string[] = [];
-const originalLog = console.log;
-console.log = (...args: unknown[]) => {
-	captured.push(args.join(' '));
-};
-render(10, 4, 2);
-console.log = originalLog;
-
-const rows = captured.filter((r) => r.trim().length > 0);
-check('10행 출력', rows.length === 10, `실제 ${rows.length}행`);
-if (rows.length === 10) {
-	const blank = (ch: string | undefined) => ch === '.' || ch === '·' || ch === ' ' || ch === undefined;
-	const col0 = rows.every((r) => !blank(r[0]));
-	const col1 = rows.slice(1).every((r) => !blank(r[1])); // 0행의 j=1은 미래라 제외
-	check(
-		'sink 열이 세로로 채워짐',
-		col0 && col1,
-		"왼쪽 2열이 모든 행에서 보여야 합니다 — 이것이 '영구 고정'의 시각적 의미",
-	);
+/**
+ * n × n 마스크를 표준출력에 그린다. 보이는 자리는 '■', 가려진 자리는 '·'.
+ *
+ * 출력을 눈으로 볼 것. 왼쪽 sink 열이 세로로 쭉 이어지고, 그 오른쪽에 대각선을
+ * 따라 창이 흘러가며, 둘 사이에 빈 구간이 벌어진다. "좁은 창으로 멀리 본다"는
+ * 말의 그림이 바로 이것이다 — 창은 좁지만 sink가 앵커로 남는다.
+ */
+export function render(n: number, W: number, nSink = 0): void {
+	for (let i = 0; i < n; i++) {
+		let row = '';
+		for (let j = 0; j < n; j++) {
+			row += visible(i, j, W, nSink) ? '■' : '·';
+		}
+		console.log(row);
+	}
 }
 
-console.log(`\n${pass}/${total} 통과`);
-
-// 📍 되짚기: docs/07-sliding-window.md § 필수 지식 1 / docs/90-must-memorize.md 카드 16
-process.exit(pass === total ? 0 : 1);
+// 직접 실행하면 W=4, nSink=2, n=10 마스크를 그린다 (선택 — 테스트와 무관).
+if (import.meta.url === `file://${process.argv[1]}`) {
+	render(10, 4, 2);
+}

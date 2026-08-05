@@ -5,16 +5,9 @@
  * 판정한다. 캐시 미적중은 에러를 내지 않으므로, 이런 검사기가 없으면
  * 조용히 비용만 낸다.
  *
- * 판정:  npm run test:3-3
+ * 명세:  tests/3-3-prefix-check.test.ts ← **먼저 읽어라.** 무엇을 만들지는 거기 있다
+ * 판정:  pnpm test 3-3
  * 막히면: docs/06-prompt-caching.md § 필수 지식 1~2
- *
- * 성공 기준 (테스트가 검사하는 항목)
- *  - 렌더 순서가 tools → system → messages다 (tools가 위치 0)
- *  - 동일 입력이면 same=true
- *  - 다르면 same=false이고 처음 갈라지는 오프셋을 정수로 보고한다
- *  - 그 오프셋이 실제로 바뀐 구간을 가리킨다
- *  - 시스템 프롬프트에 now()가 들어가면 두 번 만든 요청을 불안정으로 판정한다
- *  - 도구 목록의 순서만 바꿔도 불안정으로 판정한다
  */
 
 export interface Request {

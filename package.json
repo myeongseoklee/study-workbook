@@ -3,19 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "학습 주제별 워크북 모노레포 — 지식 문서 + 실습 과제 + 정답 테스트",
-  "workspaces": [
-    "packages/*"
-  ],
+  "description": "학습 주제별 워크북 모노레포 — 지식 문서 + 실습 과제 + 정답 구현",
+  "packageManager": "pnpm@10.20.0",
   "scripts": {
-    "test": "npm run test --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
-    "packages": "node -e \"const fs=require('fs');for(const d of fs.readdirSync('packages'))console.log(' -',d)\""
+    "test": "turbo run test",
+    "test:solutions": "STUDY_TARGET=solutions turbo run test",
+    "typecheck": "turbo run typecheck",
+    "packages": "node -e \"const fs=require('node:fs');for(const d of fs.readdirSync('packages'))console.log(' -',d)\""
   },
   "devDependencies": {
     "@types/node": "^26.1.2",
     "tsx": "^4.23.5",
-    "typescript": "^7.0.2"
+    "turbo": "^2.10.8",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">=20"

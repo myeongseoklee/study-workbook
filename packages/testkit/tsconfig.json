@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // 과제 패키지는 번들러(Vitest)가 읽으므로 bundler 해석이면 충분하지만,
+    // testkit은 실제 .js로 emit되어 Node가 직접 읽는다. 그래서 여기만 NodeNext다
+    // — 상대 import에 `.js` 확장자를 붙여야 하는 것도 그 때문이다.
+    "module": "NodeNext",
+    "moduleResolution": "nodenext"
+  },
+  "include": ["src", "tests", "vitest.config.ts"]
+}
