@@ -558,7 +558,10 @@ function checkOne(pkg, num, force) {
 			const body = git(`show ${branch}:packages/${pkg}/src/${folder}/${f}`);
 			fs.writeFileSync(path.join(probeDir, folder, f), `${body}\n`);
 		}
-		result = runVitest(pkgDir, `${num}/index`);
+		// 필터는 vitest의 경로 부분 일치다. 번호(`02-01`)만 주면 그 폴더의 extra까지
+		// 함께 걸리고, `${num}/index`는 실제 경로(`02-01-agent-loop/index.test.ts`)와
+		// 어긋난다. 폴더명을 그대로 써야 필수 문제 하나만 판정한다.
+		result = runVitest(pkgDir, `${folder}/index`);
 	} finally {
 		fs.rmSync(probeDir, { recursive: true, force: true });
 	}
