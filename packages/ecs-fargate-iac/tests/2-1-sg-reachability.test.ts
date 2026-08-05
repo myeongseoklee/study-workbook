@@ -49,7 +49,7 @@ describe('cidrContains — CIDR 범위가 주소를 포함하는가', () => {
 				'128 이상으로 시작하는 주소에서 비교가 어긋난다.',
 			() => {
 				expect(cidrContains('203.0.113.0/24', '203.0.113.10')).toBe(true);
-				expect(cidrContains('203.0.113.0/24', '203.0.114.1')).toBe(false);
+				expect(cidrContains('203.0.113.0/24', '198.51.100.1')).toBe(false);
 			},
 		);
 	});

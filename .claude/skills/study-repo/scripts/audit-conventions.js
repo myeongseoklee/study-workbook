@@ -478,6 +478,145 @@ function auditBranches(packages) {
 	}
 }
 
+// ── 반출 안전: 실제 식별자가 산출물에 남았는가 ──────────────────────────────
+//
+// 학습 자료는 공유되기 쉽다 — 노션에 올리고, 팀에 링크를 주고, 공개 레포로 옮긴다.
+// 계정 ID·공인 IP·리소스 ID가 한 문서에 모이면 그것만으로 정찰 정보가 되고,
+// 한 번 새어 나가면 git 이력·캐시·포크에 남는다. 그래서 **생성 시점에** 막는다.
+//
+// 판정은 "문서용으로 허용된 값인가"로 한다. 실제 값과 예시값을 자동으로 가르는
+// 완벽한 규칙은 없으므로, 허용 목록을 명시하고 그 밖은 사람이 보게 한다.
+
+/** AWS 문서·이 레포가 예시로 쓰는 계정 ID. */
+const ALLOWED_ACCOUNT_IDS = new Set([
+	'111122223333', // AWS 문서 표준 예시
+	'123456789012',
+	'444455556666',
+	'555555555555',
+	'000000000000',
+]);
+
+/** 문서·테스트에 써도 되는 IP. RFC 5737 예약 대역 + 사설/특수 대역 + 명백한 장난값. */
+const SAFE_IP = [
+	/^192\.0\.2\./, // RFC 5737 TEST-NET-1
+	/^198\.51\.100\./, // RFC 5737 TEST-NET-2
+	/^203\.0\.113\./, // RFC 5737 TEST-NET-3
+	/^10\./, // RFC 1918
+	/^172\.(1[6-9]|2\d|3[01])\./,
+	/^192\.168\./,
+	/^127\./,
+	/^169\.254\./, // 링크 로컬 (ECS 메타데이터 엔드포인트가 여기다)
+	/^0\.0\.0\.0/,
+	/^255\./,
+	/^8\.8\.8\.8/, // 공개 DNS — 관용적 예시
+	/^1\.2\.3\.\d+$/, // 장난값
+];
+
+/**
+ * 이 레포가 예시로 쓰는 리소스 ID. 새 예시를 만들면 여기 추가한다.
+ *
+ * 검사는 **16진수 8자 이상**만 대상으로 하므로 `sg-alb`·`igw-xxxx`·`subnet-public`
+ * 같은 설명용 표기는 애초에 걸리지 않는다(실제 AWS ID는 hex만 쓴다).
+ * 문서에서 `subnet-0aaa1111…`처럼 줄여 쓰면 앞부분만 검출되므로, 접두사 일치도 허용한다.
+ */
+const ALLOWED_RESOURCE_IDS = [
+	'subnet-0aaa1111bbbb2222a',
+	'subnet-0ccc3333dddd4444b',
+	'subnet-0eee5555ffff6666c',
+	'subnet-0999777788889999d',
+	'sg-0db1111222233334',
+	'sg-0int111122223333',
+	'vpc-0abc1234def5678a',
+];
+
+/** 검출값이 허용 예시와 같거나 그 앞부분(줄임 표기)이면 통과. */
+function isAllowedResourceId(id) {
+	return ALLOWED_RESOURCE_IDS.some((allowed) => allowed === id || allowed.startsWith(id));
+}
+
+/** 문서에 써도 되는 이메일 도메인. */
+const SAFE_EMAIL = /@(example\.(com|org|net)|invalid|localhost|anthropic\.com)$/;
+
+function auditExportSafety(pkg, root) {
+	const files = [];
+	for (const sub of ['docs', 'workbook', 'src', 'solutions', 'tests']) {
+		const dir = path.join(root, sub);
+		let entries;
+		try {
+			entries = fs.readdirSync(dir, { withFileTypes: true, recursive: true });
+		} catch {
+			continue;
+		}
+		for (const e of entries) {
+			if (!e.isFile()) continue;
+			if (!/\.(md|ts|js|ya?ml|json)$/.test(e.name)) continue;
+			const parent = e.parentPath ?? e.path ?? dir;
+			files.push(path.join(parent, e.name));
+		}
+	}
+
+	for (const file of files) {
+		const body = readIf(file);
+		if (!body) continue;
+		const rel = path.relative(root, file);
+
+		// ① 12자리 계정 ID — ARN·ECR URI 같은 AWS 문맥에서만 본다 (맨숫자는 오탐이 많다)
+		for (const m of body.matchAll(/(?:arn:aws[a-z-]*:[a-z0-9-]*:[a-z0-9-]*:|(?<![\w.])(?=\d{12}\.dkr\.ecr))(\d{12})/g)) {
+			if (!ALLOWED_ACCOUNT_IDS.has(m[1])) {
+				add('error', pkg, '반출안전', `${rel}: 실제 계정 ID로 보이는 값 ${m[1]} — 예시 계정(111122223333)으로 치환한다`);
+			}
+		}
+
+		// ② 공인 IP — 사설·문서용 대역 밖이면 실제 주소일 수 있다
+		const seenIp = new Set();
+		for (const m of body.matchAll(/\b(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\b/g)) {
+			const ip = m[1];
+			if (seenIp.has(ip)) continue;
+			seenIp.add(ip);
+			const octets = ip.split('.').map(Number);
+			if (octets.some((o) => o > 255)) continue; // 버전 번호 등
+			if (SAFE_IP.some((re) => re.test(ip))) continue;
+			add('error', pkg, '반출안전', `${rel}: 공인 IP로 보이는 값 ${ip} — RFC 5737 대역(203.0.113.x 등)으로 치환한다`);
+		}
+
+		// ③ 리소스 ID — 실제 AWS ID는 16진수만 쓴다. hex 8자 이상만 대상으로 해
+		//    `igw-xxxx`·`subnet-public` 같은 설명용 표기를 오탐하지 않는다.
+		const seenId = new Set();
+		for (const m of body.matchAll(/\b((?:vpc|subnet|sg|i|ami|vol|eni|rtb|igw|nat|acl)-[0-9a-f]{8,})\b/g)) {
+			const id = m[1];
+			if (seenId.has(id) || isAllowedResourceId(id)) continue;
+			seenId.add(id);
+			add('warn', pkg, '반출안전', `${rel}: 리소스 ID ${id} — 실제 값이면 치환하고, 예시면 스크립트의 ALLOWED_RESOURCE_IDS에 추가한다`);
+		}
+
+		// ④ 이메일 — 조직 도메인이 붙은 주소
+		const seenMail = new Set();
+		for (const m of body.matchAll(/\b[\w.+-]+@[\w-]+\.[\w.-]+\b/g)) {
+			const mail = m[0];
+			if (seenMail.has(mail) || SAFE_EMAIL.test(mail)) continue;
+			seenMail.add(mail);
+			add('error', pkg, '반출안전', `${rel}: 실제 이메일로 보이는 값 ${mail} — example.com 도메인으로 치환한다`);
+		}
+
+		// ⑤ DB·캐시 엔드포인트
+		for (const m of body.matchAll(/\b([\w-]+\.[\w-]+\.[a-z0-9-]+\.(?:rds|cache)\.amazonaws\.com)\b/g)) {
+			if (!/^example/.test(m[1])) {
+				add('error', pkg, '반출안전', `${rel}: 실제 DB·캐시 엔드포인트로 보이는 값 ${m[1]} — example로 시작하는 값으로 치환한다`);
+			}
+		}
+	}
+
+	// ⑥ 치환했다면 그 사실을 개요에 밝혀야 한다 (독자가 예시값을 실제 값으로 오해하지 않도록)
+	const overview = readIf(path.join(root, 'docs', '00-overview.md'));
+	if (overview) {
+		const hasPlaceholders = /111122223333|203\.0\.113\.|198\.51\.100\.|192\.0\.2\./.test(overview);
+		const disclosed = /예시값|치환|익명|가짜/.test(overview);
+		if (hasPlaceholders && !disclosed) {
+			add('warn', pkg, '반출안전', 'docs/00-overview.md에 예시 식별자가 있는데 치환 사실을 밝히지 않았다 — 독자가 실제 값으로 오해한다');
+		}
+	}
+}
+
 // ── 실행 ───────────────────────────────────────────────────────────────────
 const target = process.argv[2];
 const pkgRoot = path.join(REPO, 'packages');
@@ -514,6 +653,8 @@ for (const pkg of targets) {
 		}
 	}
 	auditPackageSetup(pkg, root, { isTool, isLegacy });
+	// 반출 안전은 예외 없이 모든 패키지에 적용한다 — 도구 패키지에도 실제 식별자가 들어갈 이유가 없다.
+	auditExportSafety(pkg, root);
 }
 if (!target) auditBranches(packages);
 
