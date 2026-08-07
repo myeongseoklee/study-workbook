@@ -1,7 +1,7 @@
 // 이 파일은 고치지 않는다 — 명세다. 통과시키려면 ../src/02-01-agent-loop/index.ts를 고쳐라.
 import { describe, expect, it } from "vitest";
 import { scripted } from "@study/testkit";
-import { runAgentLoop, runTool } from "../../src/02-01-agent-loop";
+import { runAgentLoop } from "../../src/02-01-agent-loop";
 
 /** create()가 돌려줄 응답 하나. tool_call 있는 스텝과 최종 답 스텝을 섞어 대본을 짠다. */
 function assistantMsg(opts: {
@@ -33,17 +33,10 @@ function stubClient(steps: ReturnType<typeof assistantMsg>[]) {
   return { client: { chat: { completions: { create } } }, create };
 }
 
-describe("runTool", () => {
-  it("add·multiply를 계산한다", () => {
-    expect(runTool("add", { a: 3, b: 5 })).toBe(8);
-    expect(runTool("multiply", { a: 4, b: 2 })).toBe(8);
-  });
-
-  it("모르는 툴 이름이면 던진다", () => {
-    expect(() => runTool("subtract", { a: 1, b: 1 })).toThrow(/알 수 없는 툴/);
-  });
-});
-
+// `tools`와 `runTool`은 스캐폴딩이라(과제는 runAgentLoop 하나다) 여기서 따로
+// 검사하지 않는다 — 스켈레톤 상태에서 통과하는 항목이 있으면 양방향 검증이
+// "아무것도 검사하지 않는 테스트"를 걸러내지 못한다. runTool의 동작은 아래
+// 루프 테스트가 결과값(8·16)으로 이미 간접 검증한다.
 describe("runAgentLoop", () => {
   it("tool_call 없이 바로 답하면 한 번만 호출하고 그 content를 반환한다", async () => {
     const { client, create } = stubClient([assistantMsg({ content: "16" })]);
