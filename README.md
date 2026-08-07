@@ -209,12 +209,15 @@ sol/{패키지명}/{과제번호}
 ```
 
 ```bash
+git switch main                                   # ← 분기 기준은 언제나 main
 git switch -c sol/stateful-context-design/03-01
 cd packages/stateful-context-design
 # tests/03-01-kv-calc/index.test.ts를 읽고 src/03-01-kv-calc/index.ts의 🎯 TODO를 채운다
 pnpm test 03-01        # 또는 감시 모드로: pnpm test:watch 03-01
 git add -A && git commit -m "sol(stateful-context-design): 03-01 KV 캐시 계산기"
 ```
+
+**분기 기준은 main이다.** `study-log`는 orphan 브랜치라 `packages/`가 없다 — 거기서 뻗으면 풀 문제 자체가 없다. 진도 기록은 `.study-log/` worktree에 상주하므로 풀이 중에 브랜치를 옮길 일도 없다(규약 7).
 
 **main으로 머지하지 않는다.** main은 문제 상태(스켈레톤)를 유지한다 — 그래야 재도전할 수 있고, 다른 사람이 같은 문제를 풀 수 있고, 풀이가 문제를 오염시키지 않는다.
 
@@ -317,7 +320,7 @@ export default defineStudyConfig(import.meta.url);
 | 브랜치 | 담는 것 | 왜 분리하나 |
 |---|---|---|
 | `main` | 교재와 **문제 상태**(스켈레톤) | 재도전이 가능해야 하고, 패키지를 떼어 공개할 때 깨끗해야 한다 |
-| `sol/{패키지}/{과제번호}` | 풀이 | 풀이가 문제를 오염시키면 다시 풀 수 없다 (규약 4) |
+| `sol/{패키지}/{과제번호}` | 풀이 (**main에서 분기**) | 풀이가 문제를 오염시키면 다시 풀 수 없다 (규약 4) |
 | `study-log` | **진도·오답 노트·메모** | 개인적이고 자주 바뀐다. 교재 이력에 섞이면 교재의 변경 이력이 안 보인다 |
 
 `study-log`는 **orphan 브랜치**다 — main 이력과 무관하게 시작해서 `git log study-log`가 학습 이력만 보여준다. 그리고 `.study-log/`에 **worktree로 상주**한다(gitignore 대상). 그래서 진도를 적으려고 브랜치를 전환하지 않아도 되고, `sol/` 브랜치에서 과제를 풀는 중에도 기록할 수 있다. 매번 stash·switch가 필요하면 아무도 쓰지 않을 기능이 된다.
