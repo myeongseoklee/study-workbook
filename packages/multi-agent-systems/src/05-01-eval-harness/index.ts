@@ -66,8 +66,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 }
 
 /*
- * 🛠 더 해볼 것 (docs/05):
+ * 🛠 더 해볼 것
+ *
+ * 선택 문제(테스트 있음) — extra-1-failure-triage.ts
+ *   실패를 네 유형으로 분류하고 집계한다. 점수만으로는 다음 수를 못 정한다.
+ *
+ * 관찰 과제(테스트 없음):
  * - 평가셋 30개 이상으로 확장 (1/3은 엣지 케이스)
- * - 실패를 4유형(툴 호출/라우팅/무한 루프/컨텍스트 오염)으로 분류
- * - LangSmith/OpenTelemetry 트레이싱 붙이기 / LLM-as-judge 로 채점(심판도 비결정적임 관찰)
+ * - LangSmith/OpenTelemetry 트레이싱 붙이기
+ * - LLM-as-judge 로 채점해 보고, 심판도 비결정적임을 관찰
  */

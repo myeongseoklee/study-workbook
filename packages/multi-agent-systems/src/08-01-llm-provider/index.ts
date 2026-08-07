@@ -105,9 +105,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 }
 
 /*
- * 🛠 더 해볼 것:
+ * 🛠 더 해볼 것
+ *
+ * 선택 문제(테스트 있음) — extra-1-tool-format.ts
+ *   벤더별 tool 정의·호출 형식 정규화. 이걸 어댑터가 흡수하지 못하면
+ *   상위 코드가 벤더를 알게 되고 추상화는 이름만 남는다.
+ *
+ * 관찰 과제(테스트 없음):
  * - OpenAI 본토 어댑터 추가 (baseURL 없이 new OpenAI())
- * - 인터페이스에 tool 호출 지원 추가: complete({system, messages, tools}) → {text, toolCalls}
- *   그리고 각 어댑터에서 벤더별 tool 형식(OpenAI function ↔ Anthropic tool_use)을 정규화
+ * - LLMProvider 인터페이스를 complete({system, messages, tools}) → {text, toolCalls} 로 확장
  * - week3 오케스트레이터가 이 getProvider() 를 쓰도록 바꿔 provider 무관하게 만들기
  */
