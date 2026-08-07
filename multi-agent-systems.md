@@ -5,10 +5,10 @@
 
 ## 문서 (읽음)
 
-- [x] 00-overview.md
-- [x] 01-prerequisites.md
-- [x] 02-what-is-an-agent.md
-- [x] 03-langgraph-basics.md
+- [x] 00-overview.md  · doc:0388cea
+- [x] 01-prerequisites.md  · doc:c6e272f
+- [x] 02-what-is-an-agent.md  · doc:578c497
+- [x] 03-langgraph-basics.md  · doc:81a25b5
 - [ ] 04-multi-agent-patterns.md
 - [ ] 05-eval-and-observability.md
 - [ ] 06-rag-when-needed.md
@@ -24,12 +24,17 @@
 
 ## 코딩 과제
 
-- [x] 02-01  통과 (6/6) · 2026-08-05
-- [x] 03-01  통과 (3/3) · 2026-08-05
+- [x] 02-01  통과 (4/4) · 2026-08-07  · spec:ec1c3f8 sol:a121312
+- [x] 03-01  통과 (3/3) · 2026-08-07  · spec:f129cee sol:f0bf2a0
+- [ ] 03-01/extra-1-graph-router  (선택) 미확정
 - [ ] 04-01  미확정
+- [ ] 04-01/extra-1-agent-router  (선택) 미확정
 - [ ] 05-01  미확정
+- [ ] 05-01/extra-1-failure-triage  (선택) 미확정
 - [ ] 06-01  미확정
+- [ ] 06-01/extra-1-hybrid-rank  (선택) 미확정
 - [ ] 08-01  미확정
+- [ ] 08-01/extra-1-tool-format  (선택) 미확정
 - [ ] 08-02  미확정
 - [ ] 08-03  미확정
 - [ ] 08-04  미확정
