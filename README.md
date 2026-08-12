@@ -202,37 +202,58 @@ grep -rn "class Fake\|function scripted\|function stub\|function mock" packages 
 
 ## 규약 4 — 문제 풀이 방법
 
-### 풀이는 별도 브랜치에서 한다
+### 풀이는 별도 worktree에서 한다
+
+과제 하나가 worktree 하나이고, 브랜치 이름이 그 경로를 따른다.
 
 ```
-sol/{패키지명}/{과제번호}
+.sol/{패키지명}/{과제번호}/   ←  sol/{패키지명}/{과제번호} 브랜치
 ```
 
 ```bash
-git switch main                                   # ← 분기 기준은 언제나 main
-git switch -c sol/stateful-context-design/03-01
-cd packages/stateful-context-design
+S=.claude/skills/study-progress/scripts/progress.js
+
+node $S start stateful-context-design 03-01   # main에서 분기 + worktree + 환경 준비
+cd .sol/stateful-context-design/03-01/packages/stateful-context-design
 # tests/03-01-kv-calc/index.test.ts를 읽고 src/03-01-kv-calc/index.ts의 🎯 TODO를 채운다
 pnpm test 03-01        # 또는 감시 모드로: pnpm test:watch 03-01
 git add -A && git commit -m "sol(stateful-context-design): 03-01 KV 캐시 계산기"
+
+node $S check stateful-context-design 03-01   # 실제 판정 → 진도 기록
+node $S done  stateful-context-design 03-01   # worktree만 정리 (브랜치·커밋은 남는다)
 ```
 
-**분기 기준은 main이다.** `study-log`는 orphan 브랜치라 `packages/`가 없다 — 거기서 뻗으면 풀 문제 자체가 없다. 진도 기록은 `.study-log/` worktree에 상주하므로 풀이 중에 브랜치를 옮길 일도 없다(규약 7).
+**`git switch`로 풀지 않는다.** 워킹트리가 하나뿐이면 셋이 서로를 밀어낸다 — main에서 교재를 보거나 자료를 고치는 작업, 과제 풀이, 에이전트가 무언가 확인하려고 브랜치를 바꾸는 일. 어느 하나가 브랜치를 점유하면 나머지는 stash를 거쳐야 하고, 막힌 과제를 놔두고 다음으로 갔다 돌아오는 실제 학습 패턴이 매번 브랜치 곡예가 된다.
+
+worktree로 열면 main은 항상 교재 상태로 남고, 풀이는 자기 디렉토리에서 **평범하게 커밋된다** — 중간 저장이 그냥 되므로 "다 풀기 전에는 git에 아무것도 없는" 구간이 생기지 않는다.
+
+대가는 새 worktree에 **추적되는 파일만 들어온다**는 것이다. `start`가 그 둘을 메운다.
+
+| 빠져 있는 것 | `start`가 하는 일 |
+|---|---|
+| `node_modules/` | `pnpm install` + testkit 빌드 (pnpm store 하드링크라 디스크는 거의 안 먹는다) |
+| `.env` (gitignore) | 원본을 가리키는 심볼릭 링크 — 키를 갱신하면 열린 worktree가 모두 따라온다 |
+
+`.env`를 잇지 않으면 API 키를 쓰는 과제는 **테스트 수집 단계에서 죽는다.** 화면에는 "키가 없다"가 아니라 스위트 실패로 보여서 원인이 자기 풀이인 줄 알게 된다.
+
+**분기 기준은 main이다.** `study-log`는 orphan 브랜치라 `packages/`가 없어 거기서 뻗으면 풀 문제 자체가 없고, 다른 `sol/` 브랜치에서 뻗으면 남의 풀이가 딸려온다. 브랜치가 이미 있으면 `start`가 그것을 재개한다(재도전·이어풀기).
 
 **main으로 머지하지 않는다.** main은 문제 상태(스켈레톤)를 유지한다 — 그래야 재도전할 수 있고, 다른 사람이 같은 문제를 풀 수 있고, 풀이가 문제를 오염시키지 않는다.
 
-풀이 브랜치는 남겨 둔다. 나중에 자기 풀이를 다시 보거나 접근을 비교할 때 쓴다.
+풀이 브랜치는 남겨 둔다. `done`은 worktree만 걷어내므로 나중에 `start`로 다시 열 수 있고, 커밋하지 않은 변경이 있으면 거부한다.
 
 ### 순서
 
 1. `docs/`를 읽는다
 2. `workbook/92-workbook.md`의 서술형을 **자료를 덮고** 푼다 → `93`으로 대조
-3. 풀이 브랜치를 만든다
+3. `node $S start {패키지} {과제번호}` — worktree가 열리고 환경까지 준비된다
 4. **`tests/{과제}/index.test.ts`를 먼저 읽는다** — 무엇을 만들지가 거기 있다
 5. `src/{과제}/index.ts`의 `🎯 TODO`를 채운다 (여유가 되면 `extra-*`도)
 6. 패키지 디렉토리에서 `pnpm test {과제번호}`로 판정한다. 실패 메시지의 `↳ 힌트`를 읽는다
-   (루트에서는 `pnpm --filter {패키지} test {과제번호}` — 루트 `pnpm test`는 turbo를 거치므로 과제 번호를 넘길 수 없다)
-7. 통과하면 커밋. 그러고 나서 `solutions/`를 열어 접근을 비교한다 — 먼저 열면 과제가 독해로 바뀐다
+   (worktree 루트에서는 `pnpm --filter {패키지} test {과제번호}` — `pnpm test`는 turbo를 거치므로 과제 번호를 넘길 수 없다)
+7. 통과하면 커밋 → `node $S check {패키지} {과제번호}`로 진도에 남긴다. **판정은 커밋된 풀이로 한다** — 커밋하지 않으면 화면의 코드와 판정 대상이 다르다
+8. `solutions/`를 열어 접근을 비교한다 — 먼저 열면 과제가 독해로 바뀐다
+9. `node $S done {패키지} {과제번호}`로 worktree를 정리한다
 
 ---
 
@@ -317,13 +338,15 @@ export default defineStudyConfig(import.meta.url);
 
 브랜치가 셋으로 갈리는 이유는 각자 보존해야 하는 것이 다르기 때문이다.
 
-| 브랜치 | 담는 것 | 왜 분리하나 |
-|---|---|---|
-| `main` | 교재와 **문제 상태**(스켈레톤) | 재도전이 가능해야 하고, 패키지를 떼어 공개할 때 깨끗해야 한다 |
-| `sol/{패키지}/{과제번호}` | 풀이 (**main에서 분기**) | 풀이가 문제를 오염시키면 다시 풀 수 없다 (규약 4) |
-| `study-log` | **진도·오답 노트·메모** | 개인적이고 자주 바뀐다. 교재 이력에 섞이면 교재의 변경 이력이 안 보인다 |
+| 브랜치 | 담는 것 | 사는 곳 | 왜 분리하나 |
+|---|---|---|---|
+| `main` | 교재와 **문제 상태**(스켈레톤) | 레포 루트 | 재도전이 가능해야 하고, 패키지를 떼어 공개할 때 깨끗해야 한다 |
+| `sol/{패키지}/{과제번호}` | 풀이 (**main에서 분기**) | `.sol/{패키지}/{번호}/` | 풀이가 문제를 오염시키면 다시 풀 수 없다 (규약 4) |
+| `study-log` | **진도·오답 노트·메모** | `.study-log/` | 개인적이고 자주 바뀐다. 교재 이력에 섞이면 교재의 변경 이력이 안 보인다 |
 
-`study-log`는 **orphan 브랜치**다 — main 이력과 무관하게 시작해서 `git log study-log`가 학습 이력만 보여준다. 그리고 `.study-log/`에 **worktree로 상주**한다(gitignore 대상). 그래서 진도를 적으려고 브랜치를 전환하지 않아도 되고, `sol/` 브랜치에서 과제를 풀는 중에도 기록할 수 있다. 매번 stash·switch가 필요하면 아무도 쓰지 않을 기능이 된다.
+**셋 다 동시에 열려 있다.** 브랜치를 전환하지 않는 것이 이 구조의 핵심이다 — `git switch`로 오가면 진도를 적으려고, 또 다른 과제를 보려고 매번 stash를 거쳐야 하고, 그러면 아무도 쓰지 않을 기능이 된다. 그래서 `study-log`와 각 `sol/` 브랜치가 gitignore된 worktree로 상주한다(`.study-log/`는 `init`이, `.sol/…`는 `start`가 연다).
+
+`study-log`는 그중에서도 **orphan 브랜치**다 — main 이력과 무관하게 시작해서 `git log study-log`가 학습 이력만 보여준다.
 
 ### 기록 파일의 두 영역
 
@@ -371,15 +394,19 @@ export default defineStudyConfig(import.meta.url);
 
 `sol/` 브랜치도 main을 따라가야 한다. 판정은 어차피 main의 명세로 하므로 진도는 그것 없이도 정확하지만, **사용자가 그 브랜치에서 직접 `pnpm test`를 돌리면** 브랜치에 담긴 옛 명세를 본다 — 화면의 결과와 기록의 판정이 어긋나고, 어느 쪽이 고장 났는지 찾느라 시간을 버린다. `sync-sol`이 체크아웃 없이 main을 머지한다(rebase가 아니라서 force push가 필요 없다).
 
+그 과제의 worktree가 열려 있으면 `sync-sol`이 **깨끗할 때만** 반영하고 worktree까지 맞춰 준다. 작업 중이면 건너뛴다 — 브랜치 ref만 옮기면 worktree의 HEAD가 옛 커밋을 가리킨 채 남아 `git status`가 "전부 삭제됨"처럼 보이고, 자기 풀이가 날아간 줄 알게 된다.
+
 ### 조작
 
 ```bash
 S=.claude/skills/study-progress/scripts/progress.js
 node $S init                          # 브랜치·worktree·기록 파일 준비 (멱등 — 동기화 겸용)
-node $S status                        # 진도 요약 + 지문 대조 (읽기 전용)
+node $S status                        # 진도 요약 + 지문 대조 + 열린 worktree (읽기 전용)
 node $S mark mcp-protocol docs 00-03  # 문서 읽음 (범위·부분일치·목록, --undo로 해제)
+node $S start mcp-protocol 03-01      # 풀이 worktree 열기 (분기·의존성·.env까지)
 node $S check mcp-protocol 03-01      # 과제를 실제로 돌려 확정
 node $S check --stale                 # 근거가 바뀐 기록만 재판정
+node $S done mcp-protocol 03-01       # 풀이 worktree 정리 (브랜치·커밋은 남는다)
 node $S sync-sol                      # 풀이 브랜치에 main 반영 (체크아웃 없음)
 node $S save "오늘 한 것"              # 커밋 + push
 ```

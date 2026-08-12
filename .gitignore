@@ -11,3 +11,6 @@ packages/*/_probe/
 
 # 학습 기록 worktree (study-log 브랜치가 상주한다)
 .study-log/
+
+# 풀이 worktree (sol/{패키지}/{과제번호} 브랜치를 과제마다 하나씩 연다)
+.sol/

@@ -13,6 +13,22 @@
  * 브랜치에서 과제를 풀는 중에도 기록을 읽고 쓸 수 있다. 매번 stash·switch가
  * 필요하면 아무도 쓰지 않을 기능이 된다.
  *
+ * ## 왜 풀이도 worktree에서 하는가
+ *
+ * 같은 이유가 풀이에도 적용된다. `git switch sol/…`로 푸는 구조에서는 워킹트리가
+ * 하나뿐이라 셋이 서로를 밀어낸다 — main에서 교재를 보거나 자료를 고치는 작업,
+ * 과제 풀이, 그리고 에이전트가 무언가 확인하려고 브랜치를 바꾸는 일. 어느 하나가
+ * 브랜치를 점유하면 나머지는 stash를 거쳐야 하고, 과제 두 개를 동시에 열어 둘 수도
+ * 없다.
+ *
+ * 그래서 `start`가 `.sol/{패키지}/{번호}/`에 worktree를 연다. main은 항상 교재
+ * 상태로 남고, 풀이는 자기 디렉토리에서 평범하게 커밋된다 — 중간 저장이 그대로
+ * 되므로 "다 풀기 전에는 git에 아무것도 없는" 상태가 생기지 않는다.
+ *
+ * 대가는 worktree마다 `pnpm install`이 필요하다는 것이다(pnpm은 store 하드링크라
+ * 디스크는 거의 안 먹는다). 다 풀면 `done`으로 worktree만 걷어낸다 — 브랜치와
+ * 커밋은 남으므로 나중에 다시 열 수 있다.
+ *
  * ## 왜 "통과했다"는 말을 믿지 않는가
  *
  * `sol/` 브랜치가 있고 TODO가 사라졌다는 것은 통과의 증거가 아니다 — TODO만
@@ -47,16 +63,19 @@
  *   progress.js status [패키지]            진도 요약 + 지문 대조 (테스트는 안 돌림)
  *   progress.js mark <패키지> docs 00-03    문서 읽음 표시 (범위·부분일치·목록)
  *   progress.js mark <패키지> workbook 1    워크북 파트 표시
+ *   progress.js start <패키지> <번호>       풀이 worktree 열기 (.sol/ · 브랜치 전환 없음)
  *   progress.js check <패키지> [번호]       코딩 과제를 실제로 돌려 확정
  *   progress.js check <패키지> 03-01/extra-1-graph-router   선택 문제 하나
  *   progress.js check --stale [패키지]      지문이 어긋난 과제만 재검증
+ *   progress.js done <패키지> <번호>        풀이 worktree 정리 (브랜치·커밋은 남는다)
  *   progress.js sync-sol [패키지] [번호]    풀이 브랜치에 main 반영 (체크아웃 없음)
  *   progress.js save ["메시지"]             기록 커밋 + push (--no-push로 생략)
  *   progress.js path [패키지]               기록 파일 경로 (에이전트가 직접 편집할 때)
  *
- * 공통 플래그: --undo (mark 해제) · --force (check가 기존 _probe를 덮음)
- *            --extras (check가 선택 문제까지 판정) · --stale (어긋난 것만)
- *            --prune (init이 목록에 없는 옛 항목을 제거) · --no-push (save)
+ * 공통 플래그: --undo (mark 해제) · --force (check가 기존 _probe를 덮음,
+ *            done이 저장 안 한 변경을 버림) · --extras (check가 선택 문제까지 판정)
+ *            --stale (어긋난 것만) · --prune (init이 목록에 없는 옛 항목을 제거)
+ *            --no-push (save) · --no-install (start가 의존성 설치를 건너뜀)
  *
  * 종료 코드는 **판정을 수행할 수 있었는지**다: 0 = 판정 완료(과제가 `막힘`이어도
  * 0이다 — 못 푼 것은 정상적인 학습 상태다), 1 = 판정 불가(파일·설정 문제).
@@ -71,6 +90,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '../../../..');
 const BRANCH = 'study-log';
 const WT = path.join(REPO, '.study-log');
+const SOL_ROOT = path.join(REPO, '.sol'); // 풀이 worktree들이 사는 곳
 const TOOL_PACKAGES = new Set(['testkit']);
 const TODAY = new Date().toISOString().slice(0, 10);
 
@@ -419,10 +439,11 @@ function cmdInit(prune = false) {
 
 	// ③ main의 .gitignore 확인. 여기서 고치지 않는다 — 추적 파일을 스크립트가
 	//    조용히 바꾸면 커밋에 의도 없는 변경이 섞인다. 알리고 사람이 정한다.
-	const gi = path.join(REPO, '.gitignore');
-	const giText = fs.existsSync(gi) ? fs.readFileSync(gi, 'utf8') : '';
-	if (!/^\.study-log\/?$/m.test(giText)) {
-		console.log('△ .gitignore에 `.study-log/` 가 없다 — 추가해야 worktree가 main에 잡히지 않는다');
+	const giText = readIgnore();
+	for (const entry of ['.study-log', '.sol']) {
+		if (!new RegExp(`^${entry.replace('.', '\\.')}\\/?$`, 'm').test(giText)) {
+			console.log(`△ .gitignore에 \`${entry}/\` 가 없다 — 추가해야 worktree가 main에 잡히지 않는다`);
+		}
 	}
 
 	// ④ 기록 파일 스캐폴딩 + 동기화(새 문서·과제가 생기면 항목만 덧붙인다)
@@ -469,7 +490,8 @@ function worktreeReadme() {
 	return `# 학습 기록 (study-log 브랜치)
 
 이 브랜치는 **진도와 학습 결과만** 담는다. 교재와 문제(스켈레톤)는 \`main\`에 있고,
-풀이는 \`sol/{패키지}/{과제번호}\` 브랜치에 있다. 셋을 섞지 않는 이유:
+풀이는 \`sol/{패키지}/{과제번호}\` 브랜치(\`.sol/\` 아래 worktree)에 있다. 셋을 섞지
+않는 이유:
 
 - main은 **문제 상태**를 보존해야 재도전이 가능하고, 패키지를 떼어 공개할 때 깨끗하다
 - 진도는 개인적이고 자주 바뀐다 — 교재 이력에 섞이면 교재의 변경 이력이 안 보인다
@@ -487,9 +509,11 @@ function worktreeReadme() {
 
 \`\`\`bash
 S=.claude/skills/study-progress/scripts/progress.js
-node $S status                        # 진도 요약
+node $S status                        # 진도 요약 + 열린 풀이 worktree
 node $S mark mcp-protocol docs 00-03  # 문서 읽음
-node $S check mcp-protocol 3-1        # 과제를 실제로 돌려 확정
+node $S start mcp-protocol 03-01      # 풀이 worktree 열기
+node $S check mcp-protocol 03-01      # 과제를 실제로 돌려 확정
+node $S done mcp-protocol 03-01       # 풀이 worktree 정리
 node $S save "오늘 한 것"              # 커밋 + push
 \`\`\`
 
@@ -743,10 +767,232 @@ function cmdMark(pkg, kind, patterns, undo) {
 	console.log(`  현재 ${done}/${items.length}`);
 }
 
+// ── start / done (풀이 worktree) ────────────────────────────────────────────
+const solPath = (pkg, num) => path.join(SOL_ROOT, pkg, num);
+const rel = (p) => path.relative(REPO, p) || '.';
+
+/**
+ * 지금 열려 있는 풀이 worktree들. `git worktree list`가 원천이다 — 디렉토리만
+ * 훑으면 사람이 손으로 지운 껍데기까지 세게 된다.
+ */
+function solWorktrees() {
+	const raw = gitOut('worktree list --porcelain') ?? '';
+	const out = [];
+	let cur = null;
+	for (const line of raw.split('\n')) {
+		if (line.startsWith('worktree ')) cur = line.slice(9).trim();
+		else if (line.startsWith('branch ') && cur) {
+			const branch = line.slice(7).trim().replace(/^refs\/heads\//, '');
+			const m = branch.match(/^sol\/(.+)\/((?:e\d+-)?\d+-\d+)$/);
+			if (m) out.push({ path: cur, branch, pkg: m[1], num: m[2] });
+			cur = null;
+		}
+	}
+	return out;
+}
+
+/** 그 과제의 worktree가 열려 있는가. 열려 있으면 ref를 함부로 옮기면 안 된다. */
+const worktreeFor = (pkg, num) => solWorktrees().find((w) => w.pkg === pkg && w.num === num) ?? null;
+
+/**
+ * pnpm을 부르는 방법. PATH에 없으면 corepack으로 우회한다.
+ *
+ * `packageManager` 필드가 버전을 고정하고 있으므로 `corepack pnpm`은 같은 버전을
+ * 쓴다. nvm으로 노드 버전을 갈아탄 뒤 `corepack enable`을 다시 안 했거나, 에이전트가
+ * 로그인 셸이 아닌 환경에서 스크립트를 돌릴 때 PATH에서 pnpm이 사라진다 — 그때
+ * "command not found"로 끝나면 원인이 의존성 설치인지 환경인지 구별되지 않는다.
+ */
+let PNPM = null;
+function pnpmCmd() {
+	if (PNPM !== null) return PNPM;
+	const has = (c) => {
+		try {
+			execSync(`command -v ${c}`, { stdio: 'ignore', shell: '/bin/sh' });
+			return true;
+		} catch {
+			return false;
+		}
+	};
+	PNPM = has('pnpm') ? 'pnpm' : has('corepack') ? 'corepack pnpm' : '';
+	return PNPM;
+}
+
+/**
+ * worktree에 의존성을 깐다. 새 worktree에는 node_modules가 없어서 테스트가 아예
+ * 돌지 않는다 — `.study-log/`가 문서만 담아 이 문제를 겪지 않았을 뿐이다.
+ *
+ * testkit은 빌드 산출물(`dist/`)로 소비된다. Vite가 설정 파일의 워크스페이스
+ * 의존성을 externalize하므로 `vitest.config.ts`의 `defineStudyConfig`는 Node가
+ * 직접 읽을 수 있어야 한다 — install만 하고 build를 빠뜨리면 설정 로딩에서 죽는다.
+ *
+ * 실패해도 worktree는 그대로 둔다. 만들어진 것을 되돌리는 것보다 무엇을 손으로
+ * 실행하면 되는지 알려주는 편이 낫다.
+ */
+function installWorktree(wt) {
+	const pnpm = pnpmCmd();
+	if (!pnpm) {
+		console.log('△ pnpm도 corepack도 없다 — worktree는 만들어졌다. 노드 환경을 갖춘 뒤 직접 실행하라:');
+		console.log(`    cd ${rel(wt)} && corepack enable pnpm && pnpm install && pnpm --filter @study/testkit build`);
+		return false;
+	}
+	console.log(`· 의존성 설치 중 (${pnpm} — store 하드링크라 디스크는 거의 안 먹는다)`);
+	const run = (cmd) => execSync(cmd, { cwd: wt, encoding: 'utf8', stdio: ['ignore', 'ignore', 'pipe'] });
+	try {
+		run(`${pnpm} install`);
+		run(`${pnpm} --filter @study/testkit build`);
+		console.log('✓ 의존성 준비 완료');
+		return true;
+	} catch (e) {
+		console.log('△ 설치 실패 — worktree는 만들어졌다. 직접 실행하라:');
+		console.log(`    cd ${rel(wt)} && ${pnpm} install && ${pnpm} --filter @study/testkit build`);
+		const err = String(e.stderr ?? e.message).trim().split('\n').slice(-1)[0];
+		if (err) console.log(`  ${err}`);
+		return false;
+	}
+}
+
+/**
+ * gitignore된 로컬 설정(`.env`)을 worktree에서도 보이게 한다.
+ *
+ * 새 worktree에는 추적되는 파일만 들어온다. API 키가 필요한 과제는 그것 없이는
+ * 테스트 수집 단계에서 `process.exit(1)`로 죽는데, 화면에는 "키가 없다"가 아니라
+ * 스위트 실패로 보여서 원인이 풀이인 줄 알게 된다.
+ *
+ * 복사가 아니라 심볼릭 링크다 — 키를 갱신하면 열려 있는 모든 worktree가 따라간다.
+ * 복사본은 만든 시점의 키를 붙들고 있어서, 키가 만료됐을 때 어느 사본이 낡았는지
+ * 추적해야 한다.
+ */
+function linkLocalEnv(wt) {
+	const linked = [];
+	for (const pkg of topicPackages()) {
+		const src = path.join(REPO, 'packages', pkg, '.env');
+		if (!fs.existsSync(src)) continue;
+		const dest = path.join(wt, 'packages', pkg, '.env');
+		if (fs.existsSync(dest)) continue;
+		try {
+			fs.symlinkSync(src, dest);
+			linked.push(pkg);
+		} catch {
+			/* 패키지가 그 브랜치에 없거나 권한이 없으면 넘어간다 */
+		}
+	}
+	if (linked.length) console.log(`✓ .env 연결: ${linked.join(', ')}  (원본을 가리키므로 키 갱신이 따라온다)`);
+}
+
+/** 풀고 나서 무엇을 할지. 명세를 먼저 읽으라는 순서가 규약이다(README 규약 4). */
+function printNext(pkg, num, wt) {
+	const tests = assignmentDir(pkg, num, 'tests');
+	const src = assignmentDir(pkg, num, 'src');
+	console.log('');
+	if (tests) console.log(`  ① 명세를 먼저 읽는다  ${rel(wt)}/packages/${pkg}/tests/${tests}/index.test.ts`);
+	if (src) console.log(`  ② 🎯 TODO를 채운다     ${rel(wt)}/packages/${pkg}/src/${src}/index.ts`);
+	console.log(`  ③ 판정                 cd ${rel(wt)}/packages/${pkg} && pnpm test ${num}`);
+	console.log(`  ④ 커밋 후 기록         node $S check ${pkg} ${num}`);
+}
+
+function cmdStart(pkg, num, opts = {}) {
+	if (!pkg || !num) die('사용: start <패키지> <과제번호>');
+	if (!topicPackages().includes(pkg)) die(`패키지를 찾을 수 없다: ${pkg}`);
+	if (!assignmentDir(pkg, num, 'src')) {
+		const known = listAssignments(pkg).join(', ');
+		die(`packages/${pkg}/src/${num}-*/ 를 찾을 수 없다 — 있는 과제: ${known || '(없음)'}`);
+	}
+
+	const branch = `sol/${pkg}/${num}`;
+	const wt = solPath(pkg, num);
+
+	// 이미 열려 있으면 경로만 알린다 — 멱등이라 "이미 하고 있었나" 확인용으로 부를 수 있다.
+	// 다만 의존성은 다시 본다: 첫 설치가 실패했을 때 재시도할 손잡이가 없으면
+	// 사용자는 실패한 worktree를 지웠다 다시 만드는 수밖에 없다.
+	const open = worktreeFor(pkg, num);
+	if (open) {
+		console.log(`이미 열려 있다: ${rel(open.path)}  (${branch})`);
+		if (opts.install !== false && !fs.existsSync(path.join(open.path, 'node_modules'))) {
+			console.log('· 의존성이 없다 — 다시 설치한다');
+			installWorktree(open.path);
+		}
+		linkLocalEnv(open.path);
+		printNext(pkg, num, open.path);
+		return;
+	}
+	if (fs.existsSync(wt) && fs.readdirSync(wt).length > 0) {
+		die(`${rel(wt)} 가 이미 있고 worktree가 아니다 — 옮기거나 지운 뒤 다시 실행하라`);
+	}
+
+	// 브랜치가 있으면 재개(재도전·이어풀기), 없으면 main에서 새로 분기한다.
+	// 분기 기준을 main으로 못박는 이유는 README 규약 4에 있다 — study-log는
+	// orphan이라 packages/ 자체가 없고, 다른 sol 브랜치에서 뻗으면 남의 풀이가 딸려온다.
+	const fresh = !branchExists(branch);
+	if (fresh) {
+		if (!gitOut('rev-parse --verify --quiet refs/heads/main')) die('main 브랜치를 찾을 수 없다');
+		git(`worktree add -b ${branch} ${JSON.stringify(wt)} main`);
+		console.log(`✓ ${branch} 생성 (main에서 분기)`);
+	} else {
+		// 그 브랜치를 다른 worktree가 쓰고 있으면 git이 거부한다 — 그 메시지가 정확하다
+		git(`worktree add ${JSON.stringify(wt)} ${branch}`);
+		console.log(`✓ ${branch} 재개 (기존 풀이가 그대로 있다)`);
+	}
+	console.log(`✓ worktree: ${rel(wt)}  (main은 교재 상태 그대로다)`);
+
+	if (!/^\.sol\/?$/m.test(readIgnore())) {
+		console.log('△ .gitignore에 `.sol/` 가 없다 — 추가해야 worktree가 main에 잡히지 않는다');
+	}
+
+	if (opts.install === false) console.log('· 의존성 설치 생략 (--no-install)');
+	else installWorktree(wt);
+	linkLocalEnv(wt);
+
+	printNext(pkg, num, wt);
+}
+
+function cmdDone(pkg, num, force) {
+	if (!pkg || !num) die('사용: done <패키지> <과제번호> [--force]');
+	const open = worktreeFor(pkg, num);
+	if (!open) {
+		console.log(`열린 worktree가 없다: ${rel(solPath(pkg, num))}`);
+		return;
+	}
+
+	// 커밋하지 않은 풀이를 조용히 날리지 않는다. worktree를 쓰는 이유의 절반이
+	// "중간 저장이 그냥 된다"인데, 정리 명령이 그것을 버리면 앞뒤가 안 맞는다.
+	const dirty = gitOut('status --porcelain', open.path);
+	if (dirty && !force) {
+		console.log(`△ ${open.branch} 에 커밋하지 않은 변경이 있다 — 지우면 사라진다`);
+		for (const l of dirty.split('\n').slice(0, 10)) console.log(`    ${l}`);
+		if (dirty.split('\n').length > 10) console.log('    …');
+		console.log(`\n  남기려면: cd ${rel(open.path)} && git add -A && git commit -m "sol(${pkg}): ${num} …"`);
+		console.log(`  버리려면: done ${pkg} ${num} --force`);
+		process.exit(1);
+	}
+
+	git(`worktree remove ${force ? '--force ' : ''}${JSON.stringify(open.path)}`);
+	// 패키지 디렉토리가 비면 같이 치운다 — .sol/ 아래 빈 껍데기가 쌓이면
+	// "뭐가 열려 있지"를 디렉토리로 판단할 수 없게 된다
+	for (const dir of [path.dirname(open.path), SOL_ROOT]) {
+		try {
+			if (fs.readdirSync(dir).length === 0) fs.rmdirSync(dir);
+		} catch {
+			/* 없거나 비어 있지 않으면 그대로 둔다 */
+		}
+	}
+	console.log(`✓ worktree 제거: ${rel(open.path)}`);
+	console.log(`  브랜치 ${open.branch} 와 커밋은 남는다 — 다시 열려면 start ${pkg} ${num}`);
+}
+
+const readIgnore = () => {
+	try {
+		return fs.readFileSync(path.join(REPO, '.gitignore'), 'utf8');
+	} catch {
+		return '';
+	}
+};
+
 // ── check (실제 판정) ───────────────────────────────────────────────────────
 function cmdCheck(pkg, key, force, opts = {}) {
 	// --stale은 패키지를 생략할 수 있다: 어긋난 것을 통째로 정리하는 손잡이다
 	if (!pkg && !opts.stale) die('사용: check <패키지> [과제번호]  |  check --stale [패키지]');
+	// 여기서 막지 않으면 "실행된 테스트가 0개"로 끝나서 원인이 번호 오타처럼 보인다
+	if (!pnpmCmd()) die('pnpm도 corepack도 없다 — 판정을 돌릴 수 없다. 노드 환경을 확인하라');
 
 	const pkgs = pkg ? [pkg] : topicPackages();
 	if (pkg && !topicPackages().includes(pkg)) die(`패키지를 찾을 수 없다: ${pkg}`);
@@ -801,6 +1047,13 @@ function checkOne(pkg, key, force) {
 	if (!branchExists(branch)) {
 		console.log(`${pkg} ${key}  · 미시작 (${branch} 브랜치가 없다)`);
 		return true; // 아직 안 푼 것은 실패가 아니다
+	}
+
+	// 판정은 **커밋된** 풀이로 한다. worktree에서 고치고 커밋하지 않았다면 화면의
+	// 코드와 판정 대상이 다르다 — 이걸 모르면 "고쳤는데 왜 그대로 막힘이지"에서 막힌다.
+	const openWt = worktreeFor(pkg, num);
+	if (openWt && gitOut('status --porcelain', openWt.path)) {
+		console.log(`${pkg} ${key}  △ ${rel(openWt.path)} 에 커밋하지 않은 변경이 있다 — 아래 판정에는 들어가지 않는다`);
 	}
 
 	const probeDir = path.join(pkgDir, '_probe');
@@ -889,7 +1142,7 @@ function checkOne(pkg, key, force) {
 function runVitest(pkgDir, num) {
 	let raw = '';
 	try {
-		raw = execSync(`pnpm exec vitest run ${num} --reporter=json`, {
+		raw = execSync(`${pnpmCmd()} exec vitest run ${num} --reporter=json`, {
 			cwd: pkgDir,
 			encoding: 'utf8',
 			env: { ...process.env, STUDY_TARGET: '_probe' },
@@ -1029,6 +1282,17 @@ function cmdStatus(filter) {
 		);
 		for (const w of warn) console.log(`${' '.repeat(28)}⚠ ${w}`);
 	}
+	// 열려 있는 풀이 worktree. 진도표에는 안 보이는 정보다 — 브랜치가 있다는 것과
+	// 지금 작업 중이라는 것은 다르고, 후자가 "어디까지 했더라"의 답인 경우가 많다.
+	const open = solWorktrees().filter((w) => pkgs.includes(w.pkg));
+	if (open.length) {
+		console.log('\n열린 풀이 worktree');
+		for (const w of open) {
+			const wtDirty = gitOut('status --porcelain', w.path);
+			console.log(`  ${rel(w.path).padEnd(40)} ${wtDirty ? '작업 중 (저장 안 한 변경)' : '커밋됨'}`);
+		}
+	}
+
 	const dirty = gitOut('status --porcelain', WT);
 	console.log(dirty ? '\n△ 저장하지 않은 기록이 있다 — progress.js save' : '');
 }
@@ -1068,6 +1332,16 @@ function cmdSyncSol(pkg, num) {
 
 		// 이미 main을 품고 있으면 할 일이 없다
 		if (gitOk(`merge-base --is-ancestor ${mainSha} ${head}`)) continue;
+
+		// 그 브랜치를 열어 둔 worktree가 있으면 ref만 옮길 수 없다. worktree의
+		// HEAD·인덱스는 옛 커밋을 가리킨 채 남아서 `git status`가 "전부 삭제됨"처럼
+		// 보이고, 사용자는 자기 풀이가 날아간 줄 안다. 깨끗하면 반영 후 맞춰 주고,
+		// 작업 중이면 아예 손대지 않는다.
+		const wt = worktreeFor(t.pkg, t.num);
+		if (wt && gitOut('status --porcelain', wt.path)) {
+			console.log(`${branch}  △ ${rel(wt.path)} 에서 작업 중 — 건너뜀 (커밋하거나 done 후 다시 실행)`);
+			continue;
+		}
 
 		const folder = assignmentDir(t.pkg, t.num, 'src');
 		if (!folder) {
@@ -1113,7 +1387,9 @@ function cmdSyncSol(pkg, num) {
 				input: `${msg}\n`,
 			}).trim();
 			git(`update-ref refs/heads/${branch} ${sha}`);
-			console.log(`✓ ${branch}  main 반영 (${git(`rev-parse --short ${sha}`)})`);
+			// 위에서 깨끗한 것을 확인했으므로 버릴 작업이 없다
+			if (wt) git(`reset --hard --quiet ${sha}`, wt.path);
+			console.log(`✓ ${branch}  main 반영 (${git(`rev-parse --short ${sha}`)})${wt ? ` · ${rel(wt.path)} 갱신` : ''}`);
 			synced++;
 		} finally {
 			fs.rmSync(idx, { force: true });
@@ -1189,11 +1465,17 @@ switch (cmd) {
 	case 'mark':
 		cmdMark(rest[0], rest[1], rest.slice(2), flags.has('--undo'));
 		break;
+	case 'start':
+		cmdStart(rest[0], rest[1], { install: !flags.has('--no-install') });
+		break;
 	case 'check':
 		cmdCheck(rest[0], rest[1], flags.has('--force'), {
 			stale: flags.has('--stale'),
 			extras: flags.has('--extras'),
 		});
+		break;
+	case 'done':
+		cmdDone(rest[0], rest[1], flags.has('--force'));
 		break;
 	case 'sync-sol':
 		cmdSyncSol(rest[0], rest[1]);
@@ -1205,5 +1487,5 @@ switch (cmd) {
 		cmdPath(rest[0]);
 		break;
 	default:
-		die(`모르는 명령: ${cmd}  (init / status / mark / check / save / path)`);
+		die(`모르는 명령: ${cmd}  (init / status / mark / start / check / done / sync-sol / save / path)`);
 }
