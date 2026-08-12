@@ -161,29 +161,54 @@ function listDocs(pkg) {
 }
 
 /**
+ * 워크북 **문제** 파일들. 정답 파일은 진도 항목이 아니다.
+ *
+ * 파일명 규약이 둘을 가른다 — `92-workbook.md` / `93-solutions.md`. 회차별로
+ * 성격이 다른 워크북이 생기면 파일이 늘어난다(`94-workbook-ep03.md`).
+ * 번호로 92만 집으면 나중 회차의 워크북이 진도에서 통째로 빠진다.
+ */
+function workbookFiles(pkg) {
+	try {
+		return fs
+			.readdirSync(path.join(REPO, 'packages', pkg, 'workbook'))
+			.filter((f) => f.endsWith('.md') && /workbook/i.test(f) && !/solutions?/i.test(f))
+			.sort();
+	} catch {
+		return [];
+	}
+}
+
+/**
  * 워크북 문제 파일의 `파트 N` 제목을 뽑아 항목으로 쓴다.
  *
  * 제목 수준이 패키지마다 다르다(`# 파트 1.` / `## 파트 1.`) — 규격이 아니라
  * 저작 시점의 차이다. 그래서 H1~H3를 모두 받는다. 파트 구조가 아예 없는
  * 구형 워크북은 파일 하나를 항목 하나로 잡는다: 0/0으로 두면 "워크북이 없다"와
  * "워크북이 있는데 진도가 0"이 화면에서 구별되지 않는다.
+ *
+ * 워크북이 **여럿이면 파일 번호를 키 앞에 붙인다**(`94:파트1`). 회차마다 파트 1이
+ * 있어 키가 충돌하기 때문이다. 하나뿐인 패키지는 접두 없이 두어 기존 기록이
+ * 그대로 살아 있게 한다 — 키가 바뀌면 그 항목의 진도가 orphan이 된다.
  */
 function listWorkbookParts(pkg) {
 	const dir = path.join(REPO, 'packages', pkg, 'workbook');
-	let file;
-	try {
-		file = fs.readdirSync(dir).find((f) => f.startsWith('92'));
-	} catch {
-		return [];
+	const files = workbookFiles(pkg);
+	if (!files.length) return [];
+	const prefixed = files.length > 1;
+
+	const out = [];
+	for (const file of files) {
+		const num = file.match(/^(\d+)/)?.[1] ?? file.replace(/\.md$/, '');
+		const text = fs.readFileSync(path.join(dir, file), 'utf8');
+		const found = [];
+		for (const line of text.split('\n')) {
+			const m = line.match(/^#{1,3}\s*파트\s*(\d+)\.?\s*(.*)$/);
+			if (m) found.push({ base: `파트${m[1]}`, label: (m[2] || '').replace(/\s*\(.*$/, '').trim() });
+		}
+		if (!found.length) found.push({ base: '워크북', label: '전체' });
+		for (const f of found) out.push({ key: prefixed ? `${num}:${f.base}` : f.base, label: f.label });
 	}
-	if (!file) return [];
-	const text = fs.readFileSync(path.join(dir, file), 'utf8');
-	const parts = [];
-	for (const line of text.split('\n')) {
-		const m = line.match(/^#{1,3}\s*파트\s*(\d+)\.?\s*(.*)$/);
-		if (m) parts.push({ key: `파트${m[1]}`, label: (m[2] || '').replace(/\s*\(.*$/, '').trim() });
-	}
-	return parts.length ? parts : [{ key: '워크북', label: '전체' }];
+	return out;
 }
 
 /**
@@ -318,18 +343,21 @@ function docStamp(pkg, doc) {
 }
 
 /**
- * 워크북 지문. 파트별로 가르지 않고 문제 파일 전체를 해싱한다 — 파트 경계는
- * 제목 수준이 패키지마다 달라 신뢰할 수 없고, 워크북은 대개 통째로 개정된다.
+ * 워크북 지문. 파트별로 가르지 않고 **그 파트가 속한 문제 파일** 전체를 해싱한다 —
+ * 파트 경계는 제목 수준이 패키지마다 달라 신뢰할 수 없고, 워크북은 대개 통째로
+ * 개정된다.
+ *
+ * 워크북이 여럿인 패키지는 키에 파일 번호가 붙어 있으므로(`94:파트1`) 그것으로
+ * 파일을 고른다. 전부 한 파일로 해싱하면 3강 워크북만 고쳤는데 1·2강 진도까지
+ * 재확인 대상이 된다.
  */
-function workbookStamp(pkg) {
+function workbookStamp(pkg, key = '') {
 	const dir = path.join(REPO, 'packages', pkg, 'workbook');
-	let file;
-	try {
-		file = fs.readdirSync(dir).find((f) => f.startsWith('92'));
-	} catch {
-		return { wb: null };
-	}
-	return { wb: file ? hashFiles([path.join(dir, file)]) : null };
+	const files = workbookFiles(pkg);
+	if (!files.length) return { wb: null };
+	const num = String(key).includes(':') ? String(key).split(':')[0] : null;
+	const file = (num && files.find((f) => f.startsWith(num))) || files[0];
+	return { wb: hashFiles([path.join(dir, file)]) };
 }
 
 const STAMP_RE = /\b(spec|sol|doc|wb):([0-9a-f]{7})\b/g;
@@ -628,7 +656,7 @@ function backfillReadStamps(pkg) {
 	let n = 0;
 	for (const [heading, stamper] of [
 		[SEC_DOCS, (k) => docStamp(pkg, k)],
-		[SEC_WORKBOOK, () => workbookStamp(pkg)],
+		[SEC_WORKBOOK, (k) => workbookStamp(pkg, k)],
 	]) {
 		const sec = findSection(sections, heading);
 		if (!sec) continue;
@@ -752,7 +780,7 @@ function cmdMark(pkg, kind, patterns, undo) {
 		changed.push(item.key);
 		// 읽은 시점의 본문 지문을 함께 박는다. 해제할 때는 지운다 — 안 읽은 것에
 		// 지문이 남아 있으면 "그 판을 안 읽었다"는 무의미한 사실이 기록된다.
-		const st = want ? (kind === 'docs' ? docStamp(pkg, item.key) : workbookStamp(pkg)) : {};
+		const st = want ? (kind === 'docs' ? docStamp(pkg, item.key) : workbookStamp(pkg, item.key)) : {};
 		return `- [${want ? 'x' : ' '}] ${item.key}${withStamp(item.tail, st)}`;
 	});
 
@@ -1227,7 +1255,7 @@ function cmdStatus(filter) {
 		// ① 읽음 표시한 문서·워크북의 본문이 그 뒤 바뀌었는가
 		for (const [list, stamper] of [
 			[docs, (k) => docStamp(pkg, k)],
-			[parts, () => workbookStamp(pkg)],
+			[parts, (k) => workbookStamp(pkg, k)],
 		]) {
 			for (const it of list.filter((i) => i.done)) {
 				const { state } = stampState(parseStamp(it.tail), stamper(it.key));
