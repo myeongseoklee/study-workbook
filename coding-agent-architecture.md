@@ -27,6 +27,15 @@
 - [ ] ep02-business-agent/08-deployment-modes.md
 - [ ] ep02-business-agent/09-business-server.md
 - [ ] ep02-business-agent/10-tech-stack.md
+- [ ] ep03-admin-implementation/00-overview.md
+- [ ] ep03-admin-implementation/01-storage-and-account.md
+- [ ] ep03-admin-implementation/02-session-and-audit.md
+- [ ] ep03-admin-implementation/03-signup-policy.md
+- [ ] ep03-admin-implementation/04-monorepo-boundaries.md
+- [ ] ep03-admin-implementation/05-model-registry.md
+- [ ] ep03-admin-implementation/06-org-tree-and-routing.md
+- [ ] ep03-admin-implementation/07-guardrails-by-structure.md
+- [ ] ep03-admin-implementation/08-acceptance-first-testing.md
 
 ## 워크북
 
@@ -42,6 +51,10 @@
 - [ ] e02-03-01  미확정
 - [ ] e02-04-01  미확정
 - [ ] e02-04-02  미확정
+- [ ] e03-02-01  미확정
+- [ ] e03-03-01  미확정
+- [ ] e03-05-01  미확정
+- [ ] e03-06-01  미확정
 
 ## 오답 노트
 
