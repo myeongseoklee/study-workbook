@@ -1,9 +1,9 @@
 /**
  * 참고 구현 — 조직 트리와 모델 라우팅.
  *
- * 판정은 tests/e03-06-01-org-tree/index.test.ts가 한다.
+ * 판정은 tests/e03-03-01-org-tree/index.test.ts가 한다.
  *
- * 📍 되짚기: docs/ep03-admin-implementation/06-org-tree-and-routing.md
+ * 📍 되짚기: docs/ep03-admin-implementation/03-delegation-and-org.md
  */
 
 export interface Org {

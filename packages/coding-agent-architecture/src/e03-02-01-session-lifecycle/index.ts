@@ -8,7 +8,7 @@
  *
  * 명세:  tests/e03-02-01-session-lifecycle/index.test.ts ← **먼저 읽어라**
  * 판정:  pnpm test e03-02-01
- * 막히면: docs/ep03-admin-implementation/02-session-and-audit.md
+ * 막히면: docs/ep03-admin-implementation/02-identity-and-session.md
  */
 
 export interface Session {

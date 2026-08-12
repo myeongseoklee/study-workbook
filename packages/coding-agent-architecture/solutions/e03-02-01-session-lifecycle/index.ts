@@ -3,7 +3,7 @@
  *
  * 판정은 tests/e03-02-01-session-lifecycle/index.test.ts가 한다.
  *
- * 📍 되짚기: docs/ep03-admin-implementation/02-session-and-audit.md
+ * 📍 되짚기: docs/ep03-admin-implementation/02-identity-and-session.md
  */
 
 export interface Session {

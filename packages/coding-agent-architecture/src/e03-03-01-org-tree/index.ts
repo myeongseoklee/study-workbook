@@ -5,9 +5,9 @@
  * 루트를 하나밖에 안 되게 만드는 것"**. 지사 A·지사 B가 서로의 하위가 아니면서
  * 나란히 존재한다. 그 위에 관리자 권한 범위와 조직별 모델 접근이 얹힌다.
  *
- * 명세:  tests/e03-06-01-org-tree/index.test.ts ← **먼저 읽어라**
+ * 명세:  tests/e03-03-01-org-tree/index.test.ts ← **먼저 읽어라**
  * 판정:  pnpm test e03-06-01
- * 막히면: docs/ep03-admin-implementation/06-org-tree-and-routing.md
+ * 막히면: docs/ep03-admin-implementation/03-delegation-and-org.md
  */
 
 export interface Org {

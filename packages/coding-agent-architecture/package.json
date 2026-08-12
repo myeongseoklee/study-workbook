@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "코딩 에이전트 만들기 — 에이전트 루프·도구·컨텍스트(1강), 세션·컴팩션·기업 납품(2강), 관리 서버 구현(3강)",
+  "description": "코딩 에이전트 만들기 — 에이전트 루프·도구·컨텍스트(1강), 세션·컴팩션·기업 납품(2강), 계획→구현 결정과 에이전트 지시(3강)",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
