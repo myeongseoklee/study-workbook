@@ -9,7 +9,7 @@
 - [x] 01-prerequisites.md  · doc:c6e272f
 - [x] 02-what-is-an-agent.md  · doc:578c497
 - [x] 03-langgraph-basics.md  · doc:81a25b5
-- [ ] 04-multi-agent-patterns.md
+- [x] 04-multi-agent-patterns.md  · doc:961b92b
 - [ ] 05-eval-and-observability.md
 - [ ] 06-rag-when-needed.md
 - [ ] 07-should-you-build-multi-agent.md
@@ -27,8 +27,8 @@
 - [x] 02-01  통과 (4/4) · 2026-08-07  · spec:ec1c3f8 sol:a121312
 - [x] 03-01  통과 (3/3) · 2026-08-13  · spec:f129cee sol:3969ca0
 - [x] 03-01/extra-1-graph-router  (선택) 통과 (9/9) · 2026-08-13  · spec:eef6305 sol:3969ca0
-- [ ] 04-01  미확정
-- [ ] 04-01/extra-1-agent-router  (선택) 미확정
+- [x] 04-01  통과 (5/5) · 2026-08-13  · spec:9a2e5a7 sol:5106a23
+- [x] 04-01/extra-1-agent-router  (선택) 통과 (9/9) · 2026-08-13  · spec:db94d42 sol:5106a23
 - [ ] 05-01  미확정
 - [ ] 05-01/extra-1-failure-triage  (선택) 미확정
 - [ ] 06-01  미확정
