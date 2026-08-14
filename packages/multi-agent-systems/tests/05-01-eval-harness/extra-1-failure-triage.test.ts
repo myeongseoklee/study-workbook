@@ -47,6 +47,35 @@ describe("classifyFailure — 네 유형으로 가른다", () => {
   it("스텝이 아예 없으면 unknown이다 (경계)", () => {
     expect(classifyFailure(trace({ steps: [] }))).toBe("unknown");
   });
+
+  it("스텝이 없는데 상한도 0이면 unknown이다 — 무한 루프가 아니다 (경계)", () => {
+    // 상한 검사를 `steps.length >= maxSteps`로만 쓰면 0 >= 0 이 참이 되어, 한 걸음도
+    // 못 뗀 트레이스가 "끝내지 못했다"로 뒤집힌다. 빈 스텝은 상한보다 먼저 걸러야 한다.
+    // 상한 0은 설정 실수거나 스텝 기록이 유실된 트레이스이지, 루프의 증거가 아니다.
+    expect(classifyFailure(trace({ steps: [], maxSteps: 0 }))).toBe("unknown");
+  });
+});
+
+describe("classifyFailure — 툴을 쓰지 않은 스텝", () => {
+  // TraceStep.tool 은 옵셔널이다. 툴 없이 추론만 한 스텝은 정상이며, 흔하다.
+  // 그런데 툴 실패를 `!step.tool?.ok`로 판정하면 tool 이 없을 때 undefined → !undefined
+  // → true 가 되어 **툴을 안 쓴 것**과 **툴이 실패한 것**을 구분하지 못한다.
+  // 그러면 대시보드가 tool-call 로 물들어 진짜 원인이 통계에서 사라진다.
+
+  it("툴을 쓰지 않은 정상 스텝뿐이면 unknown이다 — 툴 실패가 아니다", () => {
+    expect(classifyFailure(trace({ steps: [{ agent: "analyst" }] }))).toBe("unknown");
+  });
+
+  it("툴 쓴 스텝과 안 쓴 스텝이 섞여도, 실패한 툴이 없으면 unknown이다", () => {
+    const steps = [{ agent: "analyst", tool: { name: "search", ok: true } }, { agent: "analyst" }];
+    expect(classifyFailure(trace({ steps }))).toBe("unknown");
+  });
+
+  it("툴을 안 쓴 스텝 + 오염이면 context-pollution이다 — 오분류가 상위 유형을 가리면 안 된다", () => {
+    expect(
+      classifyFailure(trace({ steps: [{ agent: "analyst" }], leakedFrom: "다른 세션" })),
+    ).toBe("context-pollution");
+  });
 });
 
 describe("classifyFailure — 신호가 겹칠 때의 우선순위", () => {
