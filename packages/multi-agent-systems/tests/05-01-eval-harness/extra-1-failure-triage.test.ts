@@ -2,6 +2,9 @@
 //
 // 선택 문제: 실패를 세는 것과 **분류하는 것**은 다르다. "정확도 62%"는 무엇을
 // 고쳐야 할지 알려주지 않지만, "실패 12건 중 7건이 라우팅"은 알려준다.
+//
+// 신호가 겹치는 트레이스가 여럿 있다. 무엇을 답으로 삼을지는 docs/05-eval-and-observability.md
+// 의 실패 유형 표를 근거로 판단하라 — 이 파일은 답만 적고 이유는 적지 않는다.
 import { describe, expect, it } from "vitest";
 import { classifyFailure, summarize } from "../../src/05-01-eval-harness/extra-1-failure-triage";
 import type { Trace } from "../../src/05-01-eval-harness/extra-1-failure-triage";
@@ -14,7 +17,7 @@ const trace = (over: Partial<Trace> = {}): Trace => ({
   ...over,
 });
 
-describe("classifyFailure — 네 유형으로 가른다", () => {
+describe("classifyFailure — 신호가 하나일 때", () => {
   it("툴이 실패했으면 tool-call이다", () => {
     expect(
       classifyFailure(trace({ steps: [{ agent: "analyst", tool: { name: "search", ok: false } }] })),
@@ -32,37 +35,32 @@ describe("classifyFailure — 네 유형으로 가른다", () => {
     expect(classifyFailure(trace({ steps, maxSteps: 6 }))).toBe("infinite-loop");
   });
 
+  it("스텝이 상한을 넘겼으면 infinite-loop다", () => {
+    const steps = Array.from({ length: 7 }, () => ({ agent: "analyst", tool: { name: "s", ok: true } }));
+    expect(classifyFailure(trace({ steps, maxSteps: 6 }))).toBe("infinite-loop");
+  });
+
   it("답변에 다른 질문의 흔적이 섞였으면 context-pollution이다", () => {
     expect(classifyFailure(trace({ answer: "정상 답변", leakedFrom: "다른 세션" }))).toBe(
       "context-pollution",
     );
   });
 
-  it("실패 신호가 없으면 unknown이다 — 억지로 분류하지 않는다", () => {
-    // 분류기가 아무 유형이나 붙이면 통계가 거짓이 된다. 모르는 건 모른다고 해야
-    // "unknown이 많다 = 트레이스에 담긴 정보가 부족하다"는 신호를 얻는다.
+  it("실패 신호가 없으면 unknown이다", () => {
     expect(classifyFailure(trace())).toBe("unknown");
-  });
-
-  it("스텝이 아예 없으면 unknown이다 (경계)", () => {
-    expect(classifyFailure(trace({ steps: [] }))).toBe("unknown");
-  });
-
-  it("스텝이 없는데 상한도 0이면 unknown이다 — 무한 루프가 아니다 (경계)", () => {
-    // 상한 검사를 `steps.length >= maxSteps`로만 쓰면 0 >= 0 이 참이 되어, 한 걸음도
-    // 못 뗀 트레이스가 "끝내지 못했다"로 뒤집힌다. 빈 스텝은 상한보다 먼저 걸러야 한다.
-    // 상한 0은 설정 실수거나 스텝 기록이 유실된 트레이스이지, 루프의 증거가 아니다.
-    expect(classifyFailure(trace({ steps: [], maxSteps: 0 }))).toBe("unknown");
   });
 });
 
-describe("classifyFailure — 툴을 쓰지 않은 스텝", () => {
-  // TraceStep.tool 은 옵셔널이다. 툴 없이 추론만 한 스텝은 정상이며, 흔하다.
-  // 그런데 툴 실패를 `!step.tool?.ok`로 판정하면 tool 이 없을 때 undefined → !undefined
-  // → true 가 되어 **툴을 안 쓴 것**과 **툴이 실패한 것**을 구분하지 못한다.
-  // 그러면 대시보드가 tool-call 로 물들어 진짜 원인이 통계에서 사라진다.
+describe("classifyFailure — 스텝의 모양", () => {
+  it("스텝이 아예 없으면 unknown이다", () => {
+    expect(classifyFailure(trace({ steps: [] }))).toBe("unknown");
+  });
 
-  it("툴을 쓰지 않은 정상 스텝뿐이면 unknown이다 — 툴 실패가 아니다", () => {
+  it("스텝이 없고 상한도 0이면 unknown이다", () => {
+    expect(classifyFailure(trace({ steps: [], maxSteps: 0 }))).toBe("unknown");
+  });
+
+  it("툴을 쓰지 않은 정상 스텝뿐이면 unknown이다", () => {
     expect(classifyFailure(trace({ steps: [{ agent: "analyst" }] }))).toBe("unknown");
   });
 
@@ -71,53 +69,51 @@ describe("classifyFailure — 툴을 쓰지 않은 스텝", () => {
     expect(classifyFailure(trace({ steps }))).toBe("unknown");
   });
 
-  it("툴을 안 쓴 스텝 + 오염이면 context-pollution이다 — 오분류가 상위 유형을 가리면 안 된다", () => {
-    expect(
-      classifyFailure(trace({ steps: [{ agent: "analyst" }], leakedFrom: "다른 세션" })),
-    ).toBe("context-pollution");
+  it("툴 쓴 스텝과 안 쓴 스텝이 섞이고 실패한 툴이 있으면 tool-call이다", () => {
+    const steps = [{ agent: "analyst" }, { agent: "analyst", tool: { name: "search", ok: false } }];
+    expect(classifyFailure(trace({ steps }))).toBe("tool-call");
   });
 });
 
-describe("classifyFailure — 신호가 겹칠 때의 우선순위", () => {
-  it("무한 루프 중 툴도 실패했으면 infinite-loop다 — 루프가 상위 원인이다", () => {
-    // 루프를 돌면 그 안에서 툴 실패는 얼마든지 생긴다. 툴을 먼저 보면 진짜
-    // 원인(끝나지 않는 것)이 통계에서 사라지고 툴만 계속 고치게 된다.
+describe("classifyFailure — 신호가 둘 이상일 때", () => {
+  it("상한에 닿았고 툴도 실패했으면 infinite-loop다", () => {
     const steps = Array.from({ length: 6 }, () => ({ agent: "analyst", tool: { name: "search", ok: false } }));
     expect(classifyFailure(trace({ steps, maxSteps: 6 }))).toBe("infinite-loop");
   });
 
-  it("잘못된 에이전트가 툴까지 실패시켰으면 routing이다 — 애초에 갈 곳이 틀렸다", () => {
-    expect(
-      classifyFailure(trace({ steps: [{ agent: "ad_expert", tool: { name: "search", ok: false } }] })),
-    ).toBe("routing");
-  });
-
-  it("오염 신호는 루프·라우팅보다 뒤다 — 눈에 보이는 증상이지 원인이 아니다", () => {
+  it("상한에 닿았고 오염 흔적도 있으면 infinite-loop다", () => {
     const steps = Array.from({ length: 6 }, () => ({ agent: "analyst", tool: { name: "s", ok: true } }));
     expect(classifyFailure(trace({ steps, maxSteps: 6, leakedFrom: "다른 세션" }))).toBe(
       "infinite-loop",
     );
   });
 
-  it("오염 신호는 툴 실패보다도 뒤다 — 위 셋 중 아무것도 아닐 때만 오염이 원인이다", () => {
-    // 오염은 어느 유형과도 같이 나타난다. 위에 둘수록 아래 유형을 통째로 가리므로
-    // 넷 중 맨 마지막이다. 루프·라우팅만 넘겨 놓고 툴 위에 두면, 툴이 실패한 트레이스에
-    // 오염 흔적이 하나만 붙어도 전부 context-pollution 으로 빨려 들어간다.
+  it("다른 에이전트가 일했고 툴도 실패했으면 routing이다", () => {
+    expect(
+      classifyFailure(trace({ steps: [{ agent: "ad_expert", tool: { name: "search", ok: false } }] })),
+    ).toBe("routing");
+  });
+
+  it("다른 에이전트가 일했고 오염 흔적도 있으면 routing이다", () => {
+    expect(
+      classifyFailure(
+        trace({ steps: [{ agent: "ad_expert", tool: { name: "s", ok: true } }], leakedFrom: "다른 세션" }),
+      ),
+    ).toBe("routing");
+  });
+
+  it("툴이 실패했고 오염 흔적도 있으면 tool-call이다", () => {
     expect(
       classifyFailure(
         trace({ steps: [{ agent: "analyst", tool: { name: "s", ok: false } }], leakedFrom: "다른 세션" }),
       ),
     ).toBe("tool-call");
   });
-});
 
-describe("classifyFailure — 상한을 넘어선 트레이스", () => {
-  it("스텝이 상한을 넘겼으면 infinite-loop다 — 정확히 닿았을 때만 잡으면 안 된다", () => {
-    // `steps.length === maxSteps` 로 쓰면 상한을 **넘어선** 트레이스가 빠져나간다.
-    // 상한 적용이 한 박자 늦거나 여러 노드가 동시에 스텝을 쌓으면 초과는 실제로 생기고,
-    // 그건 루프가 아니라는 뜻이 아니라 더 확실한 루프라는 뜻이다.
-    const steps = Array.from({ length: 7 }, () => ({ agent: "analyst", tool: { name: "s", ok: true } }));
-    expect(classifyFailure(trace({ steps, maxSteps: 6 }))).toBe("infinite-loop");
+  it("툴을 안 쓴 스텝에 오염 흔적이 있으면 context-pollution이다", () => {
+    expect(
+      classifyFailure(trace({ steps: [{ agent: "analyst" }], leakedFrom: "다른 세션" })),
+    ).toBe("context-pollution");
   });
 });
 
@@ -134,7 +130,7 @@ describe("summarize — 무엇을 먼저 고칠지 보이게", () => {
     ]);
   });
 
-  it("건수가 같으면 유형 이름 순으로 안정 정렬한다 — 실행마다 순서가 흔들리면 비교를 못 한다", () => {
+  it("건수가 같으면 유형 이름 순으로 정렬한다", () => {
     const traces = [
       trace({ steps: [{ agent: "analyst", tool: { name: "s", ok: false } }] }),
       trace({ steps: [{ agent: "ad_expert", tool: { name: "s", ok: true } }] }),
