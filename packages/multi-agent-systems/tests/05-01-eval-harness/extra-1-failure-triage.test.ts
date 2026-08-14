@@ -98,6 +98,27 @@ describe("classifyFailure — 신호가 겹칠 때의 우선순위", () => {
       "infinite-loop",
     );
   });
+
+  it("오염 신호는 툴 실패보다도 뒤다 — 위 셋 중 아무것도 아닐 때만 오염이 원인이다", () => {
+    // 오염은 어느 유형과도 같이 나타난다. 위에 둘수록 아래 유형을 통째로 가리므로
+    // 넷 중 맨 마지막이다. 루프·라우팅만 넘겨 놓고 툴 위에 두면, 툴이 실패한 트레이스에
+    // 오염 흔적이 하나만 붙어도 전부 context-pollution 으로 빨려 들어간다.
+    expect(
+      classifyFailure(
+        trace({ steps: [{ agent: "analyst", tool: { name: "s", ok: false } }], leakedFrom: "다른 세션" }),
+      ),
+    ).toBe("tool-call");
+  });
+});
+
+describe("classifyFailure — 상한을 넘어선 트레이스", () => {
+  it("스텝이 상한을 넘겼으면 infinite-loop다 — 정확히 닿았을 때만 잡으면 안 된다", () => {
+    // `steps.length === maxSteps` 로 쓰면 상한을 **넘어선** 트레이스가 빠져나간다.
+    // 상한 적용이 한 박자 늦거나 여러 노드가 동시에 스텝을 쌓으면 초과는 실제로 생기고,
+    // 그건 루프가 아니라는 뜻이 아니라 더 확실한 루프라는 뜻이다.
+    const steps = Array.from({ length: 7 }, () => ({ agent: "analyst", tool: { name: "s", ok: true } }));
+    expect(classifyFailure(trace({ steps, maxSteps: 6 }))).toBe("infinite-loop");
+  });
 });
 
 describe("summarize — 무엇을 먼저 고칠지 보이게", () => {
