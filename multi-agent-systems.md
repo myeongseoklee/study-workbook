@@ -24,13 +24,13 @@
 
 ## 코딩 과제
 
-- [x] 02-01  통과 (4/4) · 2026-08-14  · spec:ec1c3f8 sol:7df3406
-- [x] 03-01  통과 (3/3) · 2026-08-14  · spec:f129cee sol:25dd803
-- [x] 03-01/extra-1-graph-router  (선택) 통과 (9/9) · 2026-08-14  · spec:eef6305 sol:25dd803
-- [x] 04-01  통과 (5/5) · 2026-08-14  · spec:9a2e5a7 sol:ed2f2eb
-- [x] 04-01/extra-1-agent-router  (선택) 통과 (9/9) · 2026-08-14  · spec:db94d42 sol:ed2f2eb
-- [x] 05-01  통과 (4/4) · 2026-08-14  · spec:c6417a2 sol:131cc7b
-- [ ] 05-01/extra-1-failure-triage  (선택) 막힘 (4/17 실패) · 2026-08-14  · spec:3287c9d sol:131cc7b
+- [x] 02-01  통과 (4/4) · 2026-08-14  · spec:ec1c3f8 sol:3592f5c
+- [x] 03-01  통과 (3/3) · 2026-08-14  · spec:f129cee sol:e064ee2
+- [x] 03-01/extra-1-graph-router  (선택) 통과 (9/9) · 2026-08-14  · spec:eef6305 sol:e064ee2
+- [x] 04-01  통과 (5/5) · 2026-08-14  · spec:9a2e5a7 sol:8b26bf7
+- [x] 04-01/extra-1-agent-router  (선택) 통과 (9/9) · 2026-08-14  · spec:db94d42 sol:8b26bf7
+- [x] 05-01  통과 (4/4) · 2026-08-14  · spec:c6417a2 sol:dd27481
+- [x] 05-01/extra-1-failure-triage  (선택) 통과 (19/19) · 2026-08-14  · spec:7e4ddbc sol:dd27481
 - [ ] 06-01  미확정
 - [ ] 06-01/extra-1-hybrid-rank  (선택) 미확정
 - [ ] 08-01  미확정
