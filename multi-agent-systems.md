@@ -24,15 +24,16 @@
 
 ## 코딩 과제
 
-- [x] 02-01  통과 (4/4) · 2026-08-14  · spec:ec1c3f8 sol:8840ad6
-- [x] 03-01  통과 (3/3) · 2026-08-14  · spec:f129cee sol:af332b8
-- [x] 03-01/extra-1-graph-router  (선택) 통과 (9/9) · 2026-08-14  · spec:eef6305 sol:af332b8
-- [x] 04-01  통과 (5/5) · 2026-08-14  · spec:9a2e5a7 sol:2b6fe21
-- [x] 04-01/extra-1-agent-router  (선택) 통과 (9/9) · 2026-08-14  · spec:db94d42 sol:2b6fe21
-- [x] 05-01  통과 (4/4) · 2026-08-14  · spec:c6417a2 sol:6f11575
-- [x] 05-01/extra-1-failure-triage  (선택) 통과 (21/21) · 2026-08-14  · spec:4a09fc0 sol:6f11575
-- [x] 06-01  통과 (5/5) · 2026-08-14  · spec:ca68ec9 sol:724eb6f
+- [x] 02-01  통과 (4/4) · 2026-08-16  · spec:ec1c3f8 sol:6566cad
+- [x] 03-01  통과 (3/3) · 2026-08-16  · spec:f129cee sol:66c7a39
+- [x] 03-01/extra-1-graph-router  (선택) 통과 (9/9) · 2026-08-16  · spec:eef6305 sol:66c7a39
+- [x] 04-01  통과 (5/5) · 2026-08-16  · spec:9a2e5a7 sol:eb453a0
+- [x] 04-01/extra-1-agent-router  (선택) 통과 (9/9) · 2026-08-16  · spec:db94d42 sol:eb453a0
+- [x] 05-01  통과 (4/4) · 2026-08-16  · spec:c6417a2 sol:58842ee
+- [x] 05-01/extra-1-failure-triage  (선택) 통과 (21/21) · 2026-08-16  · spec:4a09fc0 sol:58842ee
+- [x] 06-01  통과 (5/5) · 2026-08-16  · spec:ca68ec9 sol:3c73ee8
 - [ ] 06-01/extra-1-hybrid-rank  (선택) 미확정
+- [ ] 06-01/extra-2-memory-vector-store  (선택) 미확정
 - [ ] 08-01  미확정
 - [ ] 08-01/extra-1-tool-format  (선택) 미확정
 - [ ] 08-02  미확정
