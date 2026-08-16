@@ -54,11 +54,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 /*
  * 🛠 더 해볼 것
  *
- * 선택 문제(테스트 있음) — extra-1-hybrid-rank.ts
- *   코사인 유사도·top-k 와 RRF 결합. 키워드를 벡터로 "교체"하지 않고 합치는 이유가 여기 있다.
+ * 선택 문제(테스트 있음, 둘 중 하나를 골라도 됨):
+ * - extra-1-hybrid-rank.ts — 스토어 없이 코사인·top-k·RRF를 직접 구현
+ * - extra-2-memory-vector-store.ts — MemoryVectorStore로 검색하고 키워드 랭킹과 결합
  *
  * 관찰 과제(테스트 없음):
- * - retrieve()를 실제 임베딩 검색으로 교체 (hnswlib-node / MemoryVectorStore)
+ * - retrieve()를 실제 임베딩 API와 연결하고 색인 갱신을 관찰
  * - 청크 크기 실험 / 정확한 코드·ID 질문으로 벡터 검색의 약점 관찰
  * - week5 평가셋으로 파이프라인 변경 전후를 숫자로 측정
  */
