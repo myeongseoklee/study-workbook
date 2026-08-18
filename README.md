@@ -34,6 +34,7 @@ study/
 | `multi-agent-systems` | 멀티 에이전트 시스템 — LangGraph, 협업 패턴, 평가, RAG, 인프라 |
 | `stateful-context-design` | 축적된 상태 설계 — KV 캐시, 슬라이딩 윈도우, 이벤트 소싱을 관통하는 네 원리 |
 | `coding-agent-architecture` | 코딩 에이전트 만들기 — 에이전트 루프·도구·컨텍스트(1강), 세션·컴팩션·기업 납품(2강), 관리 서버 구현(3강). 회차가 늘어나는 시리즈라 `docs/`가 회차 폴더(`ep01-`, `ep02-`, `ep03-`) + 누적 문서 구조다 |
+| `event-sourcing-msa` | 이벤트 소싱과 MSA — 애그리게이트·불변식·**일관성의 종류**(트랜잭션 ↔ 언젠가 달성)·사가와 낙관성, 그리고 발행구독 채널. DDD·SOLID를 비판적으로 재해석하는 대목이 함께 있고, PostgreSQL을 브로커로 쓰는 선택(PGMQ)을 보강으로 붙였다 |
 | `ecs-fargate-iac` | CloudFormation으로 ECS Fargate 읽기 — IaC·네트워크·ALB·IAM·시크릿·알람·배포 |
 | `mcp-protocol` | MCP 프로토콜 정복 — 2026-07-28 개정판 공식 문서·명세 전체: 무상태 설계, MRTR, 전송, 인가, 보안 |
 

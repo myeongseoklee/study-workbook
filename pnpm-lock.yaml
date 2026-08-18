@@ -36,6 +36,12 @@ importers:
         specifier: workspace:*
         version: link:../testkit
 
+  packages/event-sourcing-msa:
+    devDependencies:
+      '@study/testkit':
+        specifier: workspace:*
+        version: link:../testkit
+
   packages/mcp-protocol:
     devDependencies:
       '@study/testkit':

@@ -1,0 +1,15 @@
+{
+  "name": "event-sourcing-msa",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "이벤트 소싱과 MSA — 애그리게이트·불변식·결과적 일관성·사가, 그리고 발행구독 채널",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@study/testkit": "workspace:*"
+  }
+}
