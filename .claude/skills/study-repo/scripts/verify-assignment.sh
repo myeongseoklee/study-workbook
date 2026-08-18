@@ -73,12 +73,21 @@ counts() {
   '
 }
 
+# 리포터 출력이 두 정수가 아니면(=vitest/node가 죽었으면) 개수를 믿을 수 없다.
+# 빈 값을 그대로 [ -gt ]에 넣으면 셸이 에러를 내면서 **거짓**으로 평가되어,
+# 아무것도 검사하지 못한 실행이 성공 분기로 떨어진다 — 감사 도구의 거짓 통과다.
+is_num() { case "$1" in ""|*[!0-9]*) return 1 ;; *) return 0 ;; esac; }
+
 FAILED=0
 
 # ── ① 스켈레톤: 전부 실패해야 한다 ─────────────────────────────────────────
 echo "① src/ (스켈레톤) — 전부 실패해야 정상"
 read -r SKEL_PASS SKEL_FAIL <<<"$(run src | counts)"
-if [ "$SKEL_PASS" -gt 0 ]; then
+if ! is_num "$SKEL_PASS" || ! is_num "$SKEL_FAIL"; then
+  echo "  ✗ 테스트가 비정상 종료했다 — 실행 결과를 읽지 못했다"
+  echo "     vitest/node가 죽었을 수 있다 (NODE_OPTIONS 등 환경을 확인하라)"
+  FAILED=1
+elif [ "$SKEL_PASS" -gt 0 ]; then
   echo "  ✗ ${SKEL_PASS}개가 통과했다 — 그 테스트들은 아무것도 검사하지 않는다"
   echo "     스켈레톤은 throw만 하므로, 통과했다면 assertion이 비었거나 상수만 보고 있다"
   FAILED=1
@@ -93,7 +102,11 @@ echo
 # ── ② 참고 구현: 전부 통과해야 한다 ────────────────────────────────────────
 echo "② solutions/ (참고 구현) — 전부 통과해야 정상"
 read -r SOL_PASS SOL_FAIL <<<"$(run solutions | counts)"
-if [ "$SOL_FAIL" -gt 0 ]; then
+if ! is_num "$SOL_PASS" || ! is_num "$SOL_FAIL"; then
+  echo "  ✗ 테스트가 비정상 종료했다 — 실행 결과를 읽지 못했다"
+  echo "     vitest/node가 죽었을 수 있다 (NODE_OPTIONS 등 환경을 확인하라)"
+  FAILED=1
+elif [ "$SOL_FAIL" -gt 0 ]; then
   echo "  ✗ ${SOL_FAIL}개가 실패했다 — 명세가 성립 불가능하거나 참고 구현이 어긋났다"
   echo "     상세:"
   ( cd "$PKG_DIR" && STUDY_TARGET=solutions pnpm exec vitest run ${NUM:+"$NUM"} 2>&1 | grep -E "^\s+(×|→)" | head -20 ) || true
@@ -107,7 +120,7 @@ fi
 echo
 
 # ── ③ 두 방향의 개수가 맞는가 ──────────────────────────────────────────────
-if [ "$SKEL_FAIL" -ne "$SOL_PASS" ] && [ "$FAILED" -eq 0 ]; then
+if [ "$FAILED" -eq 0 ] && [ "$SKEL_FAIL" -ne "$SOL_PASS" ]; then
   echo "③ ✗ 실패 ${SKEL_FAIL}개 ≠ 통과 ${SOL_PASS}개 — 두 방향에서 실행된 테스트 수가 다르다"
   echo "     테스트가 STUDY_TARGET에 따라 분기하고 있는지 확인하라 (그래선 안 된다)"
   FAILED=1
