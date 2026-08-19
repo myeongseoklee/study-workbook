@@ -37,6 +37,7 @@ study/
 | `event-sourcing-msa` | 이벤트 소싱과 MSA — 애그리게이트·불변식·**일관성의 종류**(트랜잭션 ↔ 언젠가 달성)·사가와 낙관성, 그리고 발행구독 채널. DDD·SOLID를 비판적으로 재해석하는 대목이 함께 있고, PostgreSQL을 브로커로 쓰는 선택(PGMQ)을 보강으로 붙였다 |
 | `ecs-fargate-iac` | CloudFormation으로 ECS Fargate 읽기 — IaC·네트워크·ALB·IAM·시크릿·알람·배포 |
 | `mcp-protocol` | MCP 프로토콜 정복 — 2026-07-28 개정판 공식 문서·명세 전체: 무상태 설계, MRTR, 전송, 인가, 보안 |
+| `golden-signals-use-red` | 모니터링 신호 프레임워크 셋 — Google Four Golden Signals · Gregg USE · Wilkie RED. 셋을 **감지 → 범위 → 병목** 순서로 묶고, 그 아래의 분위수·큐잉·에러 예산 계산까지 내려간다. 코딩 과제 7개가 작은 모니터링 시스템 하나를 조립하는 순서로 이어진다 |
 
 ---
 

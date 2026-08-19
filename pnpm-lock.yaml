@@ -42,6 +42,12 @@ importers:
         specifier: workspace:*
         version: link:../testkit
 
+  packages/golden-signals-use-red:
+    devDependencies:
+      '@study/testkit':
+        specifier: workspace:*
+        version: link:../testkit
+
   packages/mcp-protocol:
     devDependencies:
       '@study/testkit':

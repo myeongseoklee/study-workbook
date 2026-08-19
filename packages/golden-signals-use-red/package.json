@@ -1,0 +1,15 @@
+{
+  "name": "golden-signals-use-red",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "모니터링 신호 프레임워크 셋 — Google Four Golden Signals · Brendan Gregg USE · Tom Wilkie RED. 분위수·큐잉·에러 예산까지 손으로 만들며 익힌다",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@study/testkit": "workspace:*"
+  }
+}
