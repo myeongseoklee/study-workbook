@@ -36,6 +36,18 @@
 - [ ] ep03-admin-implementation/06-skill-enforced-structure.md
 - [ ] ep03-admin-implementation/07-build-cycle.md
 - [ ] ep03-admin-implementation/08-domain-facts.md
+- [ ] ep04-agent-server/00-overview.md
+- [ ] ep04-agent-server/01-why-not-http.md
+- [ ] ep04-agent-server/02-cps.md
+- [ ] ep04-agent-server/03-envelope.md
+- [ ] ep04-agent-server/04-idempotency.md
+- [ ] ep04-agent-server/05-idempotency-in-practice.md
+- [ ] ep04-agent-server/06-queue.md
+- [ ] ep04-agent-server/07-event-as-api.md
+- [ ] ep04-agent-server/08-workers.md
+- [ ] ep04-agent-server/09-stream-and-shard.md
+- [ ] ep04-agent-server/10-session-data-as-asset.md
+- [ ] ep04-agent-server/11-domain-facts.md
 
 ## 워크북
 
@@ -48,6 +60,12 @@
 - [ ] 94:파트3 — 코딩 과제
 - [ ] 94:파트4 — 자기 구현
 - [ ] 94:파트5 — 오답 노트
+- [ ] 96:파트1 — 연쇄 추적
+- [ ] 96:파트2 — 역전 재현
+- [ ] 96:파트3 — 사고 진단
+- [ ] 96:파트4 — 코딩 과제
+- [ ] 96:파트5 — 자기 설계
+- [ ] 96:파트6 — 오답 노트
 
 ## 코딩 과제
 
@@ -59,6 +77,10 @@
 - [ ] e03-02-01  미확정
 - [ ] e03-03-01  미확정
 - [ ] e03-06-01  미확정
+- [ ] e04-03-01  미확정
+- [ ] e04-05-01  미확정
+- [ ] e04-06-01  미확정
+- [ ] e04-08-01  미확정
 
 ## 오답 노트
 
