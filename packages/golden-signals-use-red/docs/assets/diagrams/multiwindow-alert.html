@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>다중 창 알림에서 짧은 창이 하는 일</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f9f9f7;
+      --color-ink:     #0b0b0b;
+      --color-muted:   #52514e;
+      --color-accent:  #eb6834;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--color-muted); margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400; letter-spacing: -0.02em; line-height: 1.15;
+      color: var(--color-ink); margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Gantt · Error budget alerting</p>
+    <h1>짧은 창이 있어야 복구 직후에 알림이 꺼진다</h1>
+
+    <svg viewBox="0 0 1000 500" role="img" aria-labelledby="multiwindow-alert-title multiwindow-alert-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="multiwindow-alert-title">다중 창 소진율 알림의 시간축</title>
+      <desc id="multiwindow-alert-desc">5분간의 장애 하나를 60분 시간축에 놓고, 1시간 긴 창과 5분 짧은 창이 각각 언제 참으로 남아 있는지 비교하는 간트 차트. 두 창을 함께 쓰면 알림이 복구 5분 뒤 해제되지만, 긴 창만 쓰면 알림이 한 시간 내내 남는다.</desc>
+      <defs>
+        <pattern id="mw-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="0.9" fill="rgba(11,11,11,0.10)"/>
+        </pattern>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f9f9f7"/>
+      <rect width="100%" height="100%" fill="url(#mw-dots)" opacity="0.55"/>
+
+      <text x="20" y="72" fill="#52514e" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em">경과 (분)</text>
+      <text x="200" y="72" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">0</text>
+      <text x="327" y="72" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">10</text>
+      <text x="453" y="72" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">20</text>
+      <text x="580" y="72" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">30</text>
+      <text x="707" y="72" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">40</text>
+      <text x="833" y="72" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">50</text>
+      <text x="960" y="72" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">60</text>
+      <line x1="20" y1="80" x2="960" y2="80" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+
+      <line x1="327" y1="80" x2="327" y2="384" stroke="#898781" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <line x1="390" y1="80" x2="390" y2="384" stroke="#898781" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <text x="358" y="93" fill="#898781" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">장애</text>
+
+      <text x="20" y="100" fill="#52514e" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em">관측</text>
+      <text x="20" y="118" fill="#0b0b0b" font-size="12" font-weight="600" font-family="'Geist', sans-serif">에러율</text>
+      <text x="20" y="134" fill="#898781" font-size="8" font-family="'Geist Mono', monospace">5분 · 소진율 20</text>
+
+      <text x="20" y="174" fill="#0b0b0b" font-size="12" font-weight="600" font-family="'Geist', sans-serif">긴 창 1h</text>
+      <text x="20" y="190" fill="#898781" font-size="8" font-family="'Geist Mono', monospace">충분히 심각한가</text>
+
+      <text x="20" y="230" fill="#eb6834" font-size="12" font-weight="600" font-family="'Geist', sans-serif">짧은 창 5m</text>
+      <text x="20" y="246" fill="#898781" font-size="8" font-family="'Geist Mono', monospace">지금도 타는 중인가</text>
+
+      <line x1="20" y1="264" x2="960" y2="264" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <text x="20" y="282" fill="#52514e" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em">발화 결과</text>
+
+      <text x="20" y="310" fill="#0b0b0b" font-size="12" font-weight="600" font-family="'Geist', sans-serif">긴 창 AND 짧은 창</text>
+      <text x="20" y="326" fill="#898781" font-size="8" font-family="'Geist Mono', monospace">권장</text>
+
+      <text x="20" y="366" fill="#0b0b0b" font-size="12" font-weight="600" font-family="'Geist', sans-serif">긴 창만</text>
+      <text x="20" y="382" fill="#898781" font-size="8" font-family="'Geist Mono', monospace">게이트 없음</text>
+
+      <rect x="327" y="96" width="63" height="28" rx="4" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+      <rect x="327" y="152" width="633" height="28" rx="4" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+      <rect x="327" y="208" width="127" height="28" rx="4" fill="rgba(235,104,52,0.10)" stroke="#eb6834" stroke-width="1"/>
+      <rect x="327" y="288" width="127" height="28" rx="4" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+      <rect x="327" y="344" width="633" height="28" rx="4" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+
+      <text x="466" y="226" fill="#eb6834" font-size="8" font-family="'Geist Mono', monospace">20분에 식는다 — 이 창이 해제 시점을 정한다</text>
+      <text x="466" y="306" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">복구 5분 뒤 꺼진다</text>
+      <text x="948" y="170" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">→ 창 밖까지</text>
+      <text x="948" y="362" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">→ 55분을 더 울린다</text>
+
+      <line x1="20" y1="428" x2="960" y2="428" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <text x="20" y="446" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+      <rect x="104" y="438" width="16" height="10" rx="2" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+      <text x="128" y="446" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">조건이 참인 구간</text>
+      <rect x="280" y="438" width="16" height="10" rx="2" fill="rgba(235,104,52,0.10)" stroke="#eb6834" stroke-width="1"/>
+      <text x="304" y="446" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">해제 시점을 정하는 창</text>
+      <line x1="472" y1="443" x2="496" y2="443" stroke="#898781" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <text x="504" y="446" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">장애 구간</text>
+      <text x="620" y="446" fill="#898781" font-size="8" font-family="'Geist Mono', monospace">짧은 창 = 긴 창의 1/12 · 99.9% SLO: 1h/5m 14.4 · 6h/30m 6 · 3d/6h 1</text>
+    </svg>
+  </div>
+</body>
+</html>

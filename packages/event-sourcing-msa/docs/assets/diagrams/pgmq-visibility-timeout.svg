@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 500" role="img" aria-labelledby="pgmq-visibility-timeout-title pgmq-visibility-timeout-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="pgmq-visibility-timeout-title">PGMQ 메시지 하나의 세 가지 결말</title>
+      <desc id="pgmq-visibility-timeout-desc">메시지 하나를 공통 시간축에 놓고 읽은 뒤의 세 결말을 비교하는 간트 차트. 어느 경로에서나 읽은 순간부터 메시지가 다른 소비자에게 감춰진다. 창이 열린 동안 delete 하면 큐에서 제거돼 다시 읽을 수 없고, archive 하면 보관 테이블에 남아 다시 읽을 수 있다. 아무것도 하지 않으면 visibility timeout 이 만료되면서 메시지가 다시 나타나 다른 소비자가 재소비한다.</desc>
+
+      <defs><style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');</style>
+        <pattern id="pgvt-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="0.9" fill="rgba(11,11,11,0.10)"/>
+        </pattern>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f9f9f7"/>
+      <rect width="100%" height="100%" fill="url(#pgvt-dots)" opacity="0.55"/>
+
+      <!-- ── 시간축. 라벨 열 x 20~200, 타임라인 x 200~920 ────────────────── -->
+      <text x="20" y="48" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TIME →</text>
+      <text x="200" y="48" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace">큐에 적재</text>
+      <text x="320" y="48" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">read · VT 시작</text>
+      <text x="560" y="48" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">delete / archive</text>
+      <text x="800" y="48" fill="#eb6834" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">VT 만료</text>
+      <line x1="20" y1="60" x2="960" y2="60" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+
+      <!-- ── 구역 ─────────────────────────────────────────────────────── -->
+      <rect x="20" y="68" width="940" height="112" rx="6" fill="rgba(11,11,11,0.02)" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <text x="32" y="84" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">창이 열린 동안 DELETE — 큐에서 제거</text>
+
+      <rect x="20" y="188" width="940" height="112" rx="6" fill="rgba(11,11,11,0.02)" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <text x="32" y="204" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">창이 열린 동안 ARCHIVE — 보관 테이블로 이동</text>
+
+      <rect x="20" y="308" width="940" height="112" rx="6" fill="rgba(11,11,11,0.02)" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <text x="32" y="324" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">아무것도 하지 않음 — 소비자가 죽었다</text>
+
+      <!-- ── 눈금선 ───────────────────────────────────────────────────── -->
+      <line x1="200" y1="60" x2="200" y2="420" stroke="#c3c2b7" stroke-width="1"/>
+      <line x1="320" y1="60" x2="320" y2="420" stroke="#898781" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <line x1="560" y1="60" x2="560" y2="300" stroke="#898781" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <line x1="800" y1="60" x2="800" y2="420" stroke="#eb6834" stroke-width="0.8" stroke-dasharray="4,3"/>
+
+      <!-- ── 막대. 채워진 칸 = 그 조건이 참 ─────────────────────────────── -->
+      <!-- 구역 A: delete -->
+      <text x="32" y="116" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif">큐에 감춰짐</text>
+      <rect x="320" y="100" width="240" height="24" rx="4" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+      <text x="32" y="156" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif">읽을 수 있음</text>
+      <rect x="200" y="140" width="120" height="24" rx="4" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+
+      <!-- 구역 B: archive -->
+      <text x="32" y="236" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif">큐에 감춰짐</text>
+      <rect x="320" y="220" width="240" height="24" rx="4" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+      <text x="32" y="276" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif">읽을 수 있음</text>
+      <rect x="200" y="260" width="120" height="24" rx="4" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+      <rect x="560" y="260" width="360" height="24" rx="4" fill="rgba(11,11,11,0.03)" stroke="#898781" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="572" y="276" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace">보관 테이블 — 재수화 입력</text>
+
+      <!-- 구역 C: 방치 -->
+      <text x="32" y="356" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif">큐에 감춰짐</text>
+      <rect x="320" y="340" width="480" height="24" rx="4" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+      <text x="32" y="396" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif">읽을 수 있음</text>
+      <rect x="200" y="380" width="120" height="24" rx="4" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+      <rect x="800" y="380" width="120" height="24" rx="4" fill="rgba(235,104,52,0.10)" stroke="#eb6834" stroke-width="1"/>
+      <text x="812" y="396" fill="#eb6834" font-size="9" font-family="'Geist Mono', monospace">재소비</text>
+
+      <!-- ── 범례 ─────────────────────────────────────────────────────── -->
+      <line x1="20" y1="448" x2="960" y2="448" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <text x="20" y="468" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+      <rect x="100" y="460" width="16" height="10" rx="2" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+      <text x="124" y="468" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">조건이 참인 구간 — 빈 곳은 거짓</text>
+      <rect x="376" y="460" width="16" height="10" rx="2" fill="rgba(11,11,11,0.03)" stroke="#898781" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="400" y="468" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">큐가 아니라 보관 테이블에서 읽는다</text>
+      <rect x="676" y="460" width="16" height="10" rx="2" fill="rgba(235,104,52,0.10)" stroke="#eb6834" stroke-width="1"/>
+      <text x="700" y="468" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">만료로 다시 나타난 구간</text>
+    </svg>

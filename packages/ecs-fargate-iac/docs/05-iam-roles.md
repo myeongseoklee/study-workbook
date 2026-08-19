@@ -31,11 +31,9 @@ ECS 태스크에서는 이 갱신이 완전히 투명하다. AWS SDK가 태스�
 여기가 IAM에서 가장 자주 혼동되는 지점이다. 롤에는 성격이 완전히 다른 두 문서가 붙는다.
 
 ```
-                  ┌─────────────────────────────────────┐
-누가 맡을 수 있나 │ AssumeRolePolicyDocument (신뢰 정책) │
-                  ├─────────────────────────────────────┤
-맡으면 뭘 하나    │ Policies / ManagedPolicyArns          │
-                  └─────────────────────────────────────┘
+IAM Role
+  ├─ AssumeRolePolicyDocument       ← 누가 맡을 수 있나 (신뢰 정책)
+  └─ Policies / ManagedPolicyArns   ← 맡으면 뭘 하나 (권한 정책)
 ```
 
 **신뢰 정책(trust policy)**은 문(door)이다. 누가 이 롤을 맡을 수 있는지 정한다.

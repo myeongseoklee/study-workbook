@@ -72,6 +72,10 @@ MCP 버전은 `YYYY-MM-DD` — **마지막으로 하위 호환이 깨진 날짜*
 
 **세대 감지는 서버의 속성이지 요청의 속성이 아니다** — 판정 결과를 서버 프로세스(stdio)/오리진(HTTP) 수명 동안 캐시하고, 재시작 후 재사용해도 된다(실패하면 재프로브).
 
+![세대 판정 상태 기계 — 어떤 응답이 modern으로, 어떤 응답이 legacy로 가는가](assets/diagrams/era-detection.png)
+
+**갈래를 가르는 것은 "에러가 왔는가"가 아니라 "그 에러를 알아볼 수 있는가"다** — 알아볼 수 있는 modern 에러는 modern 확정이므로 폴백하면 안 되고, 알아볼 수 없는 응답·무응답만 legacy로 간다.
+
 **stdio에서의 감지** (dual-era 클라이언트): 다른 요청 전에 `server/discover` 프로브를 보낸다(SHOULD).
 - `DiscoverResult` 반환 → modern. 계속.
 - `UnsupportedProtocolVersionError` 같은 **인식 가능한 modern 에러** → modern이되 버전만 안 맞음. `supported`에서 골라 재시도. **initialize로 폴백하지 말 것.**

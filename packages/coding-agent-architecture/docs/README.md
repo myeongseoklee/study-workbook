@@ -12,7 +12,8 @@ packages/coding-agent-architecture/
 │   │   └── 00-overview.md ... 06-local-llm.md
 │   ├── ep02-business-agent/   ← 강의 #2 (기업형 에이전트)
 │   │   ├── 00-overview.md ... 10-tech-stack.md
-│   │   └── assets/frames/     ← 강의 슬라이드 캡처
+│   │   ├── assets/frames/     ← 강의 슬라이드 캡처
+│   │   └── assets/diagrams/   ← 렌더링 차트 (HTML 소스 + SVG/PNG)
 │   ├── ep03-admin-implementation/  ← 강의 #3 (참조 구현 + 에이전트 지시)
 │   ├── ep04-agent-server/     ← 강의 #4 (이벤트 기반 서버 골격)
 │   │   ├── 00-overview.md ... 11-domain-facts.md
@@ -97,3 +98,4 @@ packages/coding-agent-architecture/
 | 2026-08-05 | #2 | `study` 모노레포 `packages/coding-agent-architecture/`로 이전(문제·정답 분리 규약 적용). `ep02-business-agent/` 추가 (본문 11파일 + 워크북 + 슬라이드 캡처 6장). 누적 문서 갱신 — `must-memorize.md`에 #2 항목 25개(신규 섹션 2개: 구현 규칙 / 비즈니스 제품 요구), `glossary.md`에 레이어 6~7 신설(용어 30여 종), `references.md`에 #2 원본·Turborepo·pgvector·PowerShell 인코딩·RHEL 컨테이너 항목과 수치 검증 안내 추가. 자막이 없는 영상이라 로컬 STT로 전사한 뒤 슬라이드 캡처로 교차 확인했고, 자체 시스템 시연 구간은 제외했다. |
 | 2026-08-11 | #3 | `ep03-admin-implementation/` 추가 (본문 9파일 + 슬라이드·스킬 캡처). 워크북 `94`/`95` 신설 — 회수형이 아니라 **계획→구현 판단형**으로 형태를 바꿨다(강의 과제가 "이해하라"가 아니라 "같은 계획표로 네 에이전트에게 시켜 만들어 와라"이기 때문). 코딩 과제 3종. 누적 문서에 `#3` 항목 추가. |
 | 2026-08-19 | #4 | `ep04-agent-server/` 추가 (본문 12파일 + 캡처 18장: 슬라이드 11 · 메모장 3 · 코드 4). 워크북 `96`/`97` 신설 — **연쇄 추적 / 역전 재현 / 사고 진단** 세 형태. 코딩 과제 4종(`e04-05-01` 멱등 검문소 · `e04-06-01` 큐 삭제 시점 · `e04-03-01` 인과 그래프 복원 · `e04-08-01` 취소 가능한 워커), 테스트 123건. 누적 문서 갱신 — `90`에 `#4` 카드 36개(정의 10 · 트레이드오프 6 · 의사결정 경계 10 · 진단 신호 10), `91`에 **레이어 8** 신설(용어 30여 종), `99`에 `#4` 원본·PGMQ·SQS·UUIDv7·`worker_threads`·아웃박스 항목과 STT 오차 목록. 자막이 없어 로컬 STT로 전사했고 식별자는 캡처로 교차 확인했다. 슬라이드 2장이 메모장에 가려져 해당 구간만 다시 받아 복원했다. 이벤트 소싱 기초는 이 모노레포의 `event-sourcing-msa` 패키지를 선수 지식으로 연결했다(강의자가 그 전제를 명시). |
+| 2026-08-20 | 시각 자료 | 렌더링 차트 1개 신설 — `ep02/04-compaction`의 **판정 지점과 잘림**(`assets/diagrams/compaction-trigger`). 캡처가 이미 슬라이드 원문을 담고 있어 나머지 후보는 그리지 않았다. 캡처 뒤에 결론 문장이 없던 세 곳(`ep02/02`, `ep03/02`, `ep03/04`)에 한 문장씩 붙였다. |

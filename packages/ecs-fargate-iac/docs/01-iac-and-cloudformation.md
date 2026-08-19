@@ -52,9 +52,11 @@ Resources:
 이 파일은 "ALB가 이런 모습으로 존재해야 한다"만 말한다. 어떻게 만들지, 이미 있으면 어떻게 할지는 CloudFormation이 정한다. 그래서 **같은 파일을 몇 번 적용해도 결과가 같다**(멱등성, idempotence). CloudFormation은 매번 이렇게 동작한다.
 
 ```
-[내가 원하는 상태: 템플릿]  ─┐
-                            ├─→ 차이 계산 → 차이만큼 API 호출
-[현재 실제 상태: 스택 기록]  ─┘
+A  내가 원하는 상태 — 템플릿
+B  현재 실제 상태 — 스택 기록
+   │
+   ▼
+   A - B = 차이  →  그 차이만큼만 API 호출
 ```
 
 이 "차이 계산"이 선언형의 전부다. 처음 적용하면 차이가 곧 전체라서 다 만들고, 두 번째는 차이가 없어서 아무것도 하지 않고, 값 하나를 고치면 그 하나만 바꾼다. **당신이 절차를 쓰지 않는 대신, 차이를 어떻게 메울지에 대한 판단을 도구에 넘긴 것이다.** 이 위임이 뒤에서 다룰 "교체(replacement)" 함정의 뿌리다 — 도구가 당신이 예상하지 않은 방식으로 차이를 메울 수 있다.
@@ -169,8 +171,8 @@ DEV에서는 `WafWebAclArn`이 빈 문자열이라 이 리소스가 아예 생�
 **`!Ref` — 파라미터 값 또는 리소스의 "대표값"**
 
 ```yaml
-VpcId: !Ref VpcId                    # 파라미터 → 그 값
-GroupId: !Ref AlbSecurityGroup       # 리소스 → 그 리소스의 대표값
+VpcId: !Ref VpcId                               # 파라미터 → 그 값
+GroupId: !Ref AlbSecurityGroup                  # 리소스 → 그 리소스의 대표값
 ```
 
 파라미터에 쓰면 값을 그대로 준다. 리소스에 쓰면 **리소스 타입마다 다른 값**을 준다. 이게 초보자가 가장 많이 걸리는 지점이다.
@@ -251,8 +253,8 @@ CloudFormation은 `!Ref`와 `!GetAtt`를 보고 **의존 그래프를 세워 순
 ```yaml
   Alb:
     Properties:
-      Name: orders-server-dev-alb      # ← 고정 이름
-      Scheme: internal                # ← 이걸 internet-facing으로 바꾸면
+      Name: orders-server-dev-alb        # ← 고정 이름
+      Scheme: internal                   # ← 이걸 internet-facing으로 바꾸면
 ```
 
 새 ALB를 `orders-server-dev-alb`라는 이름으로 만들려는데 그 이름은 옛 ALB가 쓰고 있다. `DuplicateLoadBalancerName` 오류가 나고, 업데이트가 실패하고, 롤백이 시작된다. 그리고 롤백 도중에 또 다른 리소스가 같은 문제를 일으켜 롤백마저 실패하는 연쇄가 생긴다.

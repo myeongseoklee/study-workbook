@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 500" role="img" aria-labelledby="serial-success-rate-title serial-success-rate-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="serial-success-rate-title">직렬 에이전트 수에 따른 전체 성공 확률</title>
+      <desc id="serial-success-rate-desc">에이전트 하나의 실패 확률 p를 0.05, 0.10, 0.20으로 두고 직렬로 1개부터 6개까지 엮었을 때 전체 성공 확률 (1-p)의 n제곱을 그린 선 차트. 세 곡선 모두 오른쪽으로 갈수록 아래로 휘고, 서로의 간격도 벌어진다. 실패 확률이 0.20이면 6개를 엮은 전체 성공 확률이 26퍼센트까지 떨어지고, 0.05로 가장 안정적인 경우조차 74퍼센트로 내려간다.</desc>
+      <defs><style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');</style>
+        <pattern id="ssr-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="0.9" fill="rgba(11,11,11,0.10)"/>
+        </pattern>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f9f9f7"/>
+      <rect width="100%" height="100%" fill="url(#ssr-dots)" opacity="0.55"/>
+
+      <text transform="rotate(-90 24 230)" x="24" y="230" fill="#52514e" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em" text-anchor="middle">전체 성공 확률 (1-p)ⁿ</text>
+
+      <!-- gridlines -->
+      <line x1="80" y1="332" x2="920" y2="332" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="264" x2="920" y2="264" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="196" x2="920" y2="196" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="128" x2="920" y2="128" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="60"  x2="920" y2="60"  stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+
+      <!-- axes -->
+      <line x1="80" y1="60"  x2="80"  y2="400" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+      <line x1="80" y1="400" x2="920" y2="400" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+
+      <!-- y labels -->
+      <text x="72" y="404" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">0%</text>
+      <text x="72" y="336" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">20%</text>
+      <text x="72" y="268" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">40%</text>
+      <text x="72" y="200" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">60%</text>
+      <text x="72" y="132" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">80%</text>
+      <text x="72" y="64"  fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">100%</text>
+
+      <!-- series-1 · p=0.05 -->
+      <polyline fill="none" stroke="#7c8f6f" stroke-width="1.2" stroke-linejoin="round"
+                points="80,77.0 248,93.2 416,108.5 584,123.1 752,136.9 920,150.1"/>
+      <!-- series-2 · p=0.10 -->
+      <polyline fill="none" stroke="#5e7a9b" stroke-width="1.2" stroke-linejoin="round"
+                points="80,94.0 248,124.6 416,152.1 584,176.9 752,199.2 920,219.3"/>
+      <!-- focal · p=0.20 -->
+      <polygon fill="rgba(235,104,52,0.06)"
+               points="80,128.0 248,182.4 416,225.9 584,260.7 752,288.6 920,310.9 920,400 80,400"/>
+      <polyline fill="none" stroke="#eb6834" stroke-width="1.8" stroke-linejoin="round"
+                points="80,128.0 248,182.4 416,225.9 584,260.7 752,288.6 920,310.9"/>
+      <circle cx="80"  cy="128.0" r="4" fill="#eb6834"/>
+      <circle cx="248" cy="182.4" r="4" fill="#eb6834"/>
+      <circle cx="416" cy="225.9" r="4" fill="#eb6834"/>
+      <circle cx="584" cy="260.7" r="4" fill="#eb6834"/>
+      <circle cx="752" cy="288.6" r="4" fill="#eb6834"/>
+      <circle cx="920" cy="310.9" r="4" fill="#eb6834"/>
+
+      <!-- end-of-line values -->
+      <text x="928" y="153" fill="#7c8f6f" font-size="8" font-family="'Geist Mono', monospace">74%</text>
+      <text x="928" y="222" fill="#5e7a9b" font-size="8" font-family="'Geist Mono', monospace">53%</text>
+      <text x="928" y="314" fill="#eb6834" font-size="8" font-family="'Geist Mono', monospace">26%</text>
+
+      <!-- x labels -->
+      <text x="80"  y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">1</text>
+      <text x="248" y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">2</text>
+      <text x="416" y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">3</text>
+      <text x="584" y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">4</text>
+      <text x="752" y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">5</text>
+      <text x="920" y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">6</text>
+      <text x="500" y="440" fill="#898781" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">직렬로 엮은 에이전트 수 →</text>
+
+      <!-- legend -->
+      <line x1="80" y1="462" x2="920" y2="462" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <text x="80" y="478" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+      <line x1="168" y1="474" x2="192" y2="474" stroke="#eb6834" stroke-width="1.8"/>
+      <circle cx="180" cy="474" r="4" fill="#eb6834"/>
+      <text x="200" y="478" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">p=0.20 — 하나가 80% 성공</text>
+      <line x1="440" y1="474" x2="464" y2="474" stroke="#5e7a9b" stroke-width="1.2"/>
+      <text x="472" y="478" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">p=0.10 — 하나가 90%</text>
+      <line x1="680" y1="474" x2="704" y2="474" stroke="#7c8f6f" stroke-width="1.2"/>
+      <text x="712" y="478" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">p=0.05 — 하나가 95%</text>
+    </svg>

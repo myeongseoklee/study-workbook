@@ -35,11 +35,10 @@
 구조는 두 층이다.
 
 ```
-[레지스트리]  111122223333.dkr.ecr.ap-northeast-2.amazonaws.com   ← 계정 × 리전당 하나
-   └─ [리포지토리]  orders-server                                   ← 서비스당 하나
-        ├─ [이미지] :dev          ← 태그
-        ├─ [이미지] :dev-a2238c6
-        └─ [이미지] :latest
+111122223333.dkr.ecr.ap-northeast-2.amazonaws.com       ← 레지스트리 · 계정 × 리전당 하나
+  │
+  └─ orders-server                                      ← 리포지토리 · 서비스당 하나
+       :dev  ·  :dev-a2238c6  ·  :latest                ← 이미지 태그 · 환경을 여기서 나눈다
 ```
 
 **리포지토리는 서비스당 하나이며 환경을 나누지 않는다.** dev·test·prod가 태그로 구분된다. 리포지토리를 환경별로 만들면 같은 이미지를 환경마다 다시 push해야 하고, 그러면 **"STAGE에서 검증한 이미지가 PROD의 그 이미지와 같다"는 보장이 사라진다.**

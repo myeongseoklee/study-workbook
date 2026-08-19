@@ -57,13 +57,14 @@ Parameter Store와 Secrets Manager는 둘 다 KMS로 암호화된 키-값 저장
 
 ```
 ① Environment 방식
-   태스크 정의: { "name": "ACCOUNT_DB_PASSWORD", "value": "실제비밀번호" }
-                                                          ▲ 값이 여기 있다
+   태스크 정의: { "name": "ACCOUNT_DB_PASSWORD",
+                  "value": "실제비밀번호" }
+                  ▲ 값이 여기 있다
 
 ② Secrets 방식
    태스크 정의: { "name": "GRAPH_REFRESH_TOKEN",
                   "valueFrom": "arn:aws:secretsmanager:...:secret:orders-server/dev/graph-refresh-token-AbCdEf" }
-                                ▲ ARN만 있다. 값은 Secrets Manager에
+                  ▲ ARN만 있다. 값은 Secrets Manager에
 ```
 
 `describe-task-definition`은 ECS 읽기 권한만 있으면 호출할 수 있고, 그 권한은 흔히 넓게 부여된다. ①이면 그 순간 값이 보이고, ②면 ARN만 보인다. ARN을 알아도 값을 읽으려면 Secrets Manager 권한이 별도로 필요하다.

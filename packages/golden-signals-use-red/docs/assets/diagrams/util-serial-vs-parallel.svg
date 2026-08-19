@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 500" role="img" aria-labelledby="util-depth-title util-depth-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="util-depth-title">직렬 장치와 병렬 장치의 동시 실행 깊이</title>
+      <desc id="util-depth-desc">같은 관측 구간에서 회전 디스크와 NVMe SSD의 동시 처리 요청 수를 비교하는 계단 차트. 두 장치 모두 깊이가 한 번도 0이 되지 않아 시간 기반 사용률은 똑같이 100퍼센트지만, 직렬 장치는 깊이 1로 한계에 닿아 있고 병렬 장치는 깊이 3에서 4를 오가며 장치가 감당하는 32까지 여유가 남아 있다.</desc>
+      <defs><style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');</style>
+        <pattern id="ud-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="0.9" fill="rgba(11,11,11,0.10)"/>
+        </pattern>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f9f9f7"/>
+      <rect width="100%" height="100%" fill="url(#ud-dots)" opacity="0.55"/>
+
+      <text transform="rotate(-90 24 230)" x="24" y="230" fill="#52514e" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em" text-anchor="middle">동시 처리 중인 요청 수 (큐 깊이)</text>
+
+      <line x1="80" y1="400" x2="960" y2="400" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+      <line x1="80" y1="332" x2="960" y2="332" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="264" x2="960" y2="264" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="196" x2="960" y2="196" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="128" x2="960" y2="128" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="60"  x2="960" y2="60"  stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="60"  x2="80"  y2="400" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+
+      <text x="72" y="404" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">0</text>
+      <text x="72" y="336" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">1</text>
+      <text x="72" y="268" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">2</text>
+      <text x="72" y="200" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">3</text>
+      <text x="72" y="132" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">4</text>
+      <text x="72" y="64"  fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">5</text>
+
+      <text x="520" y="428" fill="#898781" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">관측 구간 (시간 →)</text>
+
+      <polygon fill="rgba(235,104,52,0.08)" points="80,400 80.0,128.0 185.6,128.0 185.6,196.0 273.6,196.0 273.6,128.0 432.0,128.0 432.0,128.0 537.6,128.0 537.6,196.0 608.0,196.0 608.0,128.0 766.4,128.0 766.4,128.0 836.8,128.0 836.8,196.0 889.6,196.0 889.6,128.0 960.0,128.0 960,400"/>
+      <polygon fill="rgba(82,81,78,0.10)" points="80,400 80.0,332.0 960.0,332.0 960,400"/>
+
+      <polyline fill="none" stroke="#eb6834" stroke-width="1.8" stroke-linejoin="round" points="80.0,128.0 185.6,128.0 185.6,196.0 273.6,196.0 273.6,128.0 432.0,128.0 432.0,128.0 537.6,128.0 537.6,196.0 608.0,196.0 608.0,128.0 766.4,128.0 766.4,128.0 836.8,128.0 836.8,196.0 889.6,196.0 889.6,128.0 960.0,128.0"/>
+      <polyline fill="none" stroke="#52514e" stroke-width="1.2" stroke-linejoin="round" points="80.0,332.0 960.0,332.0"/>
+
+      <text x="96" y="120" fill="#eb6834" font-size="11" font-weight="600" font-family="'Geist', sans-serif">NVMe SSD — 깊이 3~4</text>
+      <text x="96" y="134" fill="#898781" font-size="8" font-family="'Geist Mono', monospace">장치는 32까지 감당한다 → 아직 한계가 아니다</text>
+      <text x="96" y="356" fill="#52514e" font-size="11" font-weight="600" font-family="'Geist', sans-serif">회전 디스크 — 깊이 1</text>
+      <text x="96" y="370" fill="#898781" font-size="8" font-family="'Geist Mono', monospace">한 번에 하나뿐 → 정말로 한계다</text>
+
+      <line x1="80" y1="400" x2="960" y2="400" stroke="#eb6834" stroke-width="2.4"/>
+      <text x="960" y="392" fill="#eb6834" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.14em">깊이가 한 번도 0이 되지 않는다 → 두 장치 모두 %util 100%</text>
+
+      <line x1="80" y1="462" x2="960" y2="462" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <text x="80" y="478" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+      <line x1="160" y1="474" x2="184" y2="474" stroke="#eb6834" stroke-width="1.8"/>
+      <text x="192" y="478" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">병렬 장치 — 사용률이 한계를 말하지 않는다</text>
+      <line x1="512" y1="474" x2="536" y2="474" stroke="#52514e" stroke-width="1.2"/>
+      <text x="544" y="478" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">직렬 장치 — 사용률이 곧 한계다</text>
+      <line x1="820" y1="474" x2="844" y2="474" stroke="#eb6834" stroke-width="2.4"/>
+      <text x="852" y="478" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">%util 이 재는 것</text>
+    </svg>

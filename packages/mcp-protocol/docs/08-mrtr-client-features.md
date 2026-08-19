@@ -19,17 +19,9 @@ MRTR은 방향을 뒤집는다. **서버는 "필요한 입력 목록"을 응답�
 
 ### 흐름과 타입
 
-```
-클라이언트: tools/call (id:1) ─────────────────▶ 서버
-서버: result { resultType: "input_required",
-               inputRequests: { 키: 요청... },
-               requestState: "불투명" } ◀────────
-클라이언트: 사용자/모델에게서 입력 수집
-클라이언트: tools/call (id:2, 원래 params
-            + inputResponses: { 키: 결과... }
-            + requestState 그대로) ────────────▶ 서버
-서버: result { resultType: "complete", ... } ◀──
-```
+![MRTR 왕복 — 서버는 input_required로 되돌리고 클라이언트가 새 id로 재시도한다](assets/diagrams/mrtr-round-trip.png)
+
+**왕복을 성립시키는 것은 두 가지다** — 재시도가 완전히 독립적인 새 요청(새 JSON-RPC id)이라는 것, 그리고 서버가 이어갈 문맥이 서버에 남지 않고 `requestState`에 실려 클라이언트를 왕복한다는 것. 그래서 서버의 유일한 신뢰 경계도 그 문자열 하나로 좁혀진다.
 
 - **`InputRequests`**: 서버가 정한 문자열 키 → 요청 객체 맵. 값은 `ElicitRequest` / `CreateMessageRequest`(sampling) / `ListRootsRequest` 중 하나(MUST). 키는 요청 스코프에서 유일
 - **`InputResponses`**: 같은 키 → 클라이언트의 결과(`ElicitResult` / `CreateMessageResult` / `ListRootsResult`)

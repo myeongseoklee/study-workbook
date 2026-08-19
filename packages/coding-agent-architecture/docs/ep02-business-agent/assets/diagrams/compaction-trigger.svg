@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 500" role="img" aria-labelledby="compaction-trigger-title compaction-trigger-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="compaction-trigger-title">컴팩션 판정 지점에 따른 컨텍스트 점유 곡선</title>
+      <desc id="compaction-trigger-desc">한 세션의 컨텍스트 창 점유율을 이터레이션 진행에 따라 그린 선 차트. 기반 컨텍스트 5퍼센트가 바닥에 깔리고 턴 로그가 그 위로 쌓인다. 턴 2에서 도구 호출이 몰려 점유가 급하게 오르는데, 이터레이션마다 판정하는 곡선은 85퍼센트에서 컴팩트를 걸어 10퍼센트로 떨어진 뒤 다시 쌓이고, 턴 시작에서만 판정하는 곡선은 그 상승을 보지 못해 100퍼센트에 닿아 잘림이 일어난다.</desc>
+
+      <defs><style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');</style>
+        <pattern id="ct-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="0.9" fill="rgba(11,11,11,0.10)"/>
+        </pattern>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f9f9f7"/>
+      <rect width="100%" height="100%" fill="url(#ct-dots)" opacity="0.55"/>
+
+      <!-- y축 라벨 (회전) -->
+      <text transform="rotate(-90 24 230)" x="24" y="230" fill="#52514e" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em" text-anchor="middle">컨텍스트 창 점유율</text>
+
+      <!-- 격자. plot x 80~960, y 40~420 -->
+      <line x1="80" y1="420" x2="960" y2="420" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+      <line x1="80" y1="344" x2="960" y2="344" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="268" x2="960" y2="268" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="192" x2="960" y2="192" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="40"  x2="960" y2="40"  stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+      <line x1="80" y1="40"  x2="80"  y2="420" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+
+      <text x="72" y="424" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">0%</text>
+      <text x="72" y="348" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">20%</text>
+      <text x="72" y="272" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">40%</text>
+      <text x="72" y="196" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">60%</text>
+      <text x="72" y="120" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">80%</text>
+      <text x="72" y="44"  fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">100%</text>
+
+      <!-- 기반 컨텍스트 5% 바닥 -->
+      <rect x="80" y="401" width="880" height="19" fill="rgba(11,11,11,0.05)"/>
+      <line x1="80" y1="401" x2="960" y2="401" stroke="rgba(11,11,11,0.20)" stroke-width="0.8"/>
+      <text x="88" y="415" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">기반 컨텍스트 5% — 고정</text>
+
+      <!-- 80% 트리거 선 -->
+      <line x1="80" y1="116" x2="960" y2="116" stroke="#eb6834" stroke-width="0.8" stroke-dasharray="5,4"/>
+      <text x="956" y="110" fill="#eb6834" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">80% 컴팩트 트리거</text>
+
+      <!-- 100% 천장 -->
+      <text x="956" y="34" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">100% = 잘림</text>
+
+      <!-- 턴 경계 -->
+      <line x1="430" y1="40" x2="430" y2="420" stroke="rgba(11,11,11,0.14)" stroke-width="0.8"/>
+      <text x="255" y="444" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">턴 1</text>
+      <text x="695" y="444" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">턴 2 — 도구 호출이 몰린다</text>
+      <text x="520" y="470" fill="#898781" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">한 세션 안의 이터레이션 진행</text>
+
+      <!-- 공통 점유 곡선 (턴 1 완만 ~ 턴 2 도구 폭주) -->
+      <polyline fill="none" stroke="#52514e" stroke-width="1.4" stroke-linejoin="round"
+                points="80,401 170,359 260,321 340,287 430,249 490,230 540,207 570,154 600,97"/>
+
+      <!-- 갈래 B: 턴 시작에서만 판정 → 천장에 닿는다 -->
+      <polyline fill="none" stroke="#52514e" stroke-width="1.4" stroke-dasharray="6,4" stroke-linejoin="round"
+                points="600,97 660,59 700,40 960,40"/>
+      <line x1="692" y1="32" x2="708" y2="48" stroke="#0b0b0b" stroke-width="1.4"/>
+      <line x1="708" y1="32" x2="692" y2="48" stroke="#0b0b0b" stroke-width="1.4"/>
+      <text x="716" y="60" fill="#0b0b0b" font-size="9" font-weight="600" font-family="'Geist', sans-serif">잘림</text>
+      <text x="716" y="74" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">롤링 · 중간 절단 · 정지</text>
+
+      <!-- 갈래 A: 이터레이션마다 판정 → 컴팩트 후 다시 쌓인다 -->
+      <polyline fill="none" stroke="#eb6834" stroke-width="1.8" stroke-linejoin="round"
+                points="600,97 630,382 710,352 790,321 870,295 960,268"/>
+      <polygon fill="rgba(235,104,52,0.06)" points="630,382 710,352 790,321 870,295 960,268 960,401 630,401"/>
+
+      <!-- 판정 지점 마커 -->
+      <circle cx="170" cy="359" r="3.5" fill="#f9f9f7" stroke="#eb6834" stroke-width="1.2"/>
+      <circle cx="260" cy="321" r="3.5" fill="#f9f9f7" stroke="#eb6834" stroke-width="1.2"/>
+      <circle cx="340" cy="287" r="3.5" fill="#f9f9f7" stroke="#eb6834" stroke-width="1.2"/>
+      <circle cx="490" cy="230" r="3.5" fill="#f9f9f7" stroke="#eb6834" stroke-width="1.2"/>
+      <circle cx="540" cy="207" r="3.5" fill="#f9f9f7" stroke="#eb6834" stroke-width="1.2"/>
+      <circle cx="570" cy="154" r="3.5" fill="#f9f9f7" stroke="#eb6834" stroke-width="1.2"/>
+      <circle cx="600" cy="97" r="5" fill="#eb6834"/>
+      <text x="594" y="86" fill="#eb6834" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">85% — 여기서 발화</text>
+
+      <rect x="76" y="397" width="8" height="8" fill="#52514e"/>
+      <rect x="426" y="245" width="8" height="8" fill="#52514e"/>
+      <text x="440" y="242" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">턴 시작 판정 — 45%, 통과</text>
+
+      <!-- 구간 라벨 -->
+      <text x="672" y="393" fill="#eb6834" font-size="8" font-family="'Geist Mono', monospace">컴팩트 레코드 → 전체 10%</text>
+
+      <!-- 범례 -->
+      <line x1="40" y1="482" x2="960" y2="482" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <text x="40" y="496" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+      <line x1="128" y1="493" x2="152" y2="493" stroke="#52514e" stroke-width="1.4"/>
+      <text x="160" y="496" fill="#52514e" font-size="8.5" font-family="'Geist', sans-serif">실제 점유 (두 갈래 공통)</text>
+      <line x1="296" y1="493" x2="320" y2="493" stroke="#eb6834" stroke-width="1.8"/>
+      <circle cx="308" cy="493" r="3.5" fill="#f9f9f7" stroke="#eb6834" stroke-width="1.2"/>
+      <text x="328" y="496" fill="#52514e" font-size="8.5" font-family="'Geist', sans-serif">이터레이션마다 판정 → 컴팩트</text>
+      <line x1="516" y1="493" x2="540" y2="493" stroke="#52514e" stroke-width="1.4" stroke-dasharray="6,4"/>
+      <rect x="524" y="489" width="8" height="8" fill="#52514e"/>
+      <text x="548" y="496" fill="#52514e" font-size="8.5" font-family="'Geist', sans-serif">턴 시작에서만 판정 → 잘림</text>
+      <rect x="720" y="487" width="12" height="10" fill="rgba(11,11,11,0.05)" stroke="rgba(11,11,11,0.20)" stroke-width="0.8"/>
+      <text x="740" y="496" fill="#52514e" font-size="8.5" font-family="'Geist', sans-serif">기반 컨텍스트 — 컴팩트 대상이 아니다</text>
+    </svg>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>배포 중 동시에 흐르는 시계</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --color-paper:#f9f9f7; --color-ink:#0b0b0b; --color-muted:#52514e; --color-accent:#eb6834; --font-sans:'Geist',system-ui,sans-serif; --font-serif:'Instrument Serif',serif; --font-mono:'Geist Mono',ui-monospace,monospace; }
+    body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem); font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 1.5rem; }
+    svg { width: 100%; min-width: 760px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Gantt · ECS Fargate</p>
+    <h1>태스크가 RUNNING이 된 뒤 동시에 흐르는 시계</h1>
+
+    <!-- viewBox 0 0 1000 440. label col x=20-255, timeline x=255-951 -->
+    <!-- 30초 = 174px. x(t) = 255 + t/30*174 → 0:255 30:429 60:603 90:777 120:951 -->
+    <!-- rows: barTop 92/138 (zone A) · 214/260 (zone B) · 336 (zone C), bar h=24 -->
+    <!-- label baseline barTop+15, mono sublabel barTop+28 -->
+    <svg viewBox="0 0 1000 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="deploy-clocks-title deploy-clocks-desc">
+      <title id="deploy-clocks-title">태스크가 RUNNING이 된 뒤 동시에 흐르는 시계</title>
+      <desc id="deploy-clocks-desc">간트 차트. 가로축은 태스크가 RUNNING이 된 시점부터 120초까지의 경과 시간이다. ALB 쪽 시계에서는 유예 기간이 0초에서 60초까지 이어지고 그 창 안의 헬스체크 실패는 무시되며, 타겟 프로브는 30초 간격으로 오고 연속 2회 성공이 필요해 가장 빨라도 60초에 healthy가 된다. 컨테이너 쪽 시계에서는 StartPeriod가 0초에서 30초까지이며 그 구간의 실패는 Retries 카운트에 들어가지 않고, 프로브는 같은 30초 간격으로 오되 Retries는 3이다. 옛 태스크는 새 태스크가 healthy로 집계된 60초 뒤부터 등록 해제 지연 30초 동안 draining 상태로 남는다. 이 30초는 기본값 300초를 줄인 값이라 강조돼 있다.</desc>
+      <defs>
+        <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="0.9" fill="rgba(11,11,11,0.10)"/>
+        </pattern>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f9f9f7"/>
+      <rect width="100%" height="100%" fill="url(#dots)" opacity="0.55"/>
+
+      <!-- zones -->
+      <rect x="12" y="68"  width="976" height="110" rx="6" fill="rgba(11,11,11,0.02)" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <rect x="12" y="190" width="976" height="110" rx="6" fill="rgba(11,11,11,0.02)" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <rect x="12" y="312" width="976" height="64"  rx="6" fill="rgba(11,11,11,0.02)" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+
+      <!-- axis origin note + tick labels -->
+      <text x="255" y="22" fill="#898781" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em">RUNNING = 0</text>
+      <text x="255" y="38" fill="#0b0b0b" font-size="9" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">0</text>
+      <text x="429" y="38" fill="#0b0b0b" font-size="9" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">30s</text>
+      <text x="603" y="38" fill="#0b0b0b" font-size="9" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">60s</text>
+      <text x="777" y="38" fill="#0b0b0b" font-size="9" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">90s</text>
+      <text x="951" y="38" fill="#0b0b0b" font-size="9" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">120s</text>
+
+      <!-- gridlines -->
+      <line x1="429" y1="46" x2="429" y2="376" stroke="rgba(11,11,11,0.08)" stroke-width="0.8" stroke-dasharray="3,3"/>
+      <line x1="603" y1="46" x2="603" y2="376" stroke="rgba(11,11,11,0.08)" stroke-width="0.8" stroke-dasharray="3,3"/>
+      <line x1="777" y1="46" x2="777" y2="376" stroke="rgba(11,11,11,0.08)" stroke-width="0.8" stroke-dasharray="3,3"/>
+      <line x1="951" y1="46" x2="951" y2="376" stroke="rgba(11,11,11,0.08)" stroke-width="0.8" stroke-dasharray="3,3"/>
+
+      <!-- header line + left divider -->
+      <line x1="255" y1="46" x2="951" y2="46" stroke="rgba(11,11,11,0.20)" stroke-width="0.8"/>
+      <line x1="255" y1="16" x2="255" y2="376" stroke="rgba(11,11,11,0.20)" stroke-width="0.8"/>
+
+      <!-- zone eyebrows -->
+      <text x="20" y="81"  fill="rgba(11,11,11,0.40)" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em">ALB SIDE</text>
+      <text x="20" y="203" fill="rgba(11,11,11,0.40)" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CONTAINER SIDE</text>
+      <text x="20" y="325" fill="rgba(11,11,11,0.40)" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em">OLD TASK</text>
+
+      <!-- ── ALB SIDE · row 1: grace period 0-60 ── -->
+      <text x="20" y="107" fill="#0b0b0b" font-size="10" font-weight="600" font-family="'Geist', sans-serif">유예 기간 60초</text>
+      <text x="20" y="120" fill="#898781" font-size="7.5" font-family="'Geist Mono', monospace">HealthCheckGracePeriod</text>
+      <rect x="255" y="92" width="348" height="24" rx="4" fill="#f9f9f7"/>
+      <rect x="255" y="92" width="348" height="24" rx="4" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+      <text x="265" y="107" fill="#52514e" font-size="9" font-family="'Geist', sans-serif">이 창의 실패는 무시</text>
+
+      <!-- ── ALB SIDE · row 2: probes, 2 consecutive OK ── -->
+      <text x="20" y="153" fill="#0b0b0b" font-size="10" font-weight="600" font-family="'Geist', sans-serif">타겟 프로브 · 연속 2회 성공</text>
+      <text x="20" y="166" fill="#898781" font-size="7.5" font-family="'Geist Mono', monospace">Interval 30 / Healthy 2</text>
+      <line x1="255" y1="150" x2="951" y2="150" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <rect x="429" y="142" width="174" height="16" rx="3" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <line x1="429" y1="136" x2="429" y2="164" stroke="#52514e" stroke-width="1.6"/>
+      <line x1="603" y1="136" x2="603" y2="164" stroke="#52514e" stroke-width="1.6"/>
+      <line x1="777" y1="136" x2="777" y2="164" stroke="#52514e" stroke-width="1.6"/>
+      <line x1="951" y1="136" x2="951" y2="164" stroke="#52514e" stroke-width="1.6"/>
+      <text x="613" y="153" fill="#52514e" font-size="9" font-family="'Geist', sans-serif">가장 빨라도 60초에 healthy</text>
+
+      <!-- ── CONTAINER SIDE · row 3: StartPeriod 0-30 ── -->
+      <text x="20" y="229" fill="#0b0b0b" font-size="10" font-weight="600" font-family="'Geist', sans-serif">StartPeriod 30초</text>
+      <text x="20" y="242" fill="#898781" font-size="7.5" font-family="'Geist Mono', monospace">container HealthCheck</text>
+      <rect x="255" y="214" width="174" height="24" rx="4" fill="#f9f9f7"/>
+      <rect x="255" y="214" width="174" height="24" rx="4" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+      <text x="439" y="229" fill="#52514e" font-size="9" font-family="'Geist', sans-serif">이 창의 실패는 Retries에 안 센다</text>
+
+      <!-- ── CONTAINER SIDE · row 4: probes, Retries 3 ── -->
+      <text x="20" y="275" fill="#0b0b0b" font-size="10" font-weight="600" font-family="'Geist', sans-serif">컨테이너 프로브 · Retries 3</text>
+      <text x="20" y="288" fill="#898781" font-size="7.5" font-family="'Geist Mono', monospace">Interval 30 / Timeout 5</text>
+      <line x1="255" y1="272" x2="951" y2="272" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <line x1="429" y1="262" x2="429" y2="282" stroke="#52514e" stroke-width="1.6"/>
+      <line x1="603" y1="262" x2="603" y2="282" stroke="#52514e" stroke-width="1.6"/>
+      <line x1="777" y1="262" x2="777" y2="282" stroke="#52514e" stroke-width="1.6"/>
+      <line x1="951" y1="262" x2="951" y2="282" stroke="#52514e" stroke-width="1.6"/>
+      <text x="787" y="269" fill="#52514e" font-size="9" font-family="'Geist', sans-serif">3회 실패 → 컨테이너 unhealthy</text>
+
+      <!-- ── OLD TASK · row 5: deregistration delay 60-90 (focal) ── -->
+      <text x="20" y="351" fill="#eb6834" font-size="10" font-weight="600" font-family="'Geist', sans-serif">등록 해제 지연 30초</text>
+      <text x="20" y="364" fill="#898781" font-size="7.5" font-family="'Geist Mono', monospace">deregistration_delay</text>
+      <rect x="603" y="336" width="174" height="24" rx="4" fill="#f9f9f7"/>
+      <rect x="603" y="336" width="174" height="24" rx="4" fill="rgba(235,104,52,0.10)" stroke="#eb6834" stroke-width="1"/>
+      <text x="613" y="351" fill="#eb6834" font-size="9" font-weight="600" font-family="'Geist', sans-serif">draining</text>
+      <text x="787" y="351" fill="#898781" font-size="9" font-family="'Geist', sans-serif">기본값이면 여기서 300초 더 간다</text>
+
+      <!-- legend -->
+      <line x1="40" y1="390" x2="960" y2="390" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <text x="40" y="406" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+
+      <rect x="40" y="416" width="20" height="12" rx="3" fill="rgba(235,104,52,0.10)" stroke="#eb6834" stroke-width="1"/>
+      <text x="68" y="426" fill="#52514e" font-size="8.5" font-family="'Geist', sans-serif">이 템플릿이 기본값에서 줄인 값</text>
+
+      <rect x="290" y="416" width="20" height="12" rx="3" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="1"/>
+      <text x="318" y="426" fill="#52514e" font-size="8.5" font-family="'Geist', sans-serif">실패를 세지 않는 창</text>
+
+      <line x1="490" y1="416" x2="490" y2="428" stroke="#52514e" stroke-width="1.6"/>
+      <text x="502" y="426" fill="#52514e" font-size="8.5" font-family="'Geist', sans-serif">헬스체크 프로브 (30초 간격)</text>
+
+      <rect x="700" y="416" width="20" height="12" rx="3" fill="rgba(82,81,78,0.15)" stroke="#52514e" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <text x="728" y="426" fill="#52514e" font-size="8.5" font-family="'Geist', sans-serif">판정에 필요한 최소 구간</text>
+    </svg>
+  </div>
+</body>
+</html>

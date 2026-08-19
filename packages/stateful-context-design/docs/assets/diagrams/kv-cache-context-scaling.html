@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KV 캐시는 컨텍스트 길이에 선형으로 커진다</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f9f9f7;
+      --color-paper-2: #fcfcfb;
+      --color-ink:     #0b0b0b;
+      --color-muted:   #52514e;
+      --color-soft:    #898781;
+      --color-rule:    rgba(11,11,11,0.10);
+      --color-accent:  #eb6834;
+      --font-sans:     'Geist', 'Apple SD Gothic Neo', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      padding: 3rem 2rem;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { margin-bottom: 2rem; }
+    .header-eyebrow {
+      font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--color-muted); margin-bottom: 0.6rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2.25rem);
+      font-weight: 400; letter-spacing: -0.02em; line-height: 1.15;
+    }
+    .diagram-container {
+      background: var(--color-paper-2); border: 1px solid var(--color-rule);
+      border-radius: 8px; padding: 1.5rem; overflow-x: auto;
+    }
+    svg { width: 100%; min-width: 760px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <p class="header-eyebrow">Line · KV cache</p>
+      <h1>같은 컨텍스트, 다른 기울기 — n_kv가 예산을 정한다</h1>
+    </div>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="kv-cache-context-scaling-title kv-cache-context-scaling-desc">
+        <title id="kv-cache-context-scaling-title">컨텍스트 길이에 따른 KV 캐시 크기 — MHA와 GQA 비교</title>
+        <desc id="kv-cache-context-scaling-desc">Llama 3.1 70B 구성(80레이어, head_dim 128, fp16, 배치 1)에서 컨텍스트 길이 0부터 128K 토큰까지 KV 캐시 크기가 선형으로 늘어나는 선 차트. KV 헤드 64개인 MHA는 토큰당 2.5MB로 128K에서 320GB에 이르고 32K에서 이미 H100 80GB를 다 쓴다. KV 헤드 8개인 GQA는 토큰당 320KB로 128K에서 40GB에 머문다. 두 직선의 기울기 비는 8배다.</desc>
+
+        <defs>
+          <pattern id="kv-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="0.9" fill="rgba(11,11,11,0.10)"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="#f9f9f7"/>
+        <rect width="100%" height="100%" fill="url(#kv-dots)" opacity="0.55"/>
+
+        <!-- y축 라벨 -->
+        <text transform="rotate(-90 24 230)" x="24" y="230" fill="#52514e" font-size="7"
+              font-family="'Geist Mono', 'Apple SD Gothic Neo', monospace" letter-spacing="0.14em" text-anchor="middle">KV 캐시 (GB)</text>
+
+        <!-- 격자: 0 ~ 320 GB, 80 간격 -->
+        <line x1="80" y1="325" x2="960" y2="325" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+        <line x1="80" y1="230" x2="960" y2="230" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+        <line x1="80" y1="135" x2="960" y2="135" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+        <line x1="80" y1="40"  x2="960" y2="40"  stroke="rgba(11,11,11,0.06)" stroke-width="0.8"/>
+        <line x1="80" y1="40"  x2="80"  y2="420" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+        <line x1="80" y1="420" x2="960" y2="420" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+
+        <text x="72" y="424" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">0</text>
+        <text x="72" y="329" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">80</text>
+        <text x="72" y="234" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">160</text>
+        <text x="72" y="139" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">240</text>
+        <text x="72" y="44"  fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">320</text>
+
+        <!-- H100 80GB 예산선 -->
+        <line x1="80" y1="325" x2="960" y2="325" stroke="#c3c2b7" stroke-width="1.4" stroke-dasharray="5 4"/>
+        <text x="956" y="318" fill="#52514e" font-size="8"
+              font-family="'Geist Mono', 'Apple SD Gothic Neo', monospace" text-anchor="end">H100 80 GB · 1장</text>
+
+        <!-- MHA (초점) -->
+        <polygon points="80,420 300,325 520,230 740,135 960,40 960,420" fill="rgba(235,104,52,0.10)"/>
+        <polyline points="80,420 300,325 520,230 740,135 960,40" fill="none" stroke="#eb6834" stroke-width="1.8" stroke-linejoin="round"/>
+        <circle cx="80" cy="420" r="4" fill="#eb6834"/>
+        <circle cx="300" cy="325" r="4" fill="#eb6834"/>
+        <circle cx="520" cy="230" r="4" fill="#eb6834"/>
+        <circle cx="740" cy="135" r="4" fill="#eb6834"/>
+        <circle cx="960" cy="40"  r="4" fill="#eb6834"/>
+        <text x="952" y="30" fill="#eb6834" font-size="9" font-weight="600"
+              font-family="'Geist Mono', monospace" text-anchor="end">320 GB</text>
+
+        <!-- GQA -->
+        <polyline points="80,420 300,408 520,396 740,384 960,372" fill="none" stroke="#7c8f6f" stroke-width="1.2" stroke-linejoin="round"/>
+        <text x="952" y="366" fill="#7c8f6f" font-size="9" font-weight="600"
+              font-family="'Geist Mono', monospace" text-anchor="end">40 GB</text>
+
+        <!-- 교차 콜아웃: MHA가 32K에서 예산선을 만난다 -->
+        <circle cx="300" cy="325" r="7.5" fill="none" stroke="#eb6834" stroke-width="1"/>
+        <line x1="292" y1="318" x2="268" y2="298" stroke="#eb6834" stroke-width="0.8"/>
+        <text x="262" y="294" fill="#eb6834" font-size="8"
+              font-family="'Geist Mono', 'Apple SD Gothic Neo', monospace" text-anchor="end">32K에서 예산 소진</text>
+
+        <!-- x축 -->
+        <text x="80"  y="440" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">0</text>
+        <text x="300" y="440" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">32K</text>
+        <text x="520" y="440" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">64K</text>
+        <text x="740" y="440" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">96K</text>
+        <text x="960" y="440" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">128K</text>
+        <text x="80" y="454" fill="#898781" font-size="7"
+              font-family="'Geist Mono', 'Apple SD Gothic Neo', monospace" letter-spacing="0.14em">컨텍스트 길이 (토큰) · 배치 1 · fp16 · L=80 · head_dim=128</text>
+
+        <!-- 범례 -->
+        <line x1="40" y1="466" x2="960" y2="466" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+        <text x="40" y="480" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+        <line x1="40" y1="493" x2="64" y2="493" stroke="#eb6834" stroke-width="1.8"/>
+        <circle cx="52" cy="493" r="4" fill="#eb6834"/>
+        <text x="72" y="496" fill="#52514e" font-size="8.5"
+              font-family="'Geist', 'Apple SD Gothic Neo', sans-serif">MHA · n_kv=64 · 토큰당 2.5 MB</text>
+        <line x1="380" y1="493" x2="404" y2="493" stroke="#7c8f6f" stroke-width="1.2"/>
+        <text x="412" y="496" fill="#52514e" font-size="8.5"
+              font-family="'Geist', 'Apple SD Gothic Neo', sans-serif">GQA · n_kv=8 · 토큰당 320 KB</text>
+        <line x1="720" y1="493" x2="744" y2="493" stroke="#c3c2b7" stroke-width="1.4" stroke-dasharray="5 4"/>
+        <text x="752" y="496" fill="#52514e" font-size="8.5"
+              font-family="'Geist', 'Apple SD Gothic Neo', sans-serif">GPU 1장의 HBM 총량</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

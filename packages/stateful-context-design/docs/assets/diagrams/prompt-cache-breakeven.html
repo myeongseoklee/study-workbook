@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>프롬프트 캐싱 손익분기</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f9f9f7;
+      --color-paper-2: #fcfcfb;
+      --color-ink:     #0b0b0b;
+      --color-muted:   #52514e;
+      --color-soft:    #898781;
+      --color-rule:    rgba(11,11,11,0.10);
+      --color-accent:  #eb6834;
+      --font-sans:     'Geist', 'Apple SD Gothic Neo', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      padding: 3rem 2rem;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { margin-bottom: 2rem; }
+    .header-eyebrow {
+      font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--color-muted); margin-bottom: 0.6rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2.25rem);
+      font-weight: 400; letter-spacing: -0.02em; line-height: 1.15;
+    }
+    .diagram-container {
+      background: var(--color-paper-2); border: 1px solid var(--color-rule);
+      border-radius: 8px; padding: 1.5rem; overflow-x: auto;
+    }
+    svg { width: 100%; min-width: 760px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <p class="header-eyebrow">Line · Prompt caching</p>
+      <h1>쓰기 프리미엄은 출발점을 올리고, 읽기 단가는 기울기를 눕힌다</h1>
+    </div>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="prompt-cache-breakeven-title prompt-cache-breakeven-desc">
+        <title id="prompt-cache-breakeven-title">같은 프리픽스를 몇 번 보내야 프롬프트 캐싱이 이득인가</title>
+        <desc id="prompt-cache-breakeven-desc">같은 프리픽스로 요청을 1회에서 6회까지 보낼 때 누적 비용을 기본 입력 단가의 배수로 그린 선 차트. 캐시를 쓰지 않으면 회당 1배씩 올라 6회에 6배가 된다. 5분 TTL은 첫 회에 쓰기 1.25배를 내고 이후 회당 0.1배만 더해 6회에 1.75배, 1시간 TTL은 쓰기 2배로 시작해 6회에 2.5배가 된다. 캐시를 쓰지 않는 선과의 교차점은 5분 TTL이 2회, 1시간 TTL이 3회다.</desc>
+
+        <defs>
+          <pattern id="pc-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="0.9" fill="rgba(11,11,11,0.10)"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="#f9f9f7"/>
+        <rect width="100%" height="100%" fill="url(#pc-dots)" opacity="0.55"/>
+
+        <text transform="rotate(-90 24 230)" x="24" y="230" fill="#52514e" font-size="7"
+              font-family="'Geist Mono', 'Apple SD Gothic Neo', monospace" letter-spacing="0.14em" text-anchor="middle">누적 비용 (기본 입력 단가의 배수)</text>
+
+        <!-- 격자: 0 ~ 6배 -->
+        <line x1="80" y1="357" x2="960" y2="357" stroke="rgba(11,11,11,0.05)" stroke-width="0.8"/>
+        <line x1="80" y1="293" x2="960" y2="293" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+        <line x1="80" y1="230" x2="960" y2="230" stroke="rgba(11,11,11,0.05)" stroke-width="0.8"/>
+        <line x1="80" y1="167" x2="960" y2="167" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+        <line x1="80" y1="103" x2="960" y2="103" stroke="rgba(11,11,11,0.05)" stroke-width="0.8"/>
+        <line x1="80" y1="40"  x2="960" y2="40"  stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+        <line x1="80" y1="40"  x2="80"  y2="420" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+        <line x1="80" y1="420" x2="960" y2="420" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+
+        <text x="72" y="424" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">0×</text>
+        <text x="72" y="297" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">2×</text>
+        <text x="72" y="171" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">4×</text>
+        <text x="72" y="44"  fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">6×</text>
+
+        <!-- 손익분기 기준선 (정수 회차) -->
+        <line x1="256" y1="40" x2="256" y2="420" stroke="#c3c2b7" stroke-width="0.8" stroke-dasharray="3 3"/>
+        <line x1="432" y1="40" x2="432" y2="420" stroke="#c3c2b7" stroke-width="0.8" stroke-dasharray="3 3"/>
+
+        <!-- 캐시 미사용 -->
+        <polyline points="80,357 256,293 432,230 608,167 784,103 960,40"
+                  fill="none" stroke="#52514e" stroke-width="1.2" stroke-linejoin="round"/>
+        <text x="952" y="34" fill="#52514e" font-size="9" font-weight="600"
+              font-family="'Geist Mono', monospace" text-anchor="end">6.0×</text>
+        <text x="700" y="118" fill="#52514e" font-size="8"
+              font-family="'Geist Mono', 'Apple SD Gothic Neo', monospace" text-anchor="end">회당 +1×</text>
+
+        <!-- 5분 TTL -->
+        <polyline points="80,341 256,335 432,328 608,322 784,315 960,309"
+                  fill="none" stroke="#7c8f6f" stroke-width="1.2" stroke-linejoin="round"/>
+        <text x="952" y="303" fill="#7c8f6f" font-size="9" font-weight="600"
+              font-family="'Geist Mono', monospace" text-anchor="end">1.75×</text>
+        <text x="88" y="326" fill="#7c8f6f" font-size="8"
+              font-family="'Geist Mono', 'Apple SD Gothic Neo', monospace">쓰기 1.25×</text>
+
+        <!-- 1시간 TTL (초점) -->
+        <polyline points="80,293 256,287 432,281 608,274 784,268 960,262"
+                  fill="none" stroke="#eb6834" stroke-width="1.8" stroke-linejoin="round"/>
+        <circle cx="80" cy="293" r="4" fill="#eb6834"/>
+        <circle cx="256" cy="287" r="4" fill="#eb6834"/>
+        <circle cx="432" cy="281" r="4" fill="#eb6834"/>
+        <circle cx="608" cy="274" r="4" fill="#eb6834"/>
+        <circle cx="784" cy="268" r="4" fill="#eb6834"/>
+        <circle cx="960" cy="262" r="4" fill="#eb6834"/>
+        <text x="952" y="256" fill="#eb6834" font-size="9" font-weight="600"
+              font-family="'Geist Mono', monospace" text-anchor="end">2.5×</text>
+        <text x="88" y="284" fill="#eb6834" font-size="8"
+              font-family="'Geist Mono', 'Apple SD Gothic Neo', monospace">쓰기 2×</text>
+        <text x="700" y="255" fill="#eb6834" font-size="8"
+              font-family="'Geist Mono', 'Apple SD Gothic Neo', monospace">회당 +0.1×</text>
+
+        <!-- 교차점 -->
+        <circle cx="129" cy="339" r="6" fill="none" stroke="#7c8f6f" stroke-width="1"/>
+        <circle cx="276" cy="286" r="6" fill="none" stroke="#eb6834" stroke-width="1"/>
+        <text x="264" y="372" fill="#7c8f6f" font-size="8"
+              font-family="'Geist Mono', 'Apple SD Gothic Neo', monospace" text-anchor="end">2회부터 이득</text>
+        <text x="440" y="372" fill="#eb6834" font-size="8"
+              font-family="'Geist Mono', 'Apple SD Gothic Neo', monospace">3회부터 이득</text>
+
+        <!-- x축 -->
+        <text x="80"  y="440" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">1</text>
+        <text x="256" y="440" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">2</text>
+        <text x="432" y="440" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">3</text>
+        <text x="608" y="440" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">4</text>
+        <text x="784" y="440" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">5</text>
+        <text x="960" y="440" fill="#52514e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">6</text>
+        <text x="80" y="454" fill="#898781" font-size="7"
+              font-family="'Geist Mono', 'Apple SD Gothic Neo', monospace" letter-spacing="0.14em">같은 프리픽스로 보낸 요청 수 (TTL 안에서)</text>
+
+        <!-- 범례 -->
+        <line x1="40" y1="466" x2="960" y2="466" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+        <text x="40" y="480" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+        <line x1="40" y1="493" x2="64" y2="493" stroke="#eb6834" stroke-width="1.8"/>
+        <circle cx="52" cy="493" r="4" fill="#eb6834"/>
+        <text x="72" y="496" fill="#52514e" font-size="8.5"
+              font-family="'Geist', 'Apple SD Gothic Neo', sans-serif">1시간 TTL · 쓰기 2×</text>
+        <line x1="300" y1="493" x2="324" y2="493" stroke="#7c8f6f" stroke-width="1.2"/>
+        <text x="332" y="496" fill="#52514e" font-size="8.5"
+              font-family="'Geist', 'Apple SD Gothic Neo', sans-serif">5분 TTL · 쓰기 1.25×</text>
+        <line x1="580" y1="493" x2="604" y2="493" stroke="#52514e" stroke-width="1.2"/>
+        <text x="612" y="496" fill="#52514e" font-size="8.5"
+              font-family="'Geist', 'Apple SD Gothic Neo', sans-serif">캐시 미사용 · 매번 정가</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

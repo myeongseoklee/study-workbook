@@ -41,16 +41,14 @@ Golden Signals와 대응시키면 이렇게 된다.
 **RED는 Golden Signals에서 Saturation을 뺀 것이다.** 그것이 이 방법을 이해하는 열쇠다.
 
 ```
-Golden Signals              RED
-  Traffic      ─────────▶     Rate
-  Errors       ─────────▶     Errors
-  Latency      ─────────▶     Duration
-  Saturation   ────╳──▶       (없다)
+  Traffic · Errors · Latency  ─────────▶  Rate · Errors · Duration   그대로 옮겨진다
+
+  Saturation                  ────╳         RED 코어에 없다
        │
        │  서비스마다 병목 자원이 다르고 시간에 따라 바뀐다
        │  → 모든 서비스에 같은 정의로 붙일 수 없다 = 동형화 불가
        │
-       └───────────────────▶  USE 가 담당한다 (자원 단위로는 정의된다)
+       └──────────────────────────────▶  USE 가 담당한다 (자원 단위로는 정의된다)
 ```
 
 ### 왜 Saturation을 뺐나

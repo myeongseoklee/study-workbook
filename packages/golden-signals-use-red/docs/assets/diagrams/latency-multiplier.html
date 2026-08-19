@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사용률이 오를 때 지연이 늘어나는 곡선</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f9f9f7;
+      --color-ink:     #0b0b0b;
+      --color-muted:   #52514e;
+      --color-accent:  #eb6834;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--color-muted); margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400; letter-spacing: -0.02em; line-height: 1.15;
+      color: var(--color-ink); margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Line chart · Queueing</p>
+    <h1>지연은 사용률에 비례하지 않는다 — 벽처럼 선다</h1>
+
+    <svg viewBox="0 0 1000 500" role="img" aria-labelledby="latency-multiplier-title latency-multiplier-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="latency-multiplier-title">사용률에 따른 지연 배수 곡선</title>
+      <desc id="latency-multiplier-desc">자원 사용률이 0에서 96퍼센트로 오를 때 M/M/1 평균 응답 시간이 무부하 처리 시간의 몇 배가 되는지 보여주는 선 차트. 70퍼센트까지는 완만하게 3배 남짓이지만 80퍼센트를 지나며 급격히 올라 90퍼센트에서 10배, 95퍼센트에서 20배가 되고 100퍼센트에서 발산한다.</desc>
+      <defs>
+        <pattern id="lm-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="0.9" fill="rgba(11,11,11,0.10)"/>
+        </pattern>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f9f9f7"/>
+      <rect width="100%" height="100%" fill="url(#lm-dots)" opacity="0.55"/>
+
+      <text transform="rotate(-90 24 230)" x="24" y="230" fill="#52514e" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em" text-anchor="middle">응답 시간 ÷ 무부하 처리 시간</text>
+
+      <line x1="80" y1="420" x2="960" y2="420" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+      <line x1="80" y1="344" x2="960" y2="344" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="268" x2="960" y2="268" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="192" x2="960" y2="192" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="116" x2="960" y2="116" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="40"  x2="960" y2="40"  stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="40"  x2="80"  y2="420" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+
+      <text x="72" y="424" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">0×</text>
+      <text x="72" y="348" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">5×</text>
+      <text x="72" y="272" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">10×</text>
+      <text x="72" y="196" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">15×</text>
+      <text x="72" y="120" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">20×</text>
+      <text x="72" y="44"  fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">25×</text>
+
+      <text x="80"  y="444" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">0%</text>
+      <text x="256" y="444" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">20%</text>
+      <text x="432" y="444" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">40%</text>
+      <text x="608" y="444" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">60%</text>
+      <text x="784" y="444" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">80%</text>
+      <text x="872" y="444" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">90%</text>
+      <text x="960" y="444" fill="#0b0b0b" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">100%</text>
+      <text x="520" y="470" fill="#898781" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">자원 사용률 ρ</text>
+
+      <line x1="960" y1="40" x2="960" y2="420" stroke="#898781" stroke-width="0.8" stroke-dasharray="4,3"/>
+
+      <polygon fill="rgba(235,104,52,0.08)" points="80,420 80.0,404.8 84.4,404.7 88.8,404.6 93.2,404.6 97.6,404.5 102.0,404.4 106.4,404.3 110.8,404.2 115.2,404.2 119.6,404.1 124.0,404.0 128.4,403.9 132.8,403.8 137.2,403.7 141.6,403.7 146.0,403.6 150.4,403.5 154.8,403.4 159.2,403.3 163.6,403.2 168.0,403.1 172.4,403.0 176.8,402.9 181.2,402.8 185.6,402.7 190.0,402.6 194.4,402.5 198.8,402.4 203.2,402.3 207.6,402.2 212.0,402.1 216.4,402.0 220.8,401.9 225.2,401.8 229.6,401.7 234.0,401.6 238.4,401.5 242.8,401.3 247.2,401.2 251.6,401.1 256.0,401.0 260.4,400.9 264.8,400.8 269.2,400.6 273.6,400.5 278.0,400.4 282.4,400.3 286.8,400.1 291.2,400.0 295.6,399.9 300.0,399.7 304.4,399.6 308.8,399.5 313.2,399.3 317.6,399.2 322.0,399.0 326.4,398.9 330.8,398.7 335.2,398.6 339.6,398.4 344.0,398.3 348.4,398.1 352.8,398.0 357.2,397.8 361.6,397.6 366.0,397.5 370.4,397.3 374.8,397.1 379.2,397.0 383.6,396.8 388.0,396.6 392.4,396.4 396.8,396.2 401.2,396.1 405.6,395.9 410.0,395.7 414.4,395.5 418.8,395.3 423.2,395.1 427.6,394.9 432.0,394.7 436.4,394.5 440.8,394.2 445.2,394.0 449.6,393.8 454.0,393.6 458.4,393.3 462.8,393.1 467.2,392.9 471.6,392.6 476.0,392.4 480.4,392.1 484.8,391.9 489.2,391.6 493.6,391.3 498.0,391.0 502.4,390.8 506.8,390.5 511.2,390.2 515.6,389.9 520.0,389.6 524.4,389.3 528.8,389.0 533.2,388.7 537.6,388.3 542.0,388.0 546.4,387.7 550.8,387.3 555.2,387.0 559.6,386.6 564.0,386.2 568.4,385.8 572.8,385.5 577.2,385.1 581.6,384.7 586.0,384.2 590.4,383.8 594.8,383.4 599.2,382.9 603.6,382.5 608.0,382.0 612.4,381.5 616.8,381.0 621.2,380.5 625.6,380.0 630.0,379.5 634.4,378.9 638.8,378.4 643.2,377.8 647.6,377.2 652.0,376.6 656.4,375.9 660.8,375.3 665.2,374.6 669.6,373.9 674.0,373.2 678.4,372.5 682.8,371.7 687.2,371.0 691.6,370.2 696.0,369.3 700.4,368.5 704.8,367.6 709.2,366.7 713.6,365.7 718.0,364.7 722.4,363.7 726.8,362.6 731.2,361.5 735.6,360.4 740.0,359.2 744.4,358.0 748.8,356.7 753.2,355.3 757.6,353.9 762.0,352.4 766.4,350.9 770.8,349.3 775.2,347.6 779.6,345.9 784.0,344.0 788.4,342.1 792.8,340.0 797.2,337.8 801.6,335.6 806.0,333.1 810.4,330.6 814.8,327.9 819.2,325.0 823.6,321.9 828.0,318.7 832.4,315.2 836.8,311.4 841.2,307.4 845.6,303.1 850.0,298.4 854.4,293.3 858.8,287.8 863.2,281.8 867.6,275.2 872.0,268.0 876.4,260.0 880.8,251.1 885.2,241.2 889.6,230.0 894.0,217.3 898.4,202.9 902.8,186.2 907.2,166.7 911.6,143.6 916.0,116.0 920.4,82.2 924.8,40.0 924.8,420"/>
+      <polyline fill="none" stroke="#eb6834" stroke-width="1.8" stroke-linejoin="round" points="80.0,404.8 84.4,404.7 88.8,404.6 93.2,404.6 97.6,404.5 102.0,404.4 106.4,404.3 110.8,404.2 115.2,404.2 119.6,404.1 124.0,404.0 128.4,403.9 132.8,403.8 137.2,403.7 141.6,403.7 146.0,403.6 150.4,403.5 154.8,403.4 159.2,403.3 163.6,403.2 168.0,403.1 172.4,403.0 176.8,402.9 181.2,402.8 185.6,402.7 190.0,402.6 194.4,402.5 198.8,402.4 203.2,402.3 207.6,402.2 212.0,402.1 216.4,402.0 220.8,401.9 225.2,401.8 229.6,401.7 234.0,401.6 238.4,401.5 242.8,401.3 247.2,401.2 251.6,401.1 256.0,401.0 260.4,400.9 264.8,400.8 269.2,400.6 273.6,400.5 278.0,400.4 282.4,400.3 286.8,400.1 291.2,400.0 295.6,399.9 300.0,399.7 304.4,399.6 308.8,399.5 313.2,399.3 317.6,399.2 322.0,399.0 326.4,398.9 330.8,398.7 335.2,398.6 339.6,398.4 344.0,398.3 348.4,398.1 352.8,398.0 357.2,397.8 361.6,397.6 366.0,397.5 370.4,397.3 374.8,397.1 379.2,397.0 383.6,396.8 388.0,396.6 392.4,396.4 396.8,396.2 401.2,396.1 405.6,395.9 410.0,395.7 414.4,395.5 418.8,395.3 423.2,395.1 427.6,394.9 432.0,394.7 436.4,394.5 440.8,394.2 445.2,394.0 449.6,393.8 454.0,393.6 458.4,393.3 462.8,393.1 467.2,392.9 471.6,392.6 476.0,392.4 480.4,392.1 484.8,391.9 489.2,391.6 493.6,391.3 498.0,391.0 502.4,390.8 506.8,390.5 511.2,390.2 515.6,389.9 520.0,389.6 524.4,389.3 528.8,389.0 533.2,388.7 537.6,388.3 542.0,388.0 546.4,387.7 550.8,387.3 555.2,387.0 559.6,386.6 564.0,386.2 568.4,385.8 572.8,385.5 577.2,385.1 581.6,384.7 586.0,384.2 590.4,383.8 594.8,383.4 599.2,382.9 603.6,382.5 608.0,382.0 612.4,381.5 616.8,381.0 621.2,380.5 625.6,380.0 630.0,379.5 634.4,378.9 638.8,378.4 643.2,377.8 647.6,377.2 652.0,376.6 656.4,375.9 660.8,375.3 665.2,374.6 669.6,373.9 674.0,373.2 678.4,372.5 682.8,371.7 687.2,371.0 691.6,370.2 696.0,369.3 700.4,368.5 704.8,367.6 709.2,366.7 713.6,365.7 718.0,364.7 722.4,363.7 726.8,362.6 731.2,361.5 735.6,360.4 740.0,359.2 744.4,358.0 748.8,356.7 753.2,355.3 757.6,353.9 762.0,352.4 766.4,350.9 770.8,349.3 775.2,347.6 779.6,345.9 784.0,344.0 788.4,342.1 792.8,340.0 797.2,337.8 801.6,335.6 806.0,333.1 810.4,330.6 814.8,327.9 819.2,325.0 823.6,321.9 828.0,318.7 832.4,315.2 836.8,311.4 841.2,307.4 845.6,303.1 850.0,298.4 854.4,293.3 858.8,287.8 863.2,281.8 867.6,275.2 872.0,268.0 876.4,260.0 880.8,251.1 885.2,241.2 889.6,230.0 894.0,217.3 898.4,202.9 902.8,186.2 907.2,166.7 911.6,143.6 916.0,116.0 920.4,82.2 924.8,40.0"/>
+
+      <circle cx="520.0" cy="389.6" r="3" fill="#52514e"/>
+      <text x="512.0" y="381.6" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">2×</text>
+      <circle cx="696.0" cy="369.3" r="3" fill="#52514e"/>
+      <text x="688.0" y="361.3" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">3.3×</text>
+      <circle cx="784.0" cy="344.0" r="4" fill="#eb6834"/>
+      <text x="776.0" y="336.0" fill="#eb6834" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">5×</text>
+      <circle cx="872.0" cy="268.0" r="4" fill="#eb6834"/>
+      <text x="852.0" y="256.0" fill="#eb6834" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">10×</text>
+      <circle cx="916.0" cy="116.0" r="4" fill="#eb6834"/>
+      <text x="884.0" y="112.0" fill="#eb6834" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">20×</text>
+
+      <text x="380" y="336" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">70%까지는 거의 평평하다 — 여유가 있다고 착각하는 구간</text>
+      <text x="872" y="60" fill="#eb6834" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.14em">벽이 선다</text>
+      <text x="872" y="76" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">ρ→100% 에서 발산</text>
+
+      <line x1="80" y1="482" x2="960" y2="482" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <text x="80" y="498" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+      <line x1="160" y1="494" x2="184" y2="494" stroke="#eb6834" stroke-width="1.8"/>
+      <circle cx="172" cy="494" r="3" fill="#eb6834"/>
+      <text x="192" y="498" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">1/(1-ρ) — M/M/1 평균 응답 시간 배수</text>
+      <line x1="560" y1="494" x2="584" y2="494" stroke="#898781" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <text x="592" y="498" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">점근선 — 도착이 처리를 따라잡는 지점</text>
+    </svg>
+  </div>
+</body>
+</html>

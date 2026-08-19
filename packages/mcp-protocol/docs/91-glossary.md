@@ -5,19 +5,17 @@
 ## 전체 지도
 
 ```
-┌────────────────────────────────────────────────────────────┐
-│ L4. 신뢰와 인가   OAuth 2.1 · PRM · CIMD · audience ·       │
-│                   passthrough · confused deputy             │
-├────────────────────────────────────────────────────────────┤
-│ L3. 기능(프리미티브)  tools · resources · prompts ·          │
-│                   elicitation · MRTR · subscriptions        │
-├────────────────────────────────────────────────────────────┤
-│ L2. 프로토콜 코어  JSON-RPC · _meta · resultType ·           │
-│                   capability · server/discover · era        │
-├────────────────────────────────────────────────────────────┤
-│ L1. 전송(바인딩)   stdio · Streamable HTTP · SSE ·           │
-│                   헤더 미러링 · Origin 검증                  │
-└────────────────────────────────────────────────────────────┘
+│ L4  신뢰와 인가       OAuth 2.1 · PRM · CIMD · audience · passthrough
+│                       confused deputy
+│
+│ L3  기능(프리미티브)  tools · resources · prompts · elicitation
+│                       MRTR · subscriptions
+│
+│ L2  프로토콜 코어     JSON-RPC · _meta · resultType · capability
+│                       server/discover · era
+│
+│ L1  전송(바인딩)      stdio · Streamable HTTP · SSE
+│                       헤더 미러링 · Origin 검증
 ```
 
 아래(L1)로 갈수록 "바이트를 어떻게 나르나"에 가깝고, 위(L4)로 갈수록 "누구를 얼마나 믿나"에 가깝다. 각 레이어는 아래 레이어를 전제한다. **용어를 외울 게 아니라 이 인과의 흐름을 잡는 게 핵심이다.**
@@ -35,7 +33,9 @@ stdio: 개행 구분 JSON-RPC, stdout은 프로토콜 전용
    ↓ 원격·다중 클라이언트라면
 Streamable HTTP: 요청마다 POST, 응답은 JSON 또는 SSE
    ↓ 중간 장비가 본문을 못 읽으니
-헤더 미러링 (Mcp-*) ↓ 미러가 생기면 불일치 검증 필요 → -32020
+헤더 미러링 (Mcp-*)
+   ↓ 미러가 생기면 불일치 검증이 따라오니
+HeaderMismatch (-32020)
 ```
 
 ## 용어

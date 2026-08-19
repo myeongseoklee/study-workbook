@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 500" role="img" aria-labelledby="rrf-rank-weighting-title rrf-rank-weighting-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="rrf-rank-weighting-title">순위별 기여 비율 — 선형 감점, 역수, RRF</title>
+      <desc id="rrf-rank-weighting-desc">한 검색 결과에서 1위부터 10위까지의 문서가 융합 점수에 기여하는 비율을 1위 기여도로 나누어 그린 선 차트. 선형 감점은 직선이라 1위와 2위의 격차가 9위와 10위의 격차와 같고, 역수는 앞쪽에서 급히 꺾여 2위가 이미 1위의 절반으로 떨어지며, 관례값 k가 60인 RRF는 거의 평평해서 10위도 1위의 87퍼센트를 기여한다.</desc>
+      <defs><style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');</style>
+        <pattern id="rrf-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="0.9" fill="rgba(11,11,11,0.10)"/>
+        </pattern>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f9f9f7"/>
+      <rect width="100%" height="100%" fill="url(#rrf-dots)" opacity="0.55"/>
+
+      <text transform="rotate(-90 24 230)" x="24" y="230" fill="#52514e" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em" text-anchor="middle">1위 대비 기여 비율</text>
+
+      <!-- gridlines -->
+      <line x1="80" y1="332" x2="908" y2="332" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="264" x2="908" y2="264" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="196" x2="908" y2="196" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="128" x2="908" y2="128" stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+      <line x1="80" y1="60"  x2="908" y2="60"  stroke="rgba(11,11,11,0.08)" stroke-width="0.8"/>
+
+      <!-- axes -->
+      <line x1="80" y1="60"  x2="80"  y2="400" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+      <line x1="80" y1="400" x2="908" y2="400" stroke="rgba(11,11,11,0.25)" stroke-width="1"/>
+
+      <!-- y labels -->
+      <text x="72" y="404" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">0</text>
+      <text x="72" y="336" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">0.2</text>
+      <text x="72" y="268" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">0.4</text>
+      <text x="72" y="200" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">0.6</text>
+      <text x="72" y="132" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">0.8</text>
+      <text x="72" y="64"  fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">1.0</text>
+
+      <!-- series-2 · 선형 감점 -->
+      <polyline fill="none" stroke="#5e7a9b" stroke-width="1.2" stroke-linejoin="round"
+                points="80,60.0 172,94.0 264,128.0 356,162.0 448,196.0 540,230.0 632,264.0 724,298.0 816,332.0 908,366.0"/>
+      <!-- series-1 · 역수 k=0 -->
+      <polyline fill="none" stroke="#7c8f6f" stroke-width="1.2" stroke-linejoin="round"
+                points="80,60.0 172,230.0 264,286.7 356,315.0 448,332.0 540,343.3 632,351.4 724,357.5 816,362.2 908,366.0"/>
+      <!-- focal · RRF k=60 -->
+      <polyline fill="none" stroke="#eb6834" stroke-width="1.8" stroke-linejoin="round"
+                points="80,60.0 172,65.5 264,70.8 356,75.9 448,80.9 540,85.8 632,90.4 724,95.0 816,99.4 908,103.7"/>
+      <circle cx="80"  cy="60.0"  r="4" fill="#eb6834"/>
+      <circle cx="172" cy="65.5"  r="4" fill="#eb6834"/>
+      <circle cx="264" cy="70.8"  r="4" fill="#eb6834"/>
+      <circle cx="356" cy="75.9"  r="4" fill="#eb6834"/>
+      <circle cx="448" cy="80.9"  r="4" fill="#eb6834"/>
+      <circle cx="540" cy="85.8"  r="4" fill="#eb6834"/>
+      <circle cx="632" cy="90.4"  r="4" fill="#eb6834"/>
+      <circle cx="724" cy="95.0"  r="4" fill="#eb6834"/>
+      <circle cx="816" cy="99.4"  r="4" fill="#eb6834"/>
+      <circle cx="908" cy="103.7" r="4" fill="#eb6834"/>
+
+      <!-- focal callout -->
+      <rect x="500" y="104" width="176" height="12" rx="2" fill="#f9f9f7"/>
+      <text x="588" y="113" fill="#eb6834" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">k=60 → 10위도 1위의 0.87</text>
+
+      <!-- end-of-line values -->
+      <text x="916" y="107" fill="#eb6834" font-size="8" font-family="'Geist Mono', monospace">0.87</text>
+      <text x="916" y="369" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">0.10</text>
+
+      <!-- x labels -->
+      <text x="80"  y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">1</text>
+      <text x="172" y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">2</text>
+      <text x="264" y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">3</text>
+      <text x="356" y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">4</text>
+      <text x="448" y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">5</text>
+      <text x="540" y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">6</text>
+      <text x="632" y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">7</text>
+      <text x="724" y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">8</text>
+      <text x="816" y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">9</text>
+      <text x="908" y="420" fill="#898781" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">10</text>
+      <text x="494" y="440" fill="#898781" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">그 검색 결과에서의 순위 →</text>
+
+      <!-- legend -->
+      <line x1="80" y1="462" x2="908" y2="462" stroke="rgba(11,11,11,0.10)" stroke-width="0.8"/>
+      <text x="80" y="478" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+      <line x1="168" y1="474" x2="192" y2="474" stroke="#eb6834" stroke-width="1.8"/>
+      <circle cx="180" cy="474" r="4" fill="#eb6834"/>
+      <text x="200" y="478" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">RRF  1/(k+순위), k=60</text>
+      <line x1="424" y1="474" x2="448" y2="474" stroke="#7c8f6f" stroke-width="1.2"/>
+      <text x="456" y="478" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">역수  1/순위 (k=0)</text>
+      <line x1="656" y1="474" x2="680" y2="474" stroke="#5e7a9b" stroke-width="1.2"/>
+      <text x="688" y="478" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">선형 감점  1위=10점, 2위=9점 …</text>
+    </svg>

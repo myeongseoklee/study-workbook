@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>세대 판정 상태 기계</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f9f9f7;
+      --color-ink:     #0b0b0b;
+      --color-muted:   #52514e;
+      --color-accent:  #eb6834;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1120px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--color-muted); margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400; letter-spacing: -0.02em; line-height: 1.15;
+      color: var(--color-ink); margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 880px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">State machine · Era detection</p>
+    <h1>프로브의 응답이 modern인지 legacy인지를 가르는 가드</h1>
+
+    <svg viewBox="0 0 960 580" role="img" aria-labelledby="era-detection-title era-detection-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="era-detection-title">MCP 서버 세대 판정 상태 기계</title>
+      <desc id="era-detection-desc">미판정 상태에서 server/discover 프로브를 보낸 뒤 응답에 따라 modern 또는 legacy로 확정되는 상태 기계. DiscoverResult가 오면 modern이고, 인식 가능한 modern 에러(-32020/21/22)가 와도 modern이므로 initialize로 폴백해서는 안 된다는 갈래가 강조돼 있다. 그 외 에러나 무응답일 때만 legacy로 판정해 initialize로 폴백한다. modern 상태에서 버전만 안 맞는 -32022는 supported 목록에서 골라 재시도하는 자기 전이로 처리하고, 판정 결과는 서버 단위로 캐시하되 가정이 어긋나면 미판정으로 돌아가 재프로브한다.</desc>
+
+      <defs>
+        <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="0.9" fill="rgba(11,11,11,0.10)"/>
+        </pattern>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#52514e"/>
+        </marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#eb6834"/>
+        </marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f9f9f7"/>
+      <rect width="100%" height="100%" fill="url(#dots)" opacity="0.55"/>
+
+      <!-- ── 전이 (박스보다 먼저 그린다) ──────────────────────── -->
+
+      <!-- 시작 -->
+      <line x1="56" y1="296" x2="84" y2="296" stroke="#52514e" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- T1: DiscoverResult → modern -->
+      <path d="M 296 274 H 376 a 8 8 0 0 1 8 -8 V 160 a 8 8 0 0 1 8 -8 H 636"
+            fill="none" stroke="#52514e" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- T2: 인식 가능한 modern 에러 → modern (초점) -->
+      <path d="M 296 296 H 432 a 8 8 0 0 1 8 -8 V 192 a 8 8 0 0 1 8 -8 H 636"
+            fill="none" stroke="#eb6834" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+      <!-- T3: 그 외 에러·무응답 → legacy -->
+      <path d="M 296 318 H 488 a 8 8 0 0 1 8 8 V 416 a 8 8 0 0 0 8 8 H 636"
+            fill="none" stroke="#52514e" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- modern 자기 전이 -->
+      <path d="M 720 120 C 720 72, 840 72, 840 116"
+            fill="none" stroke="#52514e" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <!-- ── 전이 라벨 ────────────────────────────────────────── -->
+
+      <rect x="456" y="132" width="112" height="12" rx="2" fill="#f9f9f7"/>
+      <text x="512" y="141" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">DiscoverResult</text>
+
+      <rect x="474" y="164" width="132" height="12" rx="2" fill="#f9f9f7"/>
+      <text x="540" y="173" fill="#eb6834" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">modern 에러 · 폴백 금지</text>
+      <text x="540" y="198" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">[-32020 / -32021 / -32022]</text>
+
+      <rect x="480" y="432" width="120" height="12" rx="2" fill="#f9f9f7"/>
+      <text x="540" y="441" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">그 외 에러 · 무응답</text>
+      <text x="540" y="459" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">[stdio 침묵 / HTTP 400 본문 불명]</text>
+
+      <rect x="716" y="48" width="128" height="12" rx="2" fill="#f9f9f7"/>
+      <text x="780" y="57" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">-32022 · SUPPORTED 재시도</text>
+
+      <!-- ── 상태 ─────────────────────────────────────────────── -->
+
+      <circle cx="44" cy="296" r="6" fill="#0b0b0b"/>
+
+      <rect x="88" y="252" width="208" height="88" rx="8" fill="#f9f9f7"/>
+      <rect x="88" y="252" width="208" height="88" rx="8" fill="#fcfcfb" stroke="#0b0b0b" stroke-width="1"/>
+      <rect x="96" y="260" width="40" height="12" rx="2" fill="none" stroke="rgba(11,11,11,0.40)" stroke-width="0.8"/>
+      <text x="116" y="269" fill="#52514e" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STATE</text>
+      <text x="192" y="304" fill="#0b0b0b" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">세대 미판정</text>
+      <text x="192" y="324" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">server/discover 프로브</text>
+
+      <rect x="640" y="120" width="280" height="96" rx="8" fill="#f9f9f7"/>
+      <rect x="640" y="120" width="280" height="96" rx="8" fill="rgba(11,11,11,0.05)" stroke="#52514e" stroke-width="1"/>
+      <rect x="648" y="128" width="40" height="12" rx="2" fill="none" stroke="rgba(11,11,11,0.40)" stroke-width="0.8"/>
+      <text x="668" y="137" fill="#52514e" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STATE</text>
+      <text x="780" y="176" fill="#0b0b0b" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">modern</text>
+      <text x="780" y="196" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">요청별 _meta · 무상태</text>
+
+      <rect x="640" y="376" width="280" height="96" rx="8" fill="#f9f9f7"/>
+      <rect x="640" y="376" width="280" height="96" rx="8" fill="rgba(11,11,11,0.03)" stroke="rgba(11,11,11,0.30)" stroke-width="1"/>
+      <rect x="648" y="384" width="40" height="12" rx="2" fill="none" stroke="rgba(11,11,11,0.30)" stroke-width="0.8"/>
+      <text x="668" y="393" fill="#52514e" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STATE</text>
+      <text x="780" y="432" fill="#0b0b0b" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">legacy</text>
+      <text x="780" y="452" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">initialize 폴백</text>
+
+      <!-- ── 노트 ─────────────────────────────────────────────── -->
+      <rect x="88" y="468" width="416" height="72" rx="6" fill="rgba(11,11,11,0.02)" stroke="rgba(11,11,11,0.20)" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <text x="104" y="488" fill="#898781" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">NOTE</text>
+      <text x="104" y="510" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">판정 단위 = 서버 (stdio 프로세스 · HTTP 오리진)</text>
+      <text x="104" y="528" fill="#52514e" font-size="8" font-family="'Geist Mono', monospace">* → 세대 미판정 : 캐시된 가정 불일치 시 재프로브</text>
+    </svg>
+  </div>
+</body>
+</html>

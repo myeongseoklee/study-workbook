@@ -21,15 +21,17 @@ MCP 인가는 새 발명이 아니라 **OAuth 2.1의 신중한 부분집합**이
 
 ### 전체 체인 (외울 것)
 
-```
-① 토큰 없이 요청 → 401 + WWW-Authenticate: Bearer resource_metadata="…", scope="…"
-② PRM(Protected Resource Metadata, RFC 9728) 가져오기 → authorization_servers 목록
-③ AS 메타데이터 디스커버리 (RFC 8414 / OIDC Discovery) → 엔드포인트·능력
-④ 클라이언트 등록 (CIMD 우선 / 사전등록 / DCR 폴백)
-⑤ 인가 요청: PKCE(S256) + resource 파라미터(RFC 8707) + 스코프 전략, 예상 issuer 기록
-⑥ 콜백: iss 검증(RFC 9207) → 코드+verifier+resource로 토큰 교환
-⑦ 매 요청 Authorization: Bearer <토큰> → 서버는 audience 검증
-```
+1. 토큰 없이 요청 → 401 + `WWW-Authenticate: Bearer resource_metadata="…", scope="…"`
+2. PRM(Protected Resource Metadata, RFC 9728) 가져오기 → `authorization_servers` 목록
+3. AS 메타데이터 디스커버리 (RFC 8414 / OIDC Discovery) → 엔드포인트·능력
+4. 클라이언트 등록 (CIMD 우선 / 사전등록 / DCR 폴백)
+5. 인가 요청: PKCE(S256) + `resource` 파라미터(RFC 8707) + 스코프 전략, 예상 issuer 기록
+6. 콜백: iss 검증(RFC 9207) → 코드+verifier+resource로 토큰 교환
+7. 매 요청 `Authorization: Bearer <토큰>` → 서버는 audience 검증
+
+![인가 체인 7단계 — 각 고리가 MCP 서버와 인가 서버 중 누구와 무엇을 주고받는지](assets/diagrams/auth-chain.png)
+
+**일곱 고리 중 MCP 서버와 주고받는 것은 ①②⑦뿐이고 ③⑤⑥은 인가 서버와의 순수 OAuth 왕복이며 ④는 아예 와이어 홉이 아니다** — 그래서 인가 실패를 진단할 때 "몇 번째 고리인가"보다 "어느 상대와의 왕복이 깨졌나"가 먼저 갈린다.
 
 ### ① ~ ② 보호 리소스 메타데이터 (RFC 9728)
 
