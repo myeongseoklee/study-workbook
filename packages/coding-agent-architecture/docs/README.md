@@ -13,13 +13,18 @@ packages/coding-agent-architecture/
 │   ├── ep02-business-agent/   ← 강의 #2 (기업형 에이전트)
 │   │   ├── 00-overview.md ... 10-tech-stack.md
 │   │   └── assets/frames/     ← 강의 슬라이드 캡처
-│   ├── (ep03-.../ ...)        ← 새 영상이 오면 여기에 추가
+│   ├── ep03-admin-implementation/  ← 강의 #3 (참조 구현 + 에이전트 지시)
+│   ├── ep04-agent-server/     ← 강의 #4 (이벤트 기반 서버 골격)
+│   │   ├── 00-overview.md ... 11-domain-facts.md
+│   │   └── assets/frames/     ← 슬라이드 11장 + 메모장 3장 + 코드 4장
+│   ├── (ep05-.../ ...)        ← 새 영상이 오면 여기에 추가
 │   ├── 90-must-memorize.md    ← 암기 카드 (전 회차 누적)
 │   ├── 91-glossary.md         ← 용어집 (전 회차 누적)
 │   └── 99-references.md       ← 외부 공식 문서 (전 회차 누적)
 ├── workbook/
-│   ├── 92-workbook.md         ← 문제 (1·2강 누적, 정답 0건)
-│   └── 93-solutions.md        ← 정답·해설
+│   ├── 92-workbook.md         ← 문제 (1·2강 누적) / 93-solutions.md
+│   ├── 94-workbook-ep03.md    ← 3강 (계획→구현 판단) / 95-solutions-ep03.md
+│   └── 96-workbook-ep04.md    ← 4강 (연쇄 추적·사고 진단) / 97-solutions-ep04.md
 ├── tests/                     📋 명세 — 학습자에게 주어지는 Vitest 테스트
 ├── src/                       🎯 코딩 문제 (TODO 스켈레톤)
 └── solutions/                 ✅ 참고 구현 (통과한 뒤에 읽는다)
@@ -44,6 +49,8 @@ packages/coding-agent-architecture/
 |---|---|---|---|
 | #1 | `ep01-concepts/` | 개념편 (구현 없이 구성 요소 개관) | 코딩에이전트 만들기 #1 (약 1h54m) + #1-사고로 꺼짐(도입부, 약 23m) |
 | #2 | `ep02-business-agent/` | 세션·컨텍스트의 실체 + 기업 납품 요구·개발 계획 | 코딩에이전트 만들기 #2 비지니스용 에이전트 (라이브, 약 1h23m) |
+| #3 | `ep03-admin-implementation/` | 2강 계획표의 **참조 구현** + 에이전트에게 시키는 법 | 코딩에이전트 만들기 #3 (라이브, 약 58m) |
+| #4 | `ep04-agent-server/` | 이벤트 기반 에이전트 서버의 **골격 설계** (CPS·봉투·멱등·큐·워커·샤드) | 코딩에이전트 만들기 #4 (라이브, 약 1h42m) |
 
 ## 개념 → 회차 색인
 
@@ -69,6 +76,18 @@ packages/coding-agent-architecture/
 | 배포 형태 (설치환경·손코딩 관여도·과금) | `ep02/08-deployment-modes` | — |
 | 비즈니스 서버 개발항목 (인증인가·공유드라이브·모델라우터·검색센터) | `ep02/09-business-server` | — |
 | 기술 스택 (터보 모노레포·PGVector·단일 Express) | `ep02/10-tech-stack` | — |
+| 계획 대조 (구현/부분/축소/변경/미구현) · 뒤집기 비용 | `ep03/01-plan-vs-built` | — |
+| 에이전트에게 시키는 기법 (스킬 문장 9종) | `ep03/05-instructing-the-agent` | — |
+| 스킬이 강제한 구조 (계획에 없던 것) | `ep03/06-skill-enforced-structure` | — |
+| **CPS** — 응답을 자르면 pub/sub이 귀결이다 | `ep04/02-cps` | — |
+| 이벤트 봉투 4축 · 자기 서술성 · 시퀀스 | `ep04/03-envelope` | — |
+| **멱등성** — exactly-once 불가 / 키 기반은 멱등이 아니다 | `ep04/04-idempotency` | `ep04/05-idempotency-in-practice` (검문소 실물) |
+| **큐 삭제 시점** — 유실을 중복으로 치환한다 | `ep04/06-queue` | — |
+| 이벤트가 곧 API · 패밀리 10종 · 합타입 | `ep04/07-event-as-api` | — |
+| 워커 풀 · **취소는 코드 구조의 성질** | `ep04/08-workers` | — |
+| 세션=채널 · 병목은 송신 · 샤드 | `ep04/09-stream-and-shard` | `ep02/02-session-server` (스트림형을 고른 지점) |
+| PGMQ · 온프레미스 인프라 선택 근거 | `ep04/01-why-not-http` | `event-sourcing-msa/11-postgres-as-broker` (패키지 밖) |
+| 세션 데이터가 자산이다 → 중앙 수집 요구 | `ep04/10-session-data-as-asset` | `ep02/06-why-onprem` (사업 근거) |
 
 ## 변경 이력
 
@@ -76,3 +95,5 @@ packages/coding-agent-architecture/
 |---|---|---|
 | 2026-07-29 | #1 | 최초 생성 (개념편 7파일 + 누적 공통 문서 3종). 하이브리드 구조로 재편(회차 폴더 + 최상위 누적 문서 + 이 README). |
 | 2026-08-05 | #2 | `study` 모노레포 `packages/coding-agent-architecture/`로 이전(문제·정답 분리 규약 적용). `ep02-business-agent/` 추가 (본문 11파일 + 워크북 + 슬라이드 캡처 6장). 누적 문서 갱신 — `must-memorize.md`에 #2 항목 25개(신규 섹션 2개: 구현 규칙 / 비즈니스 제품 요구), `glossary.md`에 레이어 6~7 신설(용어 30여 종), `references.md`에 #2 원본·Turborepo·pgvector·PowerShell 인코딩·RHEL 컨테이너 항목과 수치 검증 안내 추가. 자막이 없는 영상이라 로컬 STT로 전사한 뒤 슬라이드 캡처로 교차 확인했고, 자체 시스템 시연 구간은 제외했다. |
+| 2026-08-11 | #3 | `ep03-admin-implementation/` 추가 (본문 9파일 + 슬라이드·스킬 캡처). 워크북 `94`/`95` 신설 — 회수형이 아니라 **계획→구현 판단형**으로 형태를 바꿨다(강의 과제가 "이해하라"가 아니라 "같은 계획표로 네 에이전트에게 시켜 만들어 와라"이기 때문). 코딩 과제 3종. 누적 문서에 `#3` 항목 추가. |
+| 2026-08-19 | #4 | `ep04-agent-server/` 추가 (본문 12파일 + 캡처 18장: 슬라이드 11 · 메모장 3 · 코드 4). 워크북 `96`/`97` 신설 — **연쇄 추적 / 역전 재현 / 사고 진단** 세 형태. 코딩 과제 4종(`e04-05-01` 멱등 검문소 · `e04-06-01` 큐 삭제 시점 · `e04-03-01` 인과 그래프 복원 · `e04-08-01` 취소 가능한 워커), 테스트 123건. 누적 문서 갱신 — `90`에 `#4` 카드 36개(정의 10 · 트레이드오프 6 · 의사결정 경계 10 · 진단 신호 10), `91`에 **레이어 8** 신설(용어 30여 종), `99`에 `#4` 원본·PGMQ·SQS·UUIDv7·`worker_threads`·아웃박스 항목과 STT 오차 목록. 자막이 없어 로컬 STT로 전사했고 식별자는 캡처로 교차 확인했다. 슬라이드 2장이 메모장에 가려져 해당 구간만 다시 받아 복원했다. 이벤트 소싱 기초는 이 모노레포의 `event-sourcing-msa` 패키지를 선수 지식으로 연결했다(강의자가 그 전제를 명시). |
