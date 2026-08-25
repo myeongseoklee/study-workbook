@@ -38,6 +38,7 @@ study/
 | `ecs-fargate-iac` | CloudFormation으로 ECS Fargate 읽기 — IaC·네트워크·ALB·IAM·시크릿·알람·배포 |
 | `mcp-protocol` | MCP 프로토콜 정복 — 2026-07-28 개정판 공식 문서·명세 전체: 무상태 설계, MRTR, 전송, 인가, 보안 |
 | `golden-signals-use-red` | 모니터링 신호 프레임워크 셋 — Google Four Golden Signals · Gregg USE · Wilkie RED. 셋을 **감지 → 범위 → 병목** 순서로 묶고, 그 아래의 분위수·큐잉·에러 예산 계산까지 내려간다. 코딩 과제 7개가 작은 모니터링 시스템 하나를 조립하는 순서로 이어진다 |
+| `agent-era-fundamentals` | 에이전트 시대의 소프트웨어 기본기 — 엉클 밥 인터뷰(56분)를 재서술했다. 지저분한 코드가 에이전트를 무너뜨리는 임계점, 규칙을 프롬프트가 아니라 **결정론적 검사**에 두는 이유(lost in the middle), 궤적과 파이프라인, **규율과 가치의 구별**. 과제 3개가 CRAP 점수·뮤테이션 분석·의존 규칙 체커를 직접 만들게 한다 |
 
 ---
 

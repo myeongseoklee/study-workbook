@@ -1,0 +1,15 @@
+{
+  "name": "agent-era-fundamentals",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "에이전트 시대의 소프트웨어 기본기 — 지저분한 코드가 에이전트를 무너뜨리는 임계점, 지시 대신 결정론적 검사, 궤적과 파이프라인, 규율과 가치의 구별",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@study/testkit": "workspace:*"
+  }
+}
