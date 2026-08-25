@@ -36,6 +36,7 @@
 - [ ] 06-01/extra-2-memory-vector-store  (선택) 미확정
 - [ ] 06-01/extra-3-chunking  (선택) 미확정
 - [ ] 06-01/extra-4-rerank  (선택) 미확정
+- [ ] 06-01/extra-5-score-fusion  (선택) 미확정
 - [ ] 08-01  미확정
 - [ ] 08-01/extra-1-tool-format  (선택) 미확정
 - [ ] 08-02  미확정
