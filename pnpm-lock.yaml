@@ -30,6 +30,12 @@ importers:
         specifier: workspace:*
         version: link:../testkit
 
+  packages/ai-work-delegation:
+    devDependencies:
+      '@study/testkit':
+        specifier: workspace:*
+        version: link:../testkit
+
   packages/coding-agent-architecture:
     devDependencies:
       '@study/testkit':
