@@ -12,8 +12,8 @@
 - [x] 04-multi-agent-patterns.md  · doc:6340394
 - [x] 05-eval-and-observability.md  · doc:fca8394
 - [x] 06-rag-when-needed.md  · doc:1041a98
-- [ ] 07-should-you-build-multi-agent.md
-- [ ] 08-agent-platform-infra.md
+- [x] 07-should-you-build-multi-agent.md  · doc:dbac033
+- [x] 08-agent-platform-infra.md  · doc:eeb2df2
 - [ ] 90-must-memorize.md
 - [ ] 91-glossary.md
 - [ ] 99-references.md
@@ -24,21 +24,21 @@
 
 ## 코딩 과제
 
-- [x] 02-01  통과 (4/4) · 2026-08-27  · spec:ec1c3f8 sol:c5959f3
-- [x] 03-01  통과 (3/3) · 2026-08-27  · spec:f129cee sol:cb158a5
-- [x] 03-01/extra-1-graph-router  (선택) 통과 (9/9) · 2026-08-27  · spec:eef6305 sol:cb158a5
-- [x] 04-01  통과 (5/5) · 2026-08-27  · spec:9a2e5a7 sol:130c345
-- [x] 04-01/extra-1-agent-router  (선택) 통과 (9/9) · 2026-08-27  · spec:db94d42 sol:130c345
-- [x] 05-01  통과 (4/4) · 2026-08-27  · spec:c6417a2 sol:13cbd10
-- [x] 05-01/extra-1-failure-triage  (선택) 통과 (21/21) · 2026-08-27  · spec:4a09fc0 sol:13cbd10
-- [x] 06-01  통과 (5/5) · 2026-08-27  · spec:ca68ec9 sol:b7dbfca
+- [x] 02-01  통과 (4/4) · 2026-08-27  · spec:ec1c3f8 sol:cfcb762
+- [x] 03-01  통과 (3/3) · 2026-08-27  · spec:f129cee sol:1a12c09
+- [x] 03-01/extra-1-graph-router  (선택) 통과 (9/9) · 2026-08-27  · spec:eef6305 sol:1a12c09
+- [x] 04-01  통과 (5/5) · 2026-08-27  · spec:9a2e5a7 sol:7d51978
+- [x] 04-01/extra-1-agent-router  (선택) 통과 (9/9) · 2026-08-27  · spec:db94d42 sol:7d51978
+- [x] 05-01  통과 (4/4) · 2026-08-27  · spec:c6417a2 sol:944d5ce
+- [x] 05-01/extra-1-failure-triage  (선택) 통과 (21/21) · 2026-08-27  · spec:4a09fc0 sol:944d5ce
+- [x] 06-01  통과 (5/5) · 2026-08-27  · spec:ca68ec9 sol:dddfd5b
 - [ ] 06-01/extra-1-hybrid-rank  (선택) 미확정
 - [ ] 06-01/extra-2-memory-vector-store  (선택) 미확정
-- [x] 06-01/extra-3-chunking  (선택) 통과 (16/16) · 2026-08-27  · spec:a4a7625 sol:b7dbfca
-- [x] 06-01/extra-4-rerank  (선택) 통과 (13/13) · 2026-08-27  · spec:8a50585 sol:b7dbfca
-- [x] 06-01/extra-5-score-fusion  (선택) 통과 (17/17) · 2026-08-27  · spec:b8510bc sol:b7dbfca
-- [x] 06-01/extra-6-retrieval-eval  (선택) 통과 (16/16) · 2026-08-27  · spec:56417d3 sol:b7dbfca
-- [ ] 08-01  미확정
+- [x] 06-01/extra-3-chunking  (선택) 통과 (16/16) · 2026-08-27  · spec:a4a7625 sol:dddfd5b
+- [x] 06-01/extra-4-rerank  (선택) 통과 (13/13) · 2026-08-27  · spec:8a50585 sol:dddfd5b
+- [x] 06-01/extra-5-score-fusion  (선택) 통과 (17/17) · 2026-08-27  · spec:b8510bc sol:dddfd5b
+- [x] 06-01/extra-6-retrieval-eval  (선택) 통과 (16/16) · 2026-08-27  · spec:56417d3 sol:dddfd5b
+- [x] 08-01  통과 (5/5) · 2026-08-27  · spec:a026500 sol:178d263
 - [ ] 08-01/extra-1-tool-format  (선택) 미확정
 - [ ] 08-02  미확정
 - [ ] 08-03  미확정
