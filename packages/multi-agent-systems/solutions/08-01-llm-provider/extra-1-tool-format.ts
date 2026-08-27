@@ -42,19 +42,26 @@ function asObject(v: unknown): Record<string, unknown> {
 }
 
 /**
- * 두 벤더의 차이는 **위치**와 **인자 타입** 둘이다.
+ * 세 벤더의 차이는 **위치**와 **인자 타입**이다.
  *
- *   OpenAI    : `tool_calls[]`      · arguments가 JSON **문자열** → 파싱해야 한다
- *   Anthropic : `content[]`의 일부  · input이 이미 **객체** → 파싱하면 안 된다
+ *   openai    : `tool_calls[]`                        · arguments가 JSON **문자열** → 파싱해야 한다
+ *   anthropic : `content[]`의 일부(`type: tool_use`)   · input이 이미 **객체** → 파싱하면 안 된다
+ *   gemini    : `candidates[0].content.parts[]`의 일부 · args가 이미 **객체** → 파싱하면 안 된다
  *
  * 한쪽 규칙을 다른 쪽에 적용하면 `JSON.parse(object)`가 `"[object Object]"`를
  * 먹고 던지거나, 반대로 문자열이 그대로 input에 실려 도구가 인자를 못 읽는다.
  *
  * 깨진 호출은 **그것만 버린다.** 던지면 같은 응답에 함께 온 정상 호출까지
  * 잃고, 상위 루프는 회복할 기회가 없다.
+ *
+ * gemini의 각 part엔 `functionCall`과 나란히 `thoughtSignature`가 실려 있다.
+ * 여기서 그 필드를 버리는 것 자체는 맞다 — NormalizedToolCall이 담을 자리가
+ * 없다. 다만 이 결과로 **다음 턴을 이어가려 하면** 그 서명이 없어 깨진다.
+ * docs/03-langgraph-basics.md 가 LangGraph에서 겪은 바로 그 유실이, 정규화
+ * 함수 하나로도 재현된다는 것이 이 케이스의 요점이다.
  */
 export function parseToolCalls(
-  vendor: "openai" | "anthropic",
+  vendor: "openai" | "anthropic" | "gemini",
   raw: Record<string, unknown>,
 ): NormalizedToolCall[] {
   if (vendor === "openai") {
@@ -68,6 +75,18 @@ export function parseToolCalls(
       } catch {
         // 모델이 만든 인자 문자열이 깨졌다 — 이 호출만 버린다.
       }
+    }
+    return out;
+  }
+
+  if (vendor === "gemini") {
+    const candidate = (raw.candidates as Array<Record<string, any>> | undefined)?.[0];
+    const parts = (candidate?.content?.parts as Array<Record<string, any>> | undefined) ?? [];
+    const out: NormalizedToolCall[] = [];
+    for (const part of parts) {
+      const fc = part?.functionCall;
+      if (!fc?.name || !fc?.id) continue; // id 없이는 이후 응답과 짝지을 수 없다 — 버린다.
+      out.push({ id: String(fc.id), name: String(fc.name), input: asObject(fc.args) });
     }
     return out;
   }

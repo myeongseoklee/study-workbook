@@ -48,13 +48,20 @@ export function toAnthropicTool(spec: ToolSpec): Record<string, unknown> {
 /**
  * 벤더 응답 → 정규화된 툴 호출 목록.
  *
- * 힌트: 두 벤더의 가장 잦은 혼동 지점은 **인자의 타입**이다. 한쪽은 JSON
- *       문자열이고 다른 쪽은 이미 객체다. 그리고 이 함수는 던지지 않는다 —
+ * 힌트: 세 벤더의 가장 잦은 혼동 지점은 **인자의 타입**이다. openai는 JSON
+ *       문자열, anthropic·gemini는 이미 객체다. 그리고 이 함수는 던지지 않는다 —
  *       모델이 만든 문자열은 언제든 깨지는데, 어댑터가 던지면 같은 응답의
  *       정상 호출까지 함께 잃는다.
+ *
+ *       gemini는 `candidates[0].content.parts[]`에 functionCall이 실린다.
+ *       각 part엔 함께 `thoughtSignature`(대화를 이어갈 서명)가 붙어 있는데,
+ *       NormalizedToolCall에는 그 자리가 없다 — docs/03-langgraph-basics.md
+ *       § 프레임워크와 provider 호환 이 경고한 "정규화가 곧 재구성"이 여기서
+ *       실제로 벌어진다. 이 함수가 만든 결과로 **다음 턴을 이어가려 하면
+ *       깨진다** — 지금 이 정규화는 한 번의 호출을 읽는 데만 안전하다.
  */
 export function parseToolCalls(
-  vendor: "openai" | "anthropic",
+  vendor: "openai" | "anthropic" | "gemini",
   raw: Record<string, unknown>,
 ): NormalizedToolCall[] {
   // 🎯 TODO: 구현하라

@@ -5,6 +5,8 @@
 // 순수 함수라 네트워크 없이 판정할 수 있다.
 import { describe, expect, it } from "vitest";
 import { parseToolCalls, toAnthropicTool, toOpenAITool } from "../../src/08-01-llm-provider/extra-1-tool-format";
+// gemini는 toXTool 이 없다 — functionDeclarations 그룹핑은 요청 조립 단계의 일이라
+// (ToolSpec → 벤더 객체 하나) 라는 이 함수들의 모양과 안 맞는다. parseToolCalls만 다룬다.
 import type { ToolSpec } from "../../src/08-01-llm-provider/extra-1-tool-format";
 
 const spec: ToolSpec = {
@@ -101,13 +103,85 @@ describe("parseToolCalls — 응답에서 호출을 꺼낸다", () => {
     expect(parseToolCalls("openai", raw)).toEqual([{ id: "ok", name: "add", input: { a: 1 } }]);
   });
 
-  it("두 벤더의 결과 모양이 같다 — 상위 코드가 벤더를 몰라도 되는 이유다", () => {
+  it("세 벤더의 결과 모양이 같다 — 상위 코드가 벤더를 몰라도 되는 이유다", () => {
     const openai = parseToolCalls("openai", {
       tool_calls: [{ id: "c1", type: "function", function: { name: "add", arguments: '{"a":1}' } }],
     });
     const anthropic = parseToolCalls("anthropic", {
       content: [{ type: "tool_use", id: "c1", name: "add", input: { a: 1 } }],
     });
+    const gemini = parseToolCalls("gemini", {
+      candidates: [{ content: { parts: [{ functionCall: { name: "add", args: { a: 1 }, id: "c1" } }] } }],
+    });
     expect(openai).toEqual(anthropic);
+    expect(anthropic).toEqual(gemini);
+  });
+});
+
+describe("parseToolCalls — gemini: 실제 응답 모양(candidates[0].content.parts[])", () => {
+  it("args는 이미 객체라 파싱하면 안 된다", () => {
+    // 실측(gemini-3.1-flash-lite, 네이티브 함수 호출): args 가 이미 object로 온다.
+    // JSON.parse 를 걸면 문자열이 아닌 값이라 던진다.
+    const raw = {
+      candidates: [
+        {
+          content: {
+            parts: [{ functionCall: { name: "get_weather", args: { city: "서울" }, id: "call_14303" } }],
+          },
+        },
+      ],
+    };
+    expect(parseToolCalls("gemini", raw)).toEqual([{ id: "call_14303", name: "get_weather", input: { city: "서울" } }]);
+  });
+
+  it("thoughtSignature가 함께 와도 무시하고 통과한다", () => {
+    // 이 필드가 실려 있다는 것 자체가 요점이다 — docs/03 § 프레임워크와 provider
+    // 호환 이 경고한 그 서명이다. NormalizedToolCall 은 이걸 담지 않는다.
+    const raw = {
+      candidates: [
+        {
+          content: {
+            parts: [
+              {
+                functionCall: { name: "get_weather", args: { city: "서울" }, id: "call_1" },
+                thoughtSignature: "EnEKbwERTTIPfC87fYoZ1kd0dHc6ybs...",
+              },
+            ],
+          },
+        },
+      ],
+    };
+    expect(parseToolCalls("gemini", raw)).toEqual([{ id: "call_1", name: "get_weather", input: { city: "서울" } }]);
+  });
+
+  it("텍스트 part는 건너뛰고 functionCall part만 모은다", () => {
+    const raw = {
+      candidates: [
+        {
+          content: {
+            parts: [
+              { text: "날씨를 확인할게요." },
+              { functionCall: { name: "get_weather", args: { city: "서울" }, id: "c1" } },
+              { functionCall: { name: "get_weather", args: { city: "부산" }, id: "c2" } },
+            ],
+          },
+        },
+      ],
+    };
+    expect(parseToolCalls("gemini", raw).map((c) => c.id)).toEqual(["c1", "c2"]);
+  });
+
+  it("id가 없는 functionCall은 버린다 — 이후 응답과 짝지을 수 없다", () => {
+    const raw = {
+      candidates: [{ content: { parts: [{ functionCall: { name: "get_weather", args: {} } }] } }],
+    };
+    expect(parseToolCalls("gemini", raw)).toEqual([]);
+  });
+
+  it("candidates·parts가 없거나 비어 있으면 빈 배열이다 — null이 아니다", () => {
+    expect(parseToolCalls("gemini", {})).toEqual([]);
+    expect(parseToolCalls("gemini", { candidates: [] })).toEqual([]);
+    expect(parseToolCalls("gemini", { candidates: [{ content: { parts: [] } }] })).toEqual([]);
+    expect(parseToolCalls("gemini", { candidates: [{ content: { parts: [{ text: "그냥 답" }] } }] })).toEqual([]);
   });
 });
