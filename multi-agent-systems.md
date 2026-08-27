@@ -31,10 +31,10 @@
 - [x] 04-01/extra-1-agent-router  (선택) 통과 (9/9) · 2026-08-27  · spec:db94d42 sol:488b711
 - [x] 05-01  통과 (4/4) · 2026-08-27  · spec:c6417a2 sol:4c58746
 - [x] 05-01/extra-1-failure-triage  (선택) 통과 (21/21) · 2026-08-27  · spec:4a09fc0 sol:4c58746
-- [x] 06-01  통과 (5/5) · 2026-08-27  · spec:ca68ec9 sol:00366c9
+- [x] 06-01  통과 (5/5) · 2026-08-27  · spec:ca68ec9 sol:49690c7
 - [ ] 06-01/extra-1-hybrid-rank  (선택) 미확정
 - [ ] 06-01/extra-2-memory-vector-store  (선택) 미확정
-- [ ] 06-01/extra-3-chunking  (선택) 미확정
+- [x] 06-01/extra-3-chunking  (선택) 통과 (16/16) · 2026-08-27  · spec:a4a7625 sol:49690c7
 - [ ] 06-01/extra-4-rerank  (선택) 미확정
 - [ ] 06-01/extra-5-score-fusion  (선택) 미확정
 - [ ] 06-01/extra-6-retrieval-eval  (선택) 미확정
