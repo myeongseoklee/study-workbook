@@ -9,7 +9,7 @@
 - [x] 01-prerequisites.md  · doc:c6e272f
 - [x] 02-what-is-an-agent.md  · doc:578c497
 - [x] 03-langgraph-basics.md  · doc:81a25b5
-- [x] 04-multi-agent-patterns.md  · doc:961b92b
+- [x] 04-multi-agent-patterns.md  · doc:6340394
 - [x] 05-eval-and-observability.md  · doc:fca8394
 - [x] 06-rag-when-needed.md  · doc:1041a98
 - [ ] 07-should-you-build-multi-agent.md
