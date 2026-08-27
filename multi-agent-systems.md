@@ -11,7 +11,7 @@
 - [x] 03-langgraph-basics.md  · doc:81a25b5
 - [x] 04-multi-agent-patterns.md  · doc:961b92b
 - [x] 05-eval-and-observability.md  · doc:fca8394
-- [x] 06-rag-when-needed.md  · doc:acadcca
+- [x] 06-rag-when-needed.md  · doc:1041a98
 - [ ] 07-should-you-build-multi-agent.md
 - [ ] 08-agent-platform-infra.md
 - [ ] 90-must-memorize.md
