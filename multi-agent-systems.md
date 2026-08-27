@@ -37,7 +37,7 @@
 - [x] 06-01/extra-3-chunking  (선택) 통과 (16/16) · 2026-08-27  · spec:a4a7625 sol:27d43ae
 - [x] 06-01/extra-4-rerank  (선택) 통과 (13/13) · 2026-08-27  · spec:8a50585 sol:27d43ae
 - [x] 06-01/extra-5-score-fusion  (선택) 통과 (17/17) · 2026-08-27  · spec:b8510bc sol:27d43ae
-- [ ] 06-01/extra-6-retrieval-eval  (선택) 미확정
+- [x] 06-01/extra-6-retrieval-eval  (선택) 통과 (16/16) · 2026-08-27  · spec:56417d3 sol:b7dbfca
 - [ ] 08-01  미확정
 - [ ] 08-01/extra-1-tool-format  (선택) 미확정
 - [ ] 08-02  미확정
