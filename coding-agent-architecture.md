@@ -48,6 +48,20 @@
 - [ ] ep04-agent-server/09-stream-and-shard.md
 - [ ] ep04-agent-server/10-session-data-as-asset.md
 - [ ] ep04-agent-server/11-domain-facts.md
+- [ ] ep05-broker-infra/00-overview.md
+- [ ] ep05-broker-infra/01-three-bottlenecks.md
+- [ ] ep05-broker-infra/02-four-participants.md
+- [ ] ep05-broker-infra/03-pgmq.md
+- [ ] ep05-broker-infra/04-event-broker.md
+- [ ] ep05-broker-infra/05-worker-server.md
+- [ ] ep05-broker-infra/06-fat-client.md
+- [ ] ep05-broker-infra/07-infra-as-fixed-asset.md
+- [ ] ep05-broker-infra/08-implementation-shape.md
+- [ ] ep05-broker-infra/09-bash-only-tools.md
+- [ ] ep05-broker-infra/10-streaming-as-events.md
+- [ ] ep05-broker-infra/11-model-anatomy.md
+- [ ] ep05-broker-infra/12-capacity-planning.md
+- [ ] ep05-broker-infra/13-domain-facts.md
 
 ## 워크북
 
@@ -66,6 +80,12 @@
 - [ ] 96:파트4 — 코딩 과제
 - [ ] 96:파트5 — 자기 설계
 - [ ] 96:파트6 — 오답 노트
+- [ ] 98:파트1 — 무지 추적
+- [ ] 98:파트2 — 경로 판별
+- [ ] 98:파트3 — 견적 산수
+- [ ] 98:파트4 — 코딩 과제
+- [ ] 98:파트5 — 자기 설계
+- [ ] 98:파트6 — 오답 노트
 
 ## 코딩 과제
 
@@ -81,6 +101,10 @@
 - [ ] e04-05-01  미확정
 - [ ] e04-06-01  미확정
 - [ ] e04-08-01  미확정
+- [ ] e05-02-01  미확정
+- [ ] e05-04-01  미확정
+- [ ] e05-08-01  미확정
+- [ ] e05-12-01  미확정
 
 ## 오답 노트
 
