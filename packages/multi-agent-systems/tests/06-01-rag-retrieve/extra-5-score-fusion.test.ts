@@ -72,6 +72,15 @@ describe("weightedFusion", () => {
     expect(weightedFusion([L], [1], { minScore: 0.4 })).toEqual(["a", "b"]);
   });
 
+  it("minScore는 boost를 적용한 뒤의 점수로 판정한다", () => {
+    // boost 없이는 a, b 가 문턱을 넘는다. boost 를 걸면 c 가 올라와 문턱을
+    // 넘고 b 는 내려가 문턱 아래로 떨어진다 — 결과가 뒤집혀야 boost가
+    // 정렬 이후가 아니라 점수 계산 단계에서 minScore 앞에 적용된 것이다.
+    const L = [d("a", 10), d("b", 6), d("c", 3), d("e", 2)];
+    expect(weightedFusion([L], [1], { minScore: 0.4 })).toEqual(["a", "b"]);
+    expect(weightedFusion([L], [1], { boost: { c: 4, b: 0.5 }, minScore: 0.4 })).toEqual(["a", "c"]);
+  });
+
   it("가중치 개수가 검색기 수와 다르면 거부한다", () => {
     expect(() => weightedFusion([L1, L2], [1])).toThrow(/가중치/);
   });
