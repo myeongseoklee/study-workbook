@@ -18,14 +18,18 @@ packages/coding-agent-architecture/
 │   ├── ep04-agent-server/     ← 강의 #4 (이벤트 기반 서버 골격)
 │   │   ├── 00-overview.md ... 11-domain-facts.md
 │   │   └── assets/frames/     ← 슬라이드 11장 + 메모장 3장 + 코드 4장
-│   ├── (ep05-.../ ...)        ← 새 영상이 오면 여기에 추가
+│   ├── ep05-broker-infra/     ← 강의 #5 (브로커 인프라 + 로컬 모델 선택)
+│   │   ├── 00-overview.md ... 13-domain-facts.md
+│   │   └── assets/frames/     ← 다이어그램 슬라이드 3장
+│   ├── (ep06-.../ ...)        ← 새 영상이 오면 여기에 추가
 │   ├── 90-must-memorize.md    ← 암기 카드 (전 회차 누적)
 │   ├── 91-glossary.md         ← 용어집 (전 회차 누적)
 │   └── 99-references.md       ← 외부 공식 문서 (전 회차 누적)
 ├── workbook/
 │   ├── 92-workbook.md         ← 문제 (1·2강 누적) / 93-solutions.md
 │   ├── 94-workbook-ep03.md    ← 3강 (계획→구현 판단) / 95-solutions-ep03.md
-│   └── 96-workbook-ep04.md    ← 4강 (연쇄 추적·사고 진단) / 97-solutions-ep04.md
+│   ├── 96-workbook-ep04.md    ← 4강 (연쇄 추적·사고 진단) / 97-solutions-ep04.md
+│   └── 98-workbook-ep05.md    ← 5강 (무지 추적·견적 산수) / 99-solutions-ep05.md
 ├── tests/                     📋 명세 — 학습자에게 주어지는 Vitest 테스트
 ├── src/                       🎯 코딩 문제 (TODO 스켈레톤)
 └── solutions/                 ✅ 참고 구현 (통과한 뒤에 읽는다)
@@ -52,6 +56,7 @@ packages/coding-agent-architecture/
 | #2 | `ep02-business-agent/` | 세션·컨텍스트의 실체 + 기업 납품 요구·개발 계획 | 코딩에이전트 만들기 #2 비지니스용 에이전트 (라이브, 약 1h23m) |
 | #3 | `ep03-admin-implementation/` | 2강 계획표의 **참조 구현** + 에이전트에게 시키는 법 | 코딩에이전트 만들기 #3 (라이브, 약 58m) |
 | #4 | `ep04-agent-server/` | 이벤트 기반 에이전트 서버의 **골격 설계** (CPS·봉투·멱등·큐·워커·샤드) | 코딩에이전트 만들기 #4 (라이브, 약 1h42m) |
+| #5 | `ep05-broker-infra/` | 그 골격이 **도는 인프라**가 되는 회차 (네 참가자·PGMQ·브로커·재사용) + **로컬 모델 선택 실전** | 코딩에이전트 만들기 #5 (라이브, 약 1h11m) |
 
 ## 개념 → 회차 색인
 
@@ -89,6 +94,19 @@ packages/coding-agent-architecture/
 | 세션=채널 · 병목은 송신 · 샤드 | `ep04/09-stream-and-shard` | `ep02/02-session-server` (스트림형을 고른 지점) |
 | PGMQ · 온프레미스 인프라 선택 근거 | `ep04/01-why-not-http` | `event-sourcing-msa/11-postgres-as-broker` (패키지 밖) |
 | 세션 데이터가 자산이다 → 중앙 수집 요구 | `ep04/10-session-data-as-asset` | `ep02/06-why-onprem` (사업 근거) |
+| **병목 3종** — 접수 대기·요청 처리·응답 대기 | `ep05/01-three-bottlenecks` | `ep04/01-why-not-http` (같은 문제의 일관성 쪽 근거) |
+| 네 참가자와 **무지의 배치** | `ep05/02-four-participants` | — |
+| PGMQ 5연산 · **MQ와 테이블의 단일 트랜잭션** | `ep05/03-pgmq` | `ep04/06-queue` (삭제 시점) · `event-sourcing-msa/11-postgres-as-broker` |
+| **이벤트 브로커** — 처리하지 않아서 늘릴 수 있다 | `ep05/04-event-broker` | — |
+| 🔴 **큐로 읽기 대 로그로 읽기** (작업 경로 ↔ 결과 경로) | `ep05/04-event-broker` | `ep04/06-queue` (큐 쪽만 다뤘다) |
+| 기능 추가 = **워커 추가** | `ep05/05-worker-server` | `ep04/08-workers` (스레드 축척) |
+| **팻 클라이언트** — 서버의 무지와 같은 결정의 양면 | `ep05/06-fat-client` | `ep04/02-cps` (클라이언트도 서버가 된다) |
+| 🔴 **애플리케이션 = 이벤트 타입 협약 / 인프라는 고정 자산** | `ep05/07-infra-as-fixed-asset` | `ep04/07-event-as-api` |
+| 단일 Express 겸업 · **순수 라이브러리 판별식** | `ep05/08-implementation-shape` | `ep02/10-tech-stack` |
+| **도구는 bash 하나, 넓히는 것은 스킬** | `ep05/09-bash-only-tools` | `ep01/03-tools-as-control` (트레이드오프 원본) |
+| **스트리밍 = 이벤트를 잘게 자주** | `ep05/10-streaming-as-events` | `ep04/03-envelope` (`sequence`가 여기서 필수가 된다) |
+| MTP · QAT/PTQ · **멀티모달은 별도 모듈** | `ep05/11-model-anatomy` | — |
+| **용량 산수** — Q5 하한 · 용량 공백 · KV 캐시 양자화 | `ep05/12-capacity-planning` | `ep01/06-local-llm` (하드웨어 산수) · `ep02/01-session-identity` (KV 캐시) |
 
 ## 변경 이력
 
@@ -98,4 +116,5 @@ packages/coding-agent-architecture/
 | 2026-08-05 | #2 | `study` 모노레포 `packages/coding-agent-architecture/`로 이전(문제·정답 분리 규약 적용). `ep02-business-agent/` 추가 (본문 11파일 + 워크북 + 슬라이드 캡처 6장). 누적 문서 갱신 — `must-memorize.md`에 #2 항목 25개(신규 섹션 2개: 구현 규칙 / 비즈니스 제품 요구), `glossary.md`에 레이어 6~7 신설(용어 30여 종), `references.md`에 #2 원본·Turborepo·pgvector·PowerShell 인코딩·RHEL 컨테이너 항목과 수치 검증 안내 추가. 자막이 없는 영상이라 로컬 STT로 전사한 뒤 슬라이드 캡처로 교차 확인했고, 자체 시스템 시연 구간은 제외했다. |
 | 2026-08-11 | #3 | `ep03-admin-implementation/` 추가 (본문 9파일 + 슬라이드·스킬 캡처). 워크북 `94`/`95` 신설 — 회수형이 아니라 **계획→구현 판단형**으로 형태를 바꿨다(강의 과제가 "이해하라"가 아니라 "같은 계획표로 네 에이전트에게 시켜 만들어 와라"이기 때문). 코딩 과제 3종. 누적 문서에 `#3` 항목 추가. |
 | 2026-08-19 | #4 | `ep04-agent-server/` 추가 (본문 12파일 + 캡처 18장: 슬라이드 11 · 메모장 3 · 코드 4). 워크북 `96`/`97` 신설 — **연쇄 추적 / 역전 재현 / 사고 진단** 세 형태. 코딩 과제 4종(`e04-05-01` 멱등 검문소 · `e04-06-01` 큐 삭제 시점 · `e04-03-01` 인과 그래프 복원 · `e04-08-01` 취소 가능한 워커), 테스트 123건. 누적 문서 갱신 — `90`에 `#4` 카드 36개(정의 10 · 트레이드오프 6 · 의사결정 경계 10 · 진단 신호 10), `91`에 **레이어 8** 신설(용어 30여 종), `99`에 `#4` 원본·PGMQ·SQS·UUIDv7·`worker_threads`·아웃박스 항목과 STT 오차 목록. 자막이 없어 로컬 STT로 전사했고 식별자는 캡처로 교차 확인했다. 슬라이드 2장이 메모장에 가려져 해당 구간만 다시 받아 복원했다. 이벤트 소싱 기초는 이 모노레포의 `event-sourcing-msa` 패키지를 선수 지식으로 연결했다(강의자가 그 전제를 명시). |
+| 2026-08-27 | #5 | `ep05-broker-infra/` 추가 (본문 14파일 + 다이어그램 캡처 3장). 워크북 `98`/`99` 신설 — **무지 추적 / 경로 판별 / 견적 산수** 세 형태. 코딩 과제 4종(`e05-03-01` 가시성 타임아웃 시뮬레이터 · `e05-04-01` 큐 대 로그 팬아웃 · `e05-05-01` 타입 기반 워커 라우팅 · `e05-12-01` VRAM 견적기). 누적 문서 갱신 — `90`에 `#5` 카드 41개, `91`에 **레이어 9** 신설(브로커 인프라 어휘 + 로컬 모델 해부학), `99`에 `#5` 원본·PGMQ·PostgreSQL MVCC/공유 버퍼·LM Studio·Gemma QAT·`spawn` 항목과 DGX Spark 사양. 자막 없는 라이브라 로컬 STT로 전사했고 **반복 루프가 삼킨 약 20분을 다섯 구간 재전사로 복원**했다(앵커 109→143, 5,164→6,817단어). 슬라이드 다섯 장 중 **본문이 표로 다시 쓴 불릿 목록 둘은 캡처를 빼고 좌표만** 남겼다. |
 | 2026-08-20 | 시각 자료 | 렌더링 차트 1개 신설 — `ep02/04-compaction`의 **판정 지점과 잘림**(`assets/diagrams/compaction-trigger`). 캡처가 이미 슬라이드 원문을 담고 있어 나머지 후보는 그리지 않았다. 캡처 뒤에 결론 문장이 없던 세 곳(`ep02/02`, `ep03/02`, `ep03/04`)에 한 문장씩 붙였다. |
