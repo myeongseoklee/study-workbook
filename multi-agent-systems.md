@@ -38,7 +38,7 @@
 - [x] 06-01/extra-4-rerank  (선택) 통과 (13/13) · 2026-08-27  · spec:8a50585 sol:dddfd5b
 - [x] 06-01/extra-5-score-fusion  (선택) 통과 (17/17) · 2026-08-27  · spec:b8510bc sol:dddfd5b
 - [x] 06-01/extra-6-retrieval-eval  (선택) 통과 (16/16) · 2026-08-27  · spec:56417d3 sol:dddfd5b
-- [x] 08-01  통과 (5/5) · 2026-08-27  · spec:a026500 sol:178d263
+- [x] 08-01  통과 (5/5) · 2026-08-28  · spec:a026500 sol:f915295
 - [x] 08-01/extra-1-tool-format  (선택) 통과 (15/15) · 2026-08-28  · spec:e19c31b sol:f915295
 - [ ] 08-02  미확정
 - [ ] 08-03  미확정
