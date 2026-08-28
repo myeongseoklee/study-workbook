@@ -121,6 +121,13 @@ function asObject(v: unknown): Record<string, unknown> {
  * docs/03-langgraph-basics.md 가 LangGraph에서 겪은 바로 그 유실이, 정규화
  * 함수 하나로도 재현된다는 것이 이 케이스의 요점이다.
  */
+// vendor·raw가 한 객체의 필드가 아니라 별개 파라미터라, switch(vendor) 만으로는
+// TypeScript가 raw를 자동으로 좁혀주지 않는다(진짜 discriminated union이 아니다).
+// 오버로드로 "vendor가 이 값이면 raw는 이 타입"을 호출부에 알려준다 — 그래야
+// 잘못된 벤더에 잘못된 모양의 raw를 넘기는 실수를 호출 시점에 잡는다.
+export function parseToolCalls(vendor: "openai", raw: OpenAIToolCallsRaw): NormalizedToolCall[];
+export function parseToolCalls(vendor: "anthropic", raw: AnthropicContentRaw): NormalizedToolCall[];
+export function parseToolCalls(vendor: "gemini", raw: GeminiCandidatesRaw): NormalizedToolCall[];
 export function parseToolCalls(
   vendor: "openai" | "anthropic" | "gemini",
   raw: VendorToolResponse,

@@ -121,6 +121,13 @@ export function toAnthropicTool(spec: ToolSpec): Record<string, unknown> {
  *       실제로 벌어진다. 이 함수가 만든 결과로 **다음 턴을 이어가려 하면
  *       깨진다** — 지금 이 정규화는 한 번의 호출을 읽는 데만 안전하다.
  */
+// vendor·raw가 한 객체의 필드가 아니라 별개 파라미터라, switch(vendor) 만으로는
+// TypeScript가 raw를 자동으로 좁혀주지 않는다(진짜 discriminated union이 아니다).
+// 오버로드로 "vendor가 이 값이면 raw는 이 타입"을 호출부에 알려준다 — 그래야
+// 잘못된 벤더에 잘못된 모양의 raw를 넘기는 실수를 호출 시점에 잡는다.
+export function parseToolCalls(vendor: "openai", raw: OpenAIToolCallsRaw): NormalizedToolCall[];
+export function parseToolCalls(vendor: "anthropic", raw: AnthropicContentRaw): NormalizedToolCall[];
+export function parseToolCalls(vendor: "gemini", raw: GeminiCandidatesRaw): NormalizedToolCall[];
 export function parseToolCalls(
   vendor: "openai" | "anthropic" | "gemini",
   raw: VendorToolResponse,
