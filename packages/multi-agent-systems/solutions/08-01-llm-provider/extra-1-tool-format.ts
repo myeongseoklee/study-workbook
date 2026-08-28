@@ -18,6 +18,47 @@ export interface NormalizedToolCall {
   input: Record<string, unknown>;
 }
 
+/** openai: chat.completions 응답의 message.tool_calls. */
+export interface OpenAIToolCallsRaw {
+  tool_calls?: Array<{
+    id: string;
+    type: string;
+    function: { name: string; arguments: string };
+  }>;
+}
+
+/**
+ * anthropic: messages 응답의 content. tool_use 외 블록(text 등)도 섞여 온다.
+ * text·tool_use가 한 배열에 섞이므로 필드를 리터럴로 좁히지 않는다 — `type`으로
+ * 직접 걸러야 한다(구현에서 `b.type === "tool_use"`로 확인).
+ */
+export interface AnthropicContentRaw {
+  content?: Array<{
+    type: string;
+    text?: string;
+    id?: string;
+    name?: string;
+    input?: Record<string, unknown>;
+  }>;
+}
+
+/** gemini: generateContent 응답. functionCall 은 thoughtSignature 와 나란히 온다. */
+export interface GeminiCandidatesRaw {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{
+        text?: string;
+        functionCall?: { name: string; args: Record<string, unknown>; id?: string };
+        thoughtSignature?: string;
+      }>;
+    };
+  }>;
+}
+
+/** parseToolCalls 가 받는 원본 응답 — 벤더별로 이 셋 중 하나다. */
+export type VendorToolResponse = OpenAIToolCallsRaw | AnthropicContentRaw | GeminiCandidatesRaw;
+
+
 /** OpenAI는 `function` 아래로 한 겹 감싼다. */
 export function toOpenAITool(spec: ToolSpec): Record<string, unknown> {
   return {
@@ -62,16 +103,15 @@ function asObject(v: unknown): Record<string, unknown> {
  */
 export function parseToolCalls(
   vendor: "openai" | "anthropic" | "gemini",
-  raw: Record<string, unknown>,
+  raw: VendorToolResponse,
 ): NormalizedToolCall[] {
   if (vendor === "openai") {
-    const calls = Array.isArray(raw.tool_calls) ? raw.tool_calls : [];
+    const calls = (raw as OpenAIToolCallsRaw).tool_calls ?? [];
     const out: NormalizedToolCall[] = [];
-    for (const c of calls as Array<Record<string, any>>) {
-      const fn = c?.function;
-      if (!fn?.name) continue;
+    for (const c of calls) {
+      if (!c?.function?.name) continue;
       try {
-        out.push({ id: String(c.id), name: String(fn.name), input: asObject(JSON.parse(fn.arguments || "{}")) });
+        out.push({ id: c.id, name: c.function.name, input: asObject(JSON.parse(c.function.arguments || "{}")) });
       } catch {
         // 모델이 만든 인자 문자열이 깨졌다 — 이 호출만 버린다.
       }
@@ -80,19 +120,21 @@ export function parseToolCalls(
   }
 
   if (vendor === "gemini") {
-    const candidate = (raw.candidates as Array<Record<string, any>> | undefined)?.[0];
-    const parts = (candidate?.content?.parts as Array<Record<string, any>> | undefined) ?? [];
+    const parts = (raw as GeminiCandidatesRaw).candidates?.[0]?.content?.parts ?? [];
     const out: NormalizedToolCall[] = [];
     for (const part of parts) {
-      const fc = part?.functionCall;
+      const fc = part.functionCall;
       if (!fc?.name || !fc?.id) continue; // id 없이는 이후 응답과 짝지을 수 없다 — 버린다.
-      out.push({ id: String(fc.id), name: String(fc.name), input: asObject(fc.args) });
+      out.push({ id: fc.id, name: fc.name, input: asObject(fc.args) });
     }
     return out;
   }
 
-  const blocks = Array.isArray(raw.content) ? raw.content : [];
-  return (blocks as Array<Record<string, any>>)
-    .filter((b) => b?.type === "tool_use")
-    .map((b) => ({ id: String(b.id), name: String(b.name), input: asObject(b.input) }));
+  const blocks = (raw as AnthropicContentRaw).content ?? [];
+  const out: NormalizedToolCall[] = [];
+  for (const b of blocks) {
+    if (b.type !== "tool_use" || !b.id || !b.name) continue;
+    out.push({ id: b.id, name: b.name, input: asObject(b.input) });
+  }
+  return out;
 }

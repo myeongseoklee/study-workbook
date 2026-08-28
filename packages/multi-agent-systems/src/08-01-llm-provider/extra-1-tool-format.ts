@@ -24,6 +24,47 @@ export interface NormalizedToolCall {
   input: Record<string, unknown>;
 }
 
+/** openai: chat.completions 응답의 message.tool_calls. */
+export interface OpenAIToolCallsRaw {
+  tool_calls?: Array<{
+    id: string;
+    type: string;
+    function: { name: string; arguments: string };
+  }>;
+}
+
+/**
+ * anthropic: messages 응답의 content. tool_use 외 블록(text 등)도 섞여 온다.
+ * text·tool_use가 한 배열에 섞이므로 필드를 리터럴로 좁히지 않는다 — `type`으로
+ * 직접 걸러야 한다(구현에서 `b.type === "tool_use"`로 확인).
+ */
+export interface AnthropicContentRaw {
+  content?: Array<{
+    type: string;
+    text?: string;
+    id?: string;
+    name?: string;
+    input?: Record<string, unknown>;
+  }>;
+}
+
+/** gemini: generateContent 응답. functionCall 은 thoughtSignature 와 나란히 온다. */
+export interface GeminiCandidatesRaw {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{
+        text?: string;
+        functionCall?: { name: string; args: Record<string, unknown>; id?: string };
+        thoughtSignature?: string;
+      }>;
+    };
+  }>;
+}
+
+/** parseToolCalls 가 받는 원본 응답 — 벤더별로 이 셋 중 하나다. */
+export type VendorToolResponse = OpenAIToolCallsRaw | AnthropicContentRaw | GeminiCandidatesRaw;
+
+
 /**
  * ToolSpec → OpenAI 형식.
  *
@@ -62,7 +103,7 @@ export function toAnthropicTool(spec: ToolSpec): Record<string, unknown> {
  */
 export function parseToolCalls(
   vendor: "openai" | "anthropic" | "gemini",
-  raw: Record<string, unknown>,
+  raw: VendorToolResponse,
 ): NormalizedToolCall[] {
   // 🎯 TODO: 구현하라
   throw new Error("TODO: parseToolCalls");
