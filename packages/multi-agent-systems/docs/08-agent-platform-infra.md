@@ -153,6 +153,59 @@ const result   = await devAgent(`이 전략 구현: ${strategy}`);
 
 > **핵심:** 어댑터 패턴 = "계약(인터페이스)은 하나, 구현(벤더)은 여럿". Agent Card가 에이전트 사이의 계약이듯, `LLMProvider`는 플랫폼과 LLM 벤더 사이의 계약이다. 벤더 교체가 호출부에 새어나가지 않게 하는 것이 플랫폼의 일이다.
 
+#### 벤더별 tool 형식 — 실제 모양
+
+위 심화 항목("정규화")이 구체적으로 뭘 정규화하는지, 세 벤더의 실제 응답을 나란히 놓는다. **정의(요청에 넣는 것)와 호출(응답에서 받는 것)은 따로 다르다.**
+
+**① 정의 — 우리 쪽 `{name, description, parameters}` 하나를 벤더마다 다르게 감싼다.**
+
+```
+openai     { type: "function", function: { name, description, parameters } }   ← function 아래 한 겹
+anthropic  { name, description, input_schema }                                  ← 평평. 키 이름이 다르다(parameters→input_schema)
+```
+
+**② 호출 — 모델이 도구를 쓰기로 정하면, 그 결정이 벤더마다 다른 자리·다른 타입으로 온다.**
+
+```jsonc
+// openai — chat.completions 응답의 tool_calls[]. arguments는 JSON 문자열이다.
+{
+  "tool_calls": [
+    { "id": "call_1", "type": "function", "function": { "name": "add", "arguments": "{"a":3,"b":5}" } }
+  ]
+}
+
+// anthropic — messages 응답의 content[] 안에 다른 블록과 섞여 온다. input은 이미 객체다.
+{
+  "content": [
+    { "type": "text", "text": "계산할게요" },
+    { "type": "tool_use", "id": "call_1", "name": "add", "input": { "a": 3, "b": 5 } }
+  ]
+}
+
+// gemini — generateContent 응답의 candidates[0].content.parts[] 안. args도 이미 객체다.
+// (실측: gemini-3.1-flash-lite 네이티브 함수 호출)
+{
+  "candidates": [{
+    "content": {
+      "parts": [{
+        "functionCall": { "name": "get_weather", "args": { "city": "서울" }, "id": "call_14303" },
+        "thoughtSignature": "EnEKbwERTTIPfC87fYoZ..."
+      }]
+    }
+  }]
+}
+```
+
+세 위치, 두 인자 타입(문자열 vs 객체)이 이 표로 정리된다:
+
+| 벤더 | 호출이 있는 곳 | 인자 타입 |
+|---|---|---|
+| openai | `tool_calls[]` | JSON **문자열** — 파싱해야 한다 |
+| anthropic | `content[]`의 `type: "tool_use"` 블록 | 이미 **객체** |
+| gemini | `candidates[0].content.parts[]`의 `functionCall` | 이미 **객체** |
+
+**gemini의 `thoughtSignature`**는 `functionCall`과 나란히 오는 별도 필드다. 대화를 이어가는 데 필요한 서명인데, 이 워크북의 `NormalizedToolCall`엔 그 자리가 없다 — 정규화하는 순간 버려진다. 한 번의 호출을 읽는 데는 문제없지만, 그 결과로 **다음 턴을 이어가려 하면 깨진다.** [03장](03-langgraph-basics.md) § 프레임워크와 provider 호환이 LangChain에서 겪은 바로 그 유실이, 정규화 함수 하나로도 재현되는 지점이다.
+
 **자가진단:**
 1. "에이전트를 인프라로 짓는다"를 한 문장으로? (답: 마이크로서비스로 짓는다)
 2. Agent Card는 백엔드의 무엇에 대응하나? (답: OpenAPI 명세 = 서비스 계약)

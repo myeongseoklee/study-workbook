@@ -3,7 +3,7 @@
  *
  * 판정은 tests/08-01-llm-provider/extra-1-tool-format.test.ts가 한다.
  *
- * 📍 되짚기: docs/08-agent-platform-infra.md
+ * 📍 되짚기: docs/08-agent-platform-infra.md § 벤더별 tool 형식 — 실제 모양
  */
 
 export interface ToolSpec {
