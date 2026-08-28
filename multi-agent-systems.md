@@ -13,7 +13,7 @@
 - [x] 05-eval-and-observability.md  · doc:fca8394
 - [x] 06-rag-when-needed.md  · doc:1041a98
 - [x] 07-should-you-build-multi-agent.md  · doc:dbac033
-- [x] 08-agent-platform-infra.md  · doc:eeb2df2
+- [x] 08-agent-platform-infra.md  · doc:c771f54
 - [ ] 90-must-memorize.md
 - [ ] 91-glossary.md
 - [ ] 99-references.md
