@@ -10,6 +10,9 @@
  * 막히면: docs/08-agent-platform-infra.md § 벤더별 tool 형식 — 실제 모양
  */
 
+import type { ChatCompletionMessageFunctionToolCall } from "openai/resources/chat/completions/completions";
+import type { TextBlock, ToolUseBlock } from "@anthropic-ai/sdk/resources/messages/messages";
+
 /** 우리 쪽 표준 형식 — 벤더 중립. */
 export interface ToolSpec {
   name: string;
@@ -24,31 +27,48 @@ export interface NormalizedToolCall {
   input: Record<string, unknown>;
 }
 
-/** openai: chat.completions 응답의 message.tool_calls. */
+/**
+ * openai: chat.completions 응답의 message.tool_calls.
+ *
+ * `function` 필드는 `openai` 패키지의 실제 타입(`ChatCompletionMessageFunctionToolCall["function"]`)을
+ * 그대로 재사용한다 — `name`·`arguments`가 지어낸 모양이 아니라 SDK가 실제로 주는 모양이다.
+ * `type`만 리터럴("function")이 아니라 string이다 — 명세가 `const raw = {...}`로 먼저 변수에
+ * 담은 뒤 넘기는 자리가 있어, 그 시점에 리터럴이 string으로 넓어진다(타입이 아니라 이 파일
+ * 밖의 명세가 정할 수 없는 제약이라 여기서 맞춰준다).
+ */
 export interface OpenAIToolCallsRaw {
   tool_calls?: Array<{
     id: string;
     type: string;
-    function: { name: string; arguments: string };
+    function: ChatCompletionMessageFunctionToolCall["function"];
   }>;
 }
 
 /**
- * anthropic: messages 응답의 content. tool_use 외 블록(text 등)도 섞여 온다.
- * text·tool_use가 한 배열에 섞이므로 필드를 리터럴로 좁히지 않는다 — `type`으로
- * 직접 걸러야 한다(구현에서 `b.type === "tool_use"`로 확인).
+ * anthropic: messages 응답의 content. text·tool_use 블록이 섞여 온다.
+ *
+ * `input`은 `@anthropic-ai/sdk`의 실제 `ToolUseBlock["input"]`(=`unknown`)을 그대로 쓴다.
+ * `type`은 위와 같은 이유로 리터럴이 아니라 string이다 — `b.type === "tool_use"`로
+ * 직접 걸러야 한다(구현 참고).
  */
-export interface AnthropicContentRaw {
-  content?: Array<{
-    type: string;
-    text?: string;
-    id?: string;
-    name?: string;
-    input?: Record<string, unknown>;
-  }>;
+export interface AnthropicContentItem {
+  type: string;
+  text?: string;
+  id?: string;
+  name?: string;
+  input?: ToolUseBlock["input"];
 }
 
-/** gemini: generateContent 응답. functionCall 은 thoughtSignature 와 나란히 온다. */
+export interface AnthropicContentRaw {
+  content?: AnthropicContentItem[];
+}
+
+/**
+ * gemini: generateContent 응답. functionCall 은 thoughtSignature 와 나란히 온다.
+ * 이 프로젝트엔 Gemini 네이티브 SDK가 의존성으로 없어서(OpenAI 호환 엔드포인트만
+ * 쓴다) 가져올 실제 타입이 없다 — 아래는 gemini-3.1-flash-lite 를 실제로 호출해
+ * 확인한 응답 모양을 손으로 옮긴 것이다(docs/08 § 벤더별 tool 형식 참고).
+ */
 export interface GeminiCandidatesRaw {
   candidates?: Array<{
     content?: {
