@@ -31,13 +31,13 @@
 - [x] 04-01/extra-1-agent-router  (선택) 통과 (9/9) · 2026-08-27  · spec:db94d42 sol:7d51978
 - [x] 05-01  통과 (4/4) · 2026-08-27  · spec:c6417a2 sol:944d5ce
 - [x] 05-01/extra-1-failure-triage  (선택) 통과 (21/21) · 2026-08-27  · spec:4a09fc0 sol:944d5ce
-- [x] 06-01  통과 (5/5) · 2026-09-01  · spec:ca68ec9 sol:9faa214
-- [x] 06-01/extra-1-hybrid-rank  (선택) 통과 (23/23) · 2026-09-01  · spec:4b10d2c sol:9faa214
-- [ ] 06-01/extra-2-memory-vector-store  (선택) 미확정
-- [x] 06-01/extra-3-chunking  (선택) 통과 (16/16) · 2026-09-01  · spec:a4a7625 sol:9faa214
-- [x] 06-01/extra-4-rerank  (선택) 통과 (13/13) · 2026-09-01  · spec:8a50585 sol:9faa214
-- [x] 06-01/extra-5-score-fusion  (선택) 통과 (17/17) · 2026-09-01  · spec:b8510bc sol:9faa214
-- [x] 06-01/extra-6-retrieval-eval  (선택) 통과 (16/16) · 2026-09-01  · spec:56417d3 sol:9faa214
+- [x] 06-01  통과 (5/5) · 2026-09-01  · spec:ca68ec9 sol:91ec2d0
+- [x] 06-01/extra-1-hybrid-rank  (선택) 통과 (23/23) · 2026-09-01  · spec:4b10d2c sol:91ec2d0
+- [x] 06-01/extra-2-memory-vector-store  (선택) 통과 (8/8) · 2026-09-01  · spec:3776746 sol:91ec2d0
+- [x] 06-01/extra-3-chunking  (선택) 통과 (16/16) · 2026-09-01  · spec:a4a7625 sol:91ec2d0
+- [x] 06-01/extra-4-rerank  (선택) 통과 (13/13) · 2026-09-01  · spec:8a50585 sol:91ec2d0
+- [x] 06-01/extra-5-score-fusion  (선택) 통과 (17/17) · 2026-09-01  · spec:b8510bc sol:91ec2d0
+- [x] 06-01/extra-6-retrieval-eval  (선택) 통과 (16/16) · 2026-09-01  · spec:56417d3 sol:91ec2d0
 - [x] 08-01  통과 (5/5) · 2026-08-28  · spec:a026500 sol:f915295
 - [x] 08-01/extra-1-tool-format  (선택) 통과 (15/15) · 2026-08-28  · spec:e19c31b sol:f915295
 - [x] 08-02  통과 (3/3) · 2026-09-01  · spec:db067f3 sol:c1129e4
