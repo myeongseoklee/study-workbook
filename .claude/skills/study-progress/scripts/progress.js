@@ -1400,10 +1400,24 @@ function cmdSyncSol(pkg, num) {
 		const idx = path.join(REPO, '.git', `sync-sol-index-${process.pid}`);
 		const env = { ...process.env, GIT_INDEX_FILE: idx };
 		const g = (a) => execSync(`git ${a}`, { cwd: REPO, encoding: 'utf8', env }).trim();
+		const gTry = (a) => {
+			try {
+				return execSync(`git ${a}`, { cwd: REPO, encoding: 'utf8', env, stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+			} catch {
+				return null;
+			}
+		};
+		// 학습자가 실제로 안 건드린 파일까지 head(브랜치)의 옛 블롭으로 고정하면
+		// main이 그 뒤로 몇 번을 개정해도 반영되지 않는다 — merge-base 시점과
+		// head의 블롭이 같으면(=학습자가 안 건드림) main의 현재 블롭을 대신 쓴다.
+		const mergeBase = gTry(`merge-base ${head} ${mainSha}`);
 		try {
 			g(`read-tree ${mainSha}`);
 			for (const f of listing.split('\n').filter(Boolean)) {
-				const blob = g(`rev-parse ${head}:${scope}${f}`);
+				const headBlob = g(`rev-parse ${head}:${scope}${f}`);
+				const baseBlob = mergeBase ? gTry(`rev-parse ${mergeBase}:${scope}${f}`) : null;
+				const untouched = baseBlob !== null && baseBlob === headBlob;
+				const blob = untouched ? (gTry(`rev-parse ${mainSha}:${scope}${f}`) ?? headBlob) : headBlob;
 				g(`update-index --add --cacheinfo 100644,${blob},${scope}${f}`);
 			}
 			const tree = g('write-tree');
