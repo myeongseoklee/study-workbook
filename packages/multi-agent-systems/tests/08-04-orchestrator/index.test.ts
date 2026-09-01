@@ -65,4 +65,28 @@ describe("runOrchestration", () => {
     expect(fetchFn.calls[3][0]).toBe("http://localhost:8002/invoke");
     expect(JSON.parse((fetchFn.calls[3][1] as any).body).query).toContain("인사이트 X");
   });
+
+  it("urls 배열 순서가 뒤집혀도 analyst를 먼저 부른다 — 위치가 아니라 discover가 알려준 이름으로 찾아야 한다", () => {
+    // urls[0]이 ad-expert, urls[1]이 analyst다. discover 를 부르기만 하고 반환된
+    // 맵(cards)을 안 쓴 채 urls 배열 순서를 그대로 analyst→ad-expert로 가정하면,
+    // 여기서 순서가 뒤집혀 실패한다.
+    return (async () => {
+      const fetchFn = stubFetch([
+        { name: "ad-expert", url: "http://localhost:8002", capabilities: [] },
+        { name: "analyst", url: "http://localhost:8001", capabilities: [] },
+        { result: "인사이트 X" },
+        { result: "전략 Y" },
+      ]);
+
+      const out = await runOrchestration(
+        fetchFn,
+        ["http://localhost:8002", "http://localhost:8001"],
+        "성과 데이터"
+      );
+
+      expect(out).toEqual({ analysis: "인사이트 X", strategy: "전략 Y" });
+      expect(fetchFn.calls[2][0]).toBe("http://localhost:8001/invoke"); // analyst — urls 안에서는 두 번째다
+      expect(fetchFn.calls[3][0]).toBe("http://localhost:8002/invoke"); // ad-expert — urls 안에서는 첫 번째다
+    })();
+  });
 });
