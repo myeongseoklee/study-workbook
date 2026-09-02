@@ -66,6 +66,7 @@ S=~/Desktop/private/study/.claude/skills/study-progress/scripts/progress.js
 | "어디까지 했지", "진도", "뭐 남았어" | `status` |
 | "3장까지 읽었어", "이거 읽음" | `mark <패키지> docs <범위>` |
 | "워크북 파트1 풀었어" | `mark <패키지> workbook 1` |
+| "워크북 풀래", "92번 워크북 시작할래" | `start-workbook <패키지> 92` → worktree를 열고 문제 파일 경로 안내 |
 | "03-01 풀래", "이 과제 시작할래" | `start <패키지> 03-01` → 명세를 읽어주고 무엇을 만들지 안내 |
 | "03-01 통과했어", "이 과제 됐어" | `check <패키지> 03-01` (**검증 후** 기록) |
 | "선택 문제도 풀었어" | `check <패키지> 03-01/extra-1-graph-router` |
@@ -123,6 +124,17 @@ node $S done  multi-agent-systems 04-01     # worktree만 정리 (브랜치·커
 4. `solutions/`는 통과한 뒤에 연다 — 먼저 열면 과제가 독해로 바뀐다
 
 사용자가 명시적으로 "답 알려줘", "네가 풀어줘"라고 하면 그때는 응한다. 다만 통과 기록에 남는 것은 그 풀이가 아니라 **`check`가 실제로 돌린 결과**라는 점은 그대로다.
+
+### 워크북 환경 열고 닫기
+
+서술형 워크북(`workbook/92-workbook.md` 같은 파일)도 문제 파일에 직접 답을 적고 싶어 하면 채팅으로 받지 말고 이 명령을 쓴다 — main에 쓰면 교재가 오염된다.
+
+```bash
+node $S start-workbook multi-agent-systems 92     # main에서 분기 + worktree만 (설치 없음)
+node $S done multi-agent-systems workbook-92       # worktree만 정리 (브랜치·답안은 남는다)
+```
+
+`start`와 같은 패턴이지만 `pnpm install`도 `.env` 링크도 하지 않는다 — 서술형이라 실행 환경이 필요 없다. 재도전·이어쓰기, main 비오염, `done`이 브랜치를 남기는 것은 코딩 과제와 동일하다(레포 `README.md` § 규약 4). `check`가 자동으로 채점하지 않으므로, 정답 파일(`93-*`)과 대조한 결과는 `mark`로 남긴다.
 
 ## 코딩 과제 확정
 

@@ -246,10 +246,27 @@ worktree로 열면 main은 항상 교재 상태로 남고, 풀이는 자기 디�
 
 풀이 브랜치는 남겨 둔다. `done`은 worktree만 걷어내므로 나중에 `start`로 다시 열 수 있고, 커밋하지 않은 변경이 있으면 거부한다.
 
+### 워크북도 같은 방식으로 푼다
+
+서술형 문제(`workbook/92-workbook.md` 등)도 코딩 과제와 같은 이유로 별도 worktree가 필요하다 — 문제 파일에 직접 답을 적고 싶은데, main에 적으면 교재가 오염된다.
+
+```
+.sol/{패키지명}/workbook-{번호}/   ←  sol/{패키지명}/workbook-{번호} 브랜치
+```
+
+```bash
+node $S start-workbook stateful-context-design 92
+# .sol/stateful-context-design/workbook-92/packages/.../workbook/92-workbook.md 를 연다
+# 이 파일에 자유롭게 답을 적는다 — main은 그대로다
+node $S done stateful-context-design workbook-92   # worktree만 정리, 브랜치·답안은 남는다
+```
+
+`pnpm install`이나 `.env` 링크가 필요 없으므로 `start`보다 가볍다 — 워크북은 서술형이라 실행 환경이 필요 없다. 재도전·이어쓰기, main 비오염, worktree만 정리하고 브랜치는 남기는 것 모두 코딩 과제와 동일하다. 판정은 `93`(정답)과의 대조로 하며, `check`가 자동으로 걸지 않는다 — 대조 결과를 스스로 기록에 남긴다.
+
 ### 순서
 
 1. `docs/`를 읽는다
-2. `workbook/92-workbook.md`의 서술형을 **자료를 덮고** 푼다 → `93`으로 대조
+2. `node $S start-workbook {패키지} {워크북번호}`로 worktree를 열고, `workbook/92-workbook.md`의 서술형을 **자료를 덮고** 푼다 → `93`으로 대조 → `node $S done {패키지} workbook-{번호}`
 3. `node $S start {패키지} {과제번호}` — worktree가 열리고 환경까지 준비된다
 4. **`tests/{과제}/index.test.ts`를 먼저 읽는다** — 무엇을 만들지가 거기 있다
 5. `src/{과제}/index.ts`의 `🎯 TODO`를 채운다 (여유가 되면 `extra-*`도)
