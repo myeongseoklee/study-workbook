@@ -64,6 +64,8 @@
  *   progress.js mark <패키지> docs 00-03    문서 읽음 표시 (범위·부분일치·목록)
  *   progress.js mark <패키지> workbook 1    워크북 파트 표시
  *   progress.js start <패키지> <번호>       풀이 worktree 열기 (.sol/ · 브랜치 전환 없음)
+ *   progress.js start-workbook <패키지> <워크북번호>  워크북 답안 worktree 열기 (설치·판정 없음,
+ *                                          문제 파일 사본에 자유롭게 쓰기만 한다 — done은 동일)
  *   progress.js check <패키지> [번호]       코딩 과제를 실제로 돌려 확정
  *   progress.js check <패키지> 03-01/extra-1-graph-router   선택 문제 하나
  *   progress.js check --stale [패키지]      지문이 어긋난 과제만 재검증
@@ -811,7 +813,9 @@ function solWorktrees() {
 		if (line.startsWith('worktree ')) cur = line.slice(9).trim();
 		else if (line.startsWith('branch ') && cur) {
 			const branch = line.slice(7).trim().replace(/^refs\/heads\//, '');
-			const m = branch.match(/^sol\/(.+)\/((?:e\d+-)?\d+-\d+)$/);
+			// 코딩 과제(예: 03-01, e02-04-01) 뿐 아니라 워크북 worktree(workbook-92)도
+			// 같은 목록·done·status 표시를 공짜로 타게 하려고 두 번째 대안을 둔다.
+			const m = branch.match(/^sol\/(.+)\/((?:e\d+-)?\d+-\d+|workbook-\d+)$/);
 			if (m) out.push({ path: cur, branch, pkg: m[1], num: m[2] });
 			cur = null;
 		}
@@ -1004,7 +1008,71 @@ function cmdDone(pkg, num, force) {
 		}
 	}
 	console.log(`✓ worktree 제거: ${rel(open.path)}`);
-	console.log(`  브랜치 ${open.branch} 와 커밋은 남는다 — 다시 열려면 start ${pkg} ${num}`);
+	// num이 "workbook-92" 형태면 그건 start-workbook이 연 것이다 — 재개 명령도
+	// 그에 맞춰야 한다. start에 그대로 주면 assignmentDir 검사에서 죽는다.
+	const wbNum = num.match(/^workbook-(\d+)$/)?.[1];
+	const reopen = wbNum ? `start-workbook ${pkg} ${wbNum}` : `start ${pkg} ${num}`;
+	console.log(`  브랜치 ${open.branch} 와 커밋은 남는다 — 다시 열려면 ${reopen}`);
+}
+
+// ── start-workbook (워크북 서술형 파트용 worktree) ──────────────────────────
+//
+// 코딩 과제(cmdStart)와 목적이 다르다 — 판정할 코드가 없다. 그런데도 worktree가
+// 필요한 이유는 README 규약 2(문제·정답 분리)가 여기도 걸리기 때문이다:
+// 92-workbook.md는 main에 있는 **공용 문제 파일**이라 답을 그 자리에 쓰면
+// 다음 사람도, 다음 회차의 자신도 오염된 문제를 보게 된다. 채팅으로 답하면
+// 그 문제 자체가 안 생기지만, 파일에 직접 쓰고 싶다면 worktree의 사본에
+// 쓰고 main은 그대로 두면 된다 — 코딩 과제와 완전히 같은 논리다.
+//
+// 그래서 설치·`.env` 연결은 없다(순수 마크다운, 실행할 코드가 없다).
+// done은 cmdDone을 그대로 쓴다 — 그 함수는 pkg/num으로 worktree를 찾아
+// 지우기만 해서, num이 "92-01"이든 "workbook-92"든 가리지 않는다.
+function cmdStartWorkbook(pkg, num) {
+	if (!pkg || !num) die('사용: start-workbook <패키지> <워크북번호>  (예: 92)');
+	if (!topicPackages().includes(pkg)) die(`패키지를 찾을 수 없다: ${pkg}`);
+
+	const file = workbookFiles(pkg).find((f) => f.startsWith(`${num}-`));
+	if (!file) {
+		const known = workbookFiles(pkg)
+			.map((f) => f.match(/^(\d+)-/)?.[1])
+			.filter(Boolean)
+			.join(', ');
+		die(`packages/${pkg}/workbook/${num}-*.md 를 찾을 수 없다 — 있는 워크북: ${known || '(없음)'}`);
+	}
+
+	const branchKey = `workbook-${num}`;
+	const branch = `sol/${pkg}/${branchKey}`;
+	const wt = solPath(pkg, branchKey);
+
+	const open = worktreeFor(pkg, branchKey);
+	if (open) {
+		console.log(`이미 열려 있다: ${rel(open.path)}  (${branch})`);
+		console.log(`  ${rel(path.join(open.path, 'packages', pkg, 'workbook', file))}`);
+		return;
+	}
+	if (fs.existsSync(wt) && fs.readdirSync(wt).length > 0) {
+		die(`${rel(wt)} 가 이미 있고 worktree가 아니다 — 옮기거나 지운 뒤 다시 실행하라`);
+	}
+
+	const fresh = !branchExists(branch);
+	if (fresh) {
+		if (!gitOut('rev-parse --verify --quiet refs/heads/main')) die('main 브랜치를 찾을 수 없다');
+		git(`worktree add -b ${branch} ${JSON.stringify(wt)} main`);
+		console.log(`✓ ${branch} 생성 (main에서 분기)`);
+	} else {
+		git(`worktree add ${JSON.stringify(wt)} ${branch}`);
+		console.log(`✓ ${branch} 재개 (기존 답안이 그대로 있다)`);
+	}
+	console.log(`✓ worktree: ${rel(wt)}  (main은 문제 상태 그대로다)`);
+
+	if (!/^\.sol\/?$/m.test(readIgnore())) {
+		console.log('△ .gitignore에 `.sol/` 가 없다 — 추가해야 worktree가 main에 잡히지 않는다');
+	}
+
+	const target = path.join(wt, 'packages', pkg, 'workbook', file);
+	console.log(`\n  이 파일에 자유롭게 답을 적어라 — main은 안 건드린다:`);
+	console.log(`  ${rel(target)}`);
+	console.log(`\n  다 쓰면: node $S done ${pkg} ${branchKey}   (worktree만 정리, 브랜치·답안은 남는다)`);
 }
 
 const readIgnore = () => {
@@ -1510,6 +1578,9 @@ switch (cmd) {
 	case 'start':
 		cmdStart(rest[0], rest[1], { install: !flags.has('--no-install') });
 		break;
+	case 'start-workbook':
+		cmdStartWorkbook(rest[0], rest[1]);
+		break;
 	case 'check':
 		cmdCheck(rest[0], rest[1], flags.has('--force'), {
 			stale: flags.has('--stale'),
@@ -1529,5 +1600,7 @@ switch (cmd) {
 		cmdPath(rest[0]);
 		break;
 	default:
-		die(`모르는 명령: ${cmd}  (init / status / mark / start / check / done / sync-sol / save / path)`);
+		die(
+			`모르는 명령: ${cmd}  (init / status / mark / start / start-workbook / check / done / sync-sol / save / path)`,
+		);
 }
