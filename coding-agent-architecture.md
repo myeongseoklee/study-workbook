@@ -9,13 +9,13 @@
 - [ ] 91-glossary.md
 - [ ] 99-references.md
 - [ ] README.md
-- [ ] ep01-concepts/00-overview.md
-- [ ] ep01-concepts/01-why-agents.md
-- [ ] ep01-concepts/02-agent-loop.md
-- [ ] ep01-concepts/03-tools-as-control.md
-- [ ] ep01-concepts/04-hooks.md
-- [ ] ep01-concepts/05-context-and-cost.md
-- [ ] ep01-concepts/06-local-llm.md
+- [x] ep01-concepts/00-overview.md  · doc:ef7eddc
+- [x] ep01-concepts/01-why-agents.md  · doc:8a74274
+- [x] ep01-concepts/02-agent-loop.md  · doc:6caa051
+- [x] ep01-concepts/03-tools-as-control.md  · doc:1c76bd3
+- [x] ep01-concepts/04-hooks.md  · doc:03a47fb
+- [x] ep01-concepts/05-context-and-cost.md  · doc:b1a056e
+- [x] ep01-concepts/06-local-llm.md  · doc:0f9a5d1
 - [ ] ep02-business-agent/00-overview.md
 - [ ] ep02-business-agent/01-session-identity.md
 - [ ] ep02-business-agent/02-session-server.md
