@@ -1,0 +1,15 @@
+{
+  "name": "redis-pubsub-realtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Redis Pub/Sub로 실시간 알림 만들기 — 커넥션 독점과 분리, 휘발성의 경계, 팬아웃 정석 구조, 운영과 대안 판정",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@study/testkit": "workspace:*"
+  }
+}
