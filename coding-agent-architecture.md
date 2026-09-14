@@ -15,7 +15,7 @@
 - [x] ep01-concepts/03-tools-as-control.md  · doc:1c76bd3
 - [x] ep01-concepts/04-hooks.md  · doc:03a47fb
 - [x] ep01-concepts/05-context-and-cost.md  · doc:b1a056e
-- [x] ep01-concepts/06-local-llm.md  · doc:0f9a5d1
+- [x] ep01-concepts/06-local-llm.md  · doc:31a018a
 - [ ] ep02-business-agent/00-overview.md
 - [ ] ep02-business-agent/01-session-identity.md
 - [ ] ep02-business-agent/02-session-server.md
@@ -62,6 +62,11 @@
 - [ ] ep05-broker-infra/11-model-anatomy.md
 - [ ] ep05-broker-infra/12-capacity-planning.md
 - [ ] ep05-broker-infra/13-domain-facts.md
+- [ ] ep06-coding-agent-finale/00-overview.md
+- [ ] ep06-coding-agent-finale/01-event-sourced-worker-architecture.md
+- [ ] ep06-coding-agent-finale/02-prefix-cache-diagnosis.md
+- [ ] ep06-coding-agent-finale/03-kv-cache-bandwidth.md
+- [ ] ep06-coding-agent-finale/04-ai-collaboration-principles.md
 
 ## 워크북
 
@@ -86,6 +91,7 @@
 - [ ] 98:파트4 — 코딩 과제
 - [ ] 98:파트5 — 자기 설계
 - [ ] 98:파트6 — 오답 노트
+- [ ] 100:워크북 — 전체
 
 ## 코딩 과제
 
