@@ -1,6 +1,6 @@
 # 검증한 1차 출처 색인
 
-마지막 확인: **2026-11-05**. 아래는 실제로 열어 확인한 표준·공식 문서·저자 원문이다. 제품 설정은 이후 바뀔 수 있다. 핵심 설명은 교재 본문에 있으며, 출처는 검증과 심화 탐색을 위한 것이다.
+기존 색인의 확인일은 **2026-11-05**이며, 아래 「작동 원리 보강」 출처는 **2026-11-09**에 열어 확인했다. TCP·TLS·DNS와 일부 AWS 문서도 이번 보강에서 다시 확인했다. 아래는 실제로 열어 확인한 표준·공식 문서·저자 원문이다. 제품 설정은 이후 바뀔 수 있다. 핵심 설명은 교재 본문에 있으며, 출처는 검증과 심화 탐색을 위한 것이다.
 
 계산 예제는 교재에 적은 가정에서 계산했으며 외부 벤치마크를 인용하지 않았다. 실제 요금·용량 한도는 자료에 넣지 않았다. 운영 구성에 관한 미확인 사실을 교재에서 확정하지 않았다.
 
@@ -111,3 +111,36 @@
 | [Linux fork](https://man7.org/linux/man-pages/man2/fork.2.html) | 서로 다른 프로세스의 메모리 공간 |
 | [MDN HTTP 메시지](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Messages) | 상태 줄·헤더·본문 |
 | [IAM의 작동](https://docs.aws.amazon.com/IAM/latest/UserGuide/intro-structure.html) | 주체·자격증명·인증·인가 흐름 |
+
+## 작동 원리 보강 — 2026-11-09 확인
+
+| 출처 | 확인한 내용 |
+|---|---|
+| [Linux execve](https://man7.org/linux/man-pages/man2/execve.2.html) | 실행 파일과 메모리·실행 상태 준비 |
+| [Linux sched](https://man7.org/linux/man-pages/man7/sched.7.html) | 실행 흐름의 CPU 스케줄링 |
+| [Linux tcp](https://man7.org/linux/man-pages/man7/tcp.7.html) | 소켓 수신 절차·양방향 스트림·연결의 구분 |
+| [Linux fsync](https://man7.org/linux/man-pages/man2/fsync.2.html) | 메모리 버퍼와 영속 저장·디렉터리 반영의 구분 |
+| [RFC 791](https://www.rfc-editor.org/rfc/rfc791) | IPv4 전달·TTL·캡슐화의 기반 |
+| [RFC 6298](https://www.rfc-editor.org/rfc/rfc6298) | RTT 관측과 재전송 타이머 조정 |
+| [RFC 5681](https://www.rfc-editor.org/rfc/rfc5681) | 확인·손실에 따른 혼잡 윈도 조정의 기본 |
+| [RFC 793](https://www.rfc-editor.org/rfc/rfc793) | TCP 설계 배경과 연결 시작 예. 현재 표준은 RFC 9293이며 과거 문서는 배경에 사용 |
+| [Docker 이미지 계층](https://docs.docker.com/get-started/docker-concepts/building-images/understanding-image-layers/) | 읽기 전용 계층 재사용과 컨테이너 쓰기 계층 |
+| [PostgreSQL 구조](https://www.postgresql.org/docs/current/tutorial-arch.html) | 앱 클라이언트와 DB 서버의 역할 |
+| [PostgreSQL 인덱스 종류](https://www.postgresql.org/docs/current/indexes-types.html) | B-tree의 정렬·동등·범위 탐색 |
+| [PostgreSQL MVCC](https://www.postgresql.org/docs/current/mvcc-intro.html) | 행 버전·스냅샷과 동시 읽기·쓰기 |
+| [PostgreSQL WAL](https://www.postgresql.org/docs/current/wal-intro.html) | 로그 선행 기록·REDO·페이지 기록 지연 |
+| [PostgreSQL 비동기 커밋](https://www.postgresql.org/docs/current/wal-async-commit.html) | 커밋 응답과 영속 기록 시점·손실의 관계 |
+| [PostgreSQL 잠금](https://www.postgresql.org/docs/current/explicit-locking.html) | 행·테이블 잠금·교착 상태·구조 변경 |
+| [SQS 가시성 제한 시간](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html) | 임시 수신·삭제·재전달과 대기 시간의 의미 |
+| [AWS 아웃박스](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html) | DB 변경·발행 의도의 원자적 기록과 중복 메시지 |
+| [OpenTelemetry 관측 입문](https://opentelemetry.io/docs/concepts/observability-primer/) | 계측·추적 문맥·기록의 역할 |
+| [Prometheus 메트릭 종류](https://prometheus.io/docs/concepts/metric_types/) | 카운터·게이지·히스토그램의 구분 |
+| [Prometheus 분포 집계](https://prometheus.io/docs/practices/histograms/) | 분위수 집계의 한계와 히스토그램 |
+| [OWASP 인증](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html) | 로그인과 자격증명 검증 |
+| [OWASP 세션](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html) | 예측하기 어려운 세션 식별자·수명·보호 |
+| [OWASP 비밀번호 저장](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) | 비밀번호 전용 해시와 솔트 |
+| [RFC 7519](https://www.rfc-editor.org/rfc/rfc7519) | JWT의 서명·암호화 구분과 발급자·사용 대상·만료 |
+| [IAM 역할 사용](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-api.html) | 역할 인수와 STS 임시 자격증명 |
+| [IAM 정책 평가](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html) | 적용 정책의 허용·명시적 거부·경계 |
+| [ECS 서비스](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) | 원하는 태스크 개수와 실제 상태의 조정 |
+| [Fargate 태스크 네트워크](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-task-networking.html) | 태스크 ENI·IP·localhost 공유·이미지 준비 경로 |
