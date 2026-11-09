@@ -1,0 +1,13 @@
+{
+  "name": "infra-foundations",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "배포를 이해하는 플랫폼 공통 기초 — 네트워크·운영체제·컨테이너·데이터·분산 처리·운영",
+  "scripts": {
+    "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@study/testkit": "workspace:*"
+  }
+}

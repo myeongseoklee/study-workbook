@@ -60,6 +60,12 @@ importers:
         specifier: workspace:*
         version: link:../testkit
 
+  packages/infra-foundations:
+    devDependencies:
+      '@study/testkit':
+        specifier: workspace:*
+        version: link:../testkit
+
   packages/mcp-protocol:
     devDependencies:
       '@study/testkit':
