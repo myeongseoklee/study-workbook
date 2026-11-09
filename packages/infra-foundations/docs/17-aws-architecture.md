@@ -139,6 +139,8 @@ CloudFormation 템플릿은 원하는 자원과 속성, 자원 간 참조를 선
 
 ## 자가 진단
 
+답을 먼저 적은 뒤 접힌 해설을 연다. 이어 [워크북](../workbook/92-workbook.md)의 1-18번으로 확인한다. 막히면 [단계별 힌트](../workbook/94-hints.md), 답을 쓴 뒤에는 [필수 기준·오개념별 복습](../workbook/93-solutions.md)을 사용한다.
+
 <details><summary>ECS와 Fargate는 같은 역할의 서비스일까?</summary>
 
 ECS는 태스크와 서비스 실행을 관리하고, Fargate는 그 컨테이너를 실행할 컴퓨팅 방식 중 하나다. 태스크 정의와 앱 동작은 사용자가 정한다.

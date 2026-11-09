@@ -126,6 +126,8 @@ wait "$study_sleep_pid"
 
 ## 자가 진단
 
+답을 먼저 적은 뒤 접힌 해설을 연다. 이어 [워크북](../workbook/92-workbook.md)의 1-7번으로 확인한다. 막히면 [단계별 힌트](../workbook/94-hints.md), 답을 쓴 뒤에는 [필수 기준·오개념별 복습](../workbook/93-solutions.md)을 사용한다.
+
 <details><summary>CPU가 낮은데 주문 응답이 느릴 수 있는 이유 두 가지는?</summary>
 
 외부 응답이나 디스크를 기다릴 수 있고, 잠금이나 사용할 자원의 차례를 기다릴 수도 있다. 요청이 끝나지 않았다는 사실과 CPU가 계산 중이라는 사실은 다르다.
