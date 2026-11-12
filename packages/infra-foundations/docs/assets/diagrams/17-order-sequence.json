@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "c",
+      "label": "손님",
+      "type": "frontend"
+    },
+    {
+      "id": "lb",
+      "label": "ALB",
+      "type": "cloud"
+    },
+    {
+      "id": "app",
+      "label": "앱 태스크",
+      "type": "backend"
+    },
+    {
+      "id": "db",
+      "label": "RDS 주문 DB",
+      "type": "database"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "c",
+      "to": "lb",
+      "label": "HTTPS :443 · 주문 요청",
+      "y": 170
+    },
+    {
+      "id": "m1",
+      "from": "lb",
+      "to": "app",
+      "label": "선택한 앱으로 별도 연결 :3000",
+      "y": 216,
+      "note": "예시의 뒤 구간은 HTTP; 자동 암호화 아님"
+    },
+    {
+      "id": "m2",
+      "from": "app",
+      "to": "db",
+      "label": "같은 DB 연결에서 재고·주문 변경",
+      "y": 296
+    },
+    {
+      "id": "m3",
+      "from": "db",
+      "to": "app",
+      "label": "COMMIT 완료",
+      "y": 342,
+      "note": "주문 확정 근거; HTTP 응답과 다른 사건",
+      "variant": "return"
+    },
+    {
+      "id": "m4",
+      "from": "app",
+      "to": "lb",
+      "label": "주문 확정 결과 응답",
+      "y": 422,
+      "variant": "return"
+    },
+    {
+      "id": "m5",
+      "from": "lb",
+      "to": "c",
+      "label": "손님에게 응답 전달",
+      "y": 468,
+      "variant": "return"
+    }
+  ],
+  "meta": {
+    "title": "주문 요청과 확정 결과는 연결별로 왕복한다",
+    "output": "17-order-sequence.html",
+    "locale": "ko",
+    "quality_profile": "showcase"
+  }
+}

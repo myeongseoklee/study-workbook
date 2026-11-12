@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "51d5c0dc-35af-4fef-af35-97b333fe1ad9",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/private/tmp/infra-ch17-20261112/17-task-start.json",
+  "output": "/private/tmp/infra-ch17-20261112/17-task-start.html",
+  "specification": {
+    "sha256": "24a754c3878230d68daedfd8e28d7961c868b7573c89eb678f30769ad0f241d1",
+    "bytes": 2706
+  },
+  "artifact": {
+    "sha256": "2c990e583a79893af85cf472d472b00495caaadf016648da20a697007bdcbc34",
+    "bytes": 838944
+  }
+}

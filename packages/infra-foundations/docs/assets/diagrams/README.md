@@ -1,6 +1,6 @@
 # 인프라 교재의 그림 원본
 
-본문에는 별도 도구 없이 표시되는 PNG를 넣었다. SVG는 확대용 벡터 이미지이고, HTML은 구성 요소를 탐색할 수 있는 뷰어다. JSON은 다이어그램의 편집 원본이다. 모든 그림은 본문에 적힌 가정과 출처를 사용한다.
+본문에는 별도 도구 없이 표시되는 PNG를 넣었다. Archify 그림은 SVG가 벡터 확대용, HTML이 탐색 뷰어, JSON이 편집 원본이다. 17장의 AWS 배치도·서비스 연결도는 stack-diagram의 자체 완결 HTML이 편집 원본이며 밝은·어두운 PNG를 파생한다. 모든 그림은 본문에 적힌 가정과 출처를 사용한다.
 
 ## 그림 색인
 
@@ -44,11 +44,16 @@
 | 16 | [연결 성공·신원 확인·작업 허용은 다른 관문이다](16-auth.png) | [SVG](16-auth.svg) · [HTML](16-auth.html) · [JSON](16-auth.json) |
 | 16 | [역할 이름이 아니라 검증된 임시 자격으로 요청한다](16-role.png) | [SVG](16-role.svg) · [HTML](16-role.html) · [JSON](16-role.json) |
 | 17 | [실행을 준비하는 권한과 앱이 사용하는 권한을 나눈다](17-control-roles.png) | [SVG](17-control-roles.svg) · [HTML](17-control-roles.html) · [JSON](17-control-roles.json) |
-| 17 | [DNS는 주소를 알려 주고 ALB가 앱에 새 연결을 만든다](17-request.png) | [SVG](17-request.svg) · [HTML](17-request.html) · [JSON](17-request.json) |
+| 17 | [DNS 조회와 주문 요청은 서로 다른 경로다](17-request.png) | [원본 HTML](17-request.html) · [어두운 PNG](17-request-dark.png) |
+| 17 | [VPC는 여러 AZ에 걸치고, 서브넷은 한 AZ 안에 둔다](17-placement.png) | [원본 HTML](17-placement.html) · [어두운 PNG](17-placement-dark.png) |
+| 17 | [주문을 받기 전에 태스크 준비가 먼저 필요하다](17-task-start.png) | [SVG](17-task-start.svg) · [HTML](17-task-start.html) · [JSON](17-task-start.json) |
+| 17 | [주문 요청과 확정 결과는 연결별로 왕복한다](17-order-sequence.png) | [SVG](17-order-sequence.svg) · [HTML](17-order-sequence.html) · [JSON](17-order-sequence.json) |
 
 ## 그림을 고칠 때
 
-구조도·순서도·흐름도는 같은 이름의 JSON을 수정하고 Archify로 검증·렌더링한다. 아래 명령은 이 폴더에서 실행하며 `archify_cli`에는 설치된 Archify CLI 경로를 지정한다.
+17장의 AWS 배치도·연결도는 `visual-doc`의 요소별 도구 선택에 따라 stack-diagram으로 만든다. 같은 이름의 HTML에서 배치·라벨을 수정하고 브라우저로 밝은·어두운 PNG를 다시 캡처한다. 공식 아이콘은 HTML에 내장하며 원본 아이콘 파일·패키지는 레포에 복사하지 않는다. 최신 렌더링 검사는 [브라우저 검사 기록](17-stack-browser-check.json)에 남겼다.
+
+나머지 Archify 구조도·순서도·흐름도는 같은 이름의 JSON을 수정하고 Archify로 검증·렌더링한다. 아래 명령은 이 폴더에서 실행하며 `archify_cli`에는 설치된 Archify CLI 경로를 지정한다.
 
 ```bash
 archify_cli=/path/to/archify/bin/archify.mjs
@@ -61,7 +66,7 @@ node "$archify_cli" finalize sequence 04-handshake.json 04-handshake.html --qual
 python render-charts.py
 ```
 
-PNG·SVG는 본문을 보조하는 그림이며 HTML의 인터랙션까지 포함하지 않는다. Archify 뷰어와 내장 글꼴의 저작권·라이선스 고지는 각 HTML·SVG에 포함돼 있다.
+PNG·SVG는 본문을 보조하는 그림이며 HTML의 인터랙션까지 포함하지 않는다. Archify 뷰어와 내장 글꼴의 저작권·라이선스 고지는 각 HTML·SVG에 포함돼 있다. stack-diagram HTML의 아이콘 출처는 AWS Architecture Icons와 Lucide이며 서비스 로고의 권리는 각 소유자에게 있다.
 
 ## 본문 미리보기 갱신
 

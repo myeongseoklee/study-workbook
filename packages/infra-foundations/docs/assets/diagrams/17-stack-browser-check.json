@@ -1,0 +1,43 @@
+{
+  "tool": "stack-diagram",
+  "selection": "visual-doc",
+  "checks": [
+    {
+      "slug": "17-placement",
+      "theme": "light",
+      "width": 1100,
+      "height": 620,
+      "missingImages": 0,
+      "unresolved": false,
+      "outOfBounds": 0
+    },
+    {
+      "slug": "17-placement",
+      "theme": "dark",
+      "width": 1100,
+      "height": 620,
+      "missingImages": 0,
+      "unresolved": false,
+      "outOfBounds": 0
+    },
+    {
+      "slug": "17-request",
+      "theme": "light",
+      "width": 1100,
+      "height": 470,
+      "missingImages": 0,
+      "unresolved": false,
+      "outOfBounds": 0
+    },
+    {
+      "slug": "17-request",
+      "theme": "dark",
+      "width": 1100,
+      "height": 470,
+      "missingImages": 0,
+      "unresolved": false,
+      "outOfBounds": 0
+    }
+  ],
+  "visualReview": "light and dark PNGs inspected"
+}

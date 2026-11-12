@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "a841e588-87e2-439e-9887-21f3ce6d07b1",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/private/tmp/infra-ch17-20261112/17-order-sequence.json",
+  "output": "/private/tmp/infra-ch17-20261112/17-order-sequence.html",
+  "specification": {
+    "sha256": "525a7310620bfb7c68796c65df73f236a2547471cb4bb863028c1b2bee7abb8a",
+    "bytes": 1634
+  },
+  "artifact": {
+    "sha256": "76382e11f0338619e3d195e9a53add55b5952ae7afe71fd4042b451ec314ac64",
+    "bytes": 832261
+  }
+}

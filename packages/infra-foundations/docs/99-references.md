@@ -162,3 +162,18 @@
 | [Docker 자원 제한](https://docs.docker.com/engine/containers/resource_constraints/) | 기본 무제한과 명시적 CPU·메모리 제한, OOM |
 | [Linux 네임스페이스](https://man7.org/linux/man-pages/man7/namespaces.7.html) | 프로세스가 보는 자원 범위의 구분 |
 | [Docker Desktop 설정](https://docs.docker.com/desktop/settings-and-maintenance/settings/) | Mac에서 사용하는 Linux VM과 가상머신 관리자 |
+
+## 서비스 품질과 업무 성과의 측정 — 2026-11-12 확인
+
+| 출처 | 확인한 내용 |
+|---|---|
+| [Google SRE의 SLO 구현](https://sre.google/workbook/implementing-slos/) | 사용자 관점의 신뢰성 목표, 이해관계자와의 합의와 품질 지표 선택 |
+| [Google Analytics 전자상거래 측정](https://developers.google.com/analytics/devguides/collection/ga4/ecommerce) | 조회·장바구니·결제 시작·구매·환불 사건의 구분 |
+
+## AWS 배치와 실행 순서 그림 — 2026-11-12 확인
+
+| 출처 | 확인한 내용 |
+|---|---|
+| [VPC 서브넷](https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html) | 서브넷은 하나의 AZ에 속하며 public·private는 경로 조건으로 구분 |
+| [ECS 태스크 수명](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-lifecycle-explanation.html) | 네트워크·이미지·대상 등록 등 시작 준비와 종료 단계 |
+| [ALB 배치와 연결](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/application-load-balancers.html) | AZ별 ALB 노드·서브넷과 대상 연결 |

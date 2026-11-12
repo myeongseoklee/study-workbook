@@ -1,0 +1,136 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "lanes": [
+    {
+      "id": "manage",
+      "label": "제어 평면 · 무엇을 실행할지 관리"
+    },
+    {
+      "id": "run",
+      "label": "실행 기반 · 실제 태스크 준비"
+    },
+    {
+      "id": "error",
+      "label": "실패 시 먼저 볼 단계"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "deploy",
+      "label": "배포자가 정의 적용",
+      "sublabel": "새 이미지 · 원하는 개수",
+      "lane": "manage",
+      "col": 0,
+      "type": "backend"
+    },
+    {
+      "id": "ecs",
+      "label": "ECS가 실행 조정",
+      "sublabel": "현재와 원하는 상태 비교",
+      "lane": "manage",
+      "col": 1,
+      "type": "backend"
+    },
+    {
+      "id": "eni",
+      "label": "실행 자원 준비",
+      "sublabel": "Fargate · ENI/IP",
+      "lane": "run",
+      "col": 2,
+      "type": "backend"
+    },
+    {
+      "id": "pull",
+      "label": "이미지·설정 준비",
+      "sublabel": "경로 + 실행 역할 필요",
+      "lane": "run",
+      "col": 3,
+      "type": "backend"
+    },
+    {
+      "id": "start",
+      "label": "앱 프로세스 시작",
+      "sublabel": "초기화 · :3000 수신",
+      "lane": "run",
+      "col": 4,
+      "type": "backend"
+    },
+    {
+      "id": "health",
+      "label": "대상 준비 확인",
+      "sublabel": "ALB 등록·헬스 체크",
+      "lane": "run",
+      "col": 5,
+      "type": "backend"
+    },
+    {
+      "id": "failure",
+      "label": "준비 실패",
+      "sublabel": "앱 실행 전부터 막힐 수 있음",
+      "lane": "error",
+      "col": 3,
+      "type": "backend"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "deploy",
+      "to": "ecs",
+      "role": "main"
+    },
+    {
+      "id": "e2",
+      "from": "ecs",
+      "to": "eni",
+      "role": "main"
+    },
+    {
+      "id": "e3",
+      "from": "eni",
+      "to": "pull",
+      "role": "main"
+    },
+    {
+      "id": "e4",
+      "from": "pull",
+      "to": "start",
+      "role": "main"
+    },
+    {
+      "id": "e5",
+      "from": "start",
+      "to": "health",
+      "role": "main"
+    },
+    {
+      "id": "fail",
+      "from": "pull",
+      "to": "failure",
+      "label": "다운로드·설정 실패",
+      "role": "branch"
+    }
+  ],
+  "mainPath": [
+    "deploy",
+    "ecs",
+    "eni",
+    "pull",
+    "start",
+    "health"
+  ],
+  "meta": {
+    "title": "주문을 받기 전에 태스크 준비가 먼저 필요하다",
+    "output": "17-task-start.html",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "관리·실행 단계"
+        }
+      }
+    }
+  }
+}
