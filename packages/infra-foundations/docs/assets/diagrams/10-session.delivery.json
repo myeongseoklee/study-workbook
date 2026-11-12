@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "a46245d7-6d72-49ba-a426-7cb778851264",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/10-session.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/10-session.html",
+  "specification": {
+    "sha256": "e9faa5bbf1ed9c86f30c92462290150ce8e8a8fadc60e8623ed346e75aa8fa43",
+    "bytes": 1418
+  },
+  "artifact": {
+    "sha256": "bc352e9a0f10c29c24b1ffb960f7f45d06106927bd9d79ae7ce449b31ffba2e8",
+    "bytes": 831701
+  }
+}

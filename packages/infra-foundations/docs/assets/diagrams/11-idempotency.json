@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "a",
+      "label": "요청 A",
+      "type": "backend"
+    },
+    {
+      "id": "d",
+      "label": "DB · 유일 키 K",
+      "type": "database"
+    },
+    {
+      "id": "b",
+      "label": "재시도 B",
+      "type": "backend"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "a",
+      "to": "d",
+      "y": 170,
+      "label": "트랜잭션에서 K 기록"
+    },
+    {
+      "id": "m1",
+      "from": "b",
+      "to": "d",
+      "y": 216,
+      "label": "같은 K 기록 시도",
+      "note": "유일성 경쟁에서 대기·충돌"
+    },
+    {
+      "id": "m2",
+      "from": "a",
+      "to": "d",
+      "y": 296,
+      "label": "주문과 K의 결과 함께 COMMIT"
+    },
+    {
+      "id": "m3",
+      "from": "b",
+      "to": "d",
+      "y": 342,
+      "label": "충돌 처리 뒤 K의 결과 조회"
+    },
+    {
+      "id": "m4",
+      "from": "d",
+      "to": "b",
+      "y": 388,
+      "label": "새 주문 대신 확정 결과",
+      "variant": "return"
+    }
+  ],
+  "meta": {
+    "title": "같은 키의 경쟁과 주문 기록을 한 DB에서 조정한다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "11-idempotency.html"
+  }
+}

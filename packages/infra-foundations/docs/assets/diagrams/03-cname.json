@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "components": [
+    {
+      "id": "mine",
+      "label": "내 서비스 이름",
+      "sublabel": "shop.example.com",
+      "type": "frontend",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "provider",
+      "label": "업체의 접속 이름",
+      "sublabel": "service.example.net",
+      "type": "backend",
+      "pos": [
+        350,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "ip",
+      "label": "업체가 관리할 주소",
+      "sublabel": "A: 203.0.113.10",
+      "type": "database",
+      "pos": [
+        660,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "e0",
+      "from": "mine",
+      "to": "provider",
+      "label": "CNAME"
+    },
+    {
+      "id": "e1",
+      "from": "provider",
+      "to": "ip",
+      "label": "A 조회"
+    }
+  ],
+  "meta": {
+    "title": "이름은 내가 유지하고 IP 관리는 업체가 맡는다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "03-cname.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "실행·처리"
+        },
+        "database": {
+          "label": "데이터·저장"
+        },
+        "frontend": {
+          "label": "요청하는 쪽"
+        },
+        "cloud": {
+          "label": "클라우드 서비스"
+        },
+        "security": {
+          "label": "권한"
+        }
+      }
+    }
+  }
+}

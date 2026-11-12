@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "components": [
+    {
+      "id": "file",
+      "label": "프로그램 파일",
+      "sublabel": "저장 장치에 보관",
+      "type": "database",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "mem",
+      "label": "프로세스 메모리",
+      "sublabel": "명령과 작업 값",
+      "type": "backend",
+      "pos": [
+        350,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "cpu",
+      "label": "CPU",
+      "sublabel": "레지스터에서 계산",
+      "type": "backend",
+      "pos": [
+        660,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "saved",
+      "label": "영속 데이터",
+      "sublabel": "별도 기록 절차 필요",
+      "type": "database",
+      "pos": [
+        350,
+        230
+      ],
+      "size": [
+        170,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "e0",
+      "from": "file",
+      "to": "mem",
+      "label": "실행 준비"
+    },
+    {
+      "id": "e1",
+      "from": "mem",
+      "to": "cpu",
+      "label": "명령·값"
+    },
+    {
+      "id": "e2",
+      "from": "cpu",
+      "to": "mem",
+      "label": "계산 결과"
+    },
+    {
+      "id": "e3",
+      "from": "mem",
+      "to": "saved",
+      "label": "저장 요청"
+    }
+  ],
+  "meta": {
+    "title": "실행 중인 값과 오래 남길 값은 어디에 있을까",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "01-execution.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "실행·처리"
+        },
+        "database": {
+          "label": "데이터·저장"
+        },
+        "frontend": {
+          "label": "요청하는 쪽"
+        },
+        "cloud": {
+          "label": "클라우드 서비스"
+        },
+        "security": {
+          "label": "권한"
+        }
+      }
+    }
+  }
+}

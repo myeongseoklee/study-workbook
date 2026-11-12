@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "components": [
+    {
+      "id": "infra",
+      "label": "태스크 실행 기반",
+      "sublabel": "이미지·설정 준비",
+      "type": "backend",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "er",
+      "label": "실행 역할",
+      "sublabel": "준비 단계의 권한",
+      "type": "security",
+      "pos": [
+        350,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "ecr",
+      "label": "ECR 등",
+      "sublabel": "이미지·지정 시크릿 등",
+      "type": "cloud",
+      "pos": [
+        660,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "app",
+      "label": "실행 중인 앱",
+      "sublabel": "상품·영수증 접근",
+      "type": "backend",
+      "pos": [
+        40,
+        230
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "tr",
+      "label": "태스크 역할",
+      "sublabel": "앱의 AWS API 권한",
+      "type": "security",
+      "pos": [
+        350,
+        230
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "s3",
+      "label": "S3 등",
+      "sublabel": "허용된 객체 작업",
+      "type": "cloud",
+      "pos": [
+        660,
+        230
+      ],
+      "size": [
+        170,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "e0",
+      "from": "infra",
+      "to": "er",
+      "label": "사용 권한"
+    },
+    {
+      "id": "e1",
+      "from": "er",
+      "to": "ecr",
+      "label": "허용 범위"
+    },
+    {
+      "id": "e2",
+      "from": "app",
+      "to": "tr",
+      "label": "사용 권한"
+    },
+    {
+      "id": "e3",
+      "from": "tr",
+      "to": "s3",
+      "label": "허용 범위"
+    }
+  ],
+  "meta": {
+    "title": "실행을 준비하는 권한과 앱이 사용하는 권한을 나눈다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "17-control-roles.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "실행·처리"
+        },
+        "database": {
+          "label": "데이터·저장"
+        },
+        "frontend": {
+          "label": "요청하는 쪽"
+        },
+        "cloud": {
+          "label": "클라우드 서비스"
+        },
+        "security": {
+          "label": "권한"
+        }
+      }
+    }
+  }
+}

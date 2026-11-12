@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "cc329f08-74c0-45ec-a388-8eb97ff2aba2",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/02-sockets.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/02-sockets.html",
+  "specification": {
+    "sha256": "9dadc6289a8ac1dacf9fa2326b3631c9f158488c67af7cfb7cf53f5cc8d5b7de",
+    "bytes": 2648
+  },
+  "artifact": {
+    "sha256": "b73695dd5989aa2b1d3ddeb893d5dfe2fc245346fbcc543188b6296776a07bc6",
+    "bytes": 840679
+  }
+}

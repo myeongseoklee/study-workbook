@@ -144,3 +144,21 @@
 | [IAM 정책 평가](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html) | 적용 정책의 허용·명시적 거부·경계 |
 | [ECS 서비스](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) | 원하는 태스크 개수와 실제 상태의 조정 |
 | [Fargate 태스크 네트워크](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-task-networking.html) | 태스크 ENI·IP·localhost 공유·이미지 준비 경로 |
+
+## CNAME 사용 이유와 조회 예시 — 2026-11-10 확인
+
+| 출처 | 확인한 내용 |
+|---|---|
+| [RFC 1034 §3.6.2](https://www.rfc-editor.org/rfc/rfc1034#section-3.6.2) | 별칭과 대상 이름·A 조회 시 CNAME 따라가기·응답 재사용 |
+| [Route 53 레코드 종류](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/ResourceRecordTypes.html#CNAMEFormat) | CNAME 대상은 이름·영역 최상위 제약·Alias와의 차이 |
+
+## 이미지에서 프로세스 실행까지 — 2026-11-10 확인
+
+| 출처 | 확인한 내용 |
+|---|---|
+| [Docker 이미지](https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-an-image/) | 실행용 파일·설정 패키지, 이미지 불변성과 계층 |
+| [Docker create](https://docs.docker.com/reference/cli/docker/container/create/) | 생성과 시작의 분리, 실행 전 컨테이너와 쓰기 영역 |
+| [Docker 계층·쓰기 시 복사](https://docs.docker.com/engine/storage/drivers/) | 이미지와 컨테이너 변경의 분리, 구현별 차이 |
+| [Docker 자원 제한](https://docs.docker.com/engine/containers/resource_constraints/) | 기본 무제한과 명시적 CPU·메모리 제한, OOM |
+| [Linux 네임스페이스](https://man7.org/linux/man-pages/man7/namespaces.7.html) | 프로세스가 보는 자원 범위의 구분 |
+| [Docker Desktop 설정](https://docs.docker.com/desktop/settings-and-maintenance/settings/) | Mac에서 사용하는 Linux VM과 가상머신 관리자 |

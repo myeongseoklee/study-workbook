@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "ec49cd53-b84a-4cd5-bcff-a58f4c4e41d1",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/09-wal.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/09-wal.html",
+  "specification": {
+    "sha256": "0f42d485d717750b4bff0ffcb4a480b38bc4b1ee85886424eb0ec09a8565e883",
+    "bytes": 1585
+  },
+  "artifact": {
+    "sha256": "5ad27f05deaa4e97505cedbaa43660833453ff5a151eb104e4dc1c0cc6aa945f",
+    "bytes": 832634
+  }
+}

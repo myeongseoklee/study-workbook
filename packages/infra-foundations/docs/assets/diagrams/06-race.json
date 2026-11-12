@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "a",
+      "label": "스레드 A",
+      "type": "backend"
+    },
+    {
+      "id": "m",
+      "label": "공유 재고 변수",
+      "type": "database"
+    },
+    {
+      "id": "b",
+      "label": "스레드 B",
+      "type": "backend"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "a",
+      "to": "m",
+      "y": 170,
+      "label": "재고 읽기"
+    },
+    {
+      "id": "m1",
+      "from": "m",
+      "to": "a",
+      "y": 216,
+      "label": "3 반환",
+      "variant": "return"
+    },
+    {
+      "id": "m2",
+      "from": "b",
+      "to": "m",
+      "y": 262,
+      "label": "재고 읽기"
+    },
+    {
+      "id": "m3",
+      "from": "m",
+      "to": "b",
+      "y": 308,
+      "label": "3 반환",
+      "variant": "return"
+    },
+    {
+      "id": "m4",
+      "from": "a",
+      "to": "m",
+      "y": 354,
+      "label": "3−1인 2 쓰기"
+    },
+    {
+      "id": "m5",
+      "from": "b",
+      "to": "m",
+      "y": 400,
+      "label": "3−1인 2 쓰기",
+      "note": "최종 2; 기대 1과 다름"
+    }
+  ],
+  "meta": {
+    "title": "둘 다 3을 읽으면 두 번 빼도 2가 남을 수 있다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "06-race.html"
+  }
+}

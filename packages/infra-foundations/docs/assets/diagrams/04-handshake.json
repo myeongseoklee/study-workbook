@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "c",
+      "label": "클라이언트 TCP",
+      "type": "frontend"
+    },
+    {
+      "id": "s",
+      "label": "서버 TCP",
+      "type": "backend"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "c",
+      "to": "s",
+      "y": 170,
+      "label": "SYN · SEQ=100",
+      "note": "서버: SYN-RECEIVED"
+    },
+    {
+      "id": "m1",
+      "from": "s",
+      "to": "c",
+      "y": 250,
+      "label": "SYN+ACK · SEQ=500 · ACK=101",
+      "note": "클라이언트: ESTABLISHED"
+    },
+    {
+      "id": "m2",
+      "from": "c",
+      "to": "s",
+      "y": 330,
+      "label": "ACK · SEQ=101 · ACK=501",
+      "note": "서버: ESTABLISHED"
+    }
+  ],
+  "meta": {
+    "title": "세 번째 ACK가 서버의 시작 번호까지 확인한다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "04-handshake.html"
+  }
+}

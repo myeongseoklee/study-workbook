@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "f50e3e30-1906-4977-9c85-5a3ead7f6108",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/13-rollout.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/13-rollout.html",
+  "specification": {
+    "sha256": "b0a70091ba6d00aa2b0db3c12e979a9e1981852747f73d15805d696a83d62d6a",
+    "bytes": 2164
+  },
+  "artifact": {
+    "sha256": "3feac6f84e3bf16ef2d3b91c9c14c7be90bb4e1a07474fe0f21fab6f63fe9cc7",
+    "bytes": 836075
+  }
+}

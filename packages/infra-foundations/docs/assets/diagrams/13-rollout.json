@@ -1,0 +1,117 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "lanes": [
+    {
+      "id": "main",
+      "label": "진행 순서"
+    },
+    {
+      "id": "branch",
+      "label": "조건에 따른 다른 결과"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "old",
+      "lane": "main",
+      "col": 0,
+      "label": "A·B 서비스 중",
+      "sublabel": "v1 두 개",
+      "type": "backend"
+    },
+    {
+      "id": "new",
+      "lane": "main",
+      "col": 1,
+      "label": "C 시작",
+      "sublabel": "v2 초기화 중",
+      "type": "backend"
+    },
+    {
+      "id": "ready",
+      "lane": "main",
+      "col": 2,
+      "label": "C 준비 확인",
+      "sublabel": "A·B·C 배정 가능",
+      "type": "backend"
+    },
+    {
+      "id": "drain",
+      "lane": "main",
+      "col": 3,
+      "label": "A 배정 중단",
+      "sublabel": "B·C 수신; A는 마무리",
+      "type": "backend"
+    },
+    {
+      "id": "stop",
+      "lane": "main",
+      "col": 4,
+      "label": "A 종료",
+      "sublabel": "남은 대상도 조건 확인",
+      "type": "backend"
+    },
+    {
+      "id": "hold",
+      "lane": "branch",
+      "col": 2,
+      "label": "기존 용량 유지",
+      "sublabel": "실패 원인 확인",
+      "type": "backend"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "old",
+      "to": "new",
+      "role": "main"
+    },
+    {
+      "id": "e2",
+      "from": "new",
+      "to": "ready",
+      "role": "main"
+    },
+    {
+      "id": "e3",
+      "from": "ready",
+      "to": "drain",
+      "role": "main"
+    },
+    {
+      "id": "e4",
+      "from": "drain",
+      "to": "stop",
+      "role": "main"
+    },
+    {
+      "id": "b-hold",
+      "from": "new",
+      "to": "hold",
+      "label": "준비 실패",
+      "role": "branch"
+    }
+  ],
+  "mainPath": [
+    "old",
+    "new",
+    "ready",
+    "drain",
+    "stop"
+  ],
+  "meta": {
+    "title": "새 대상 준비 뒤에 기존 대상을 줄인다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "13-rollout.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "처리·상태 단계"
+        }
+      }
+    }
+  }
+}

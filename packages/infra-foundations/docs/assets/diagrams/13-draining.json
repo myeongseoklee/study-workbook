@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "m",
+      "label": "입구·실행 관리자",
+      "type": "backend"
+    },
+    {
+      "id": "a",
+      "label": "기존 앱 A",
+      "type": "backend"
+    },
+    {
+      "id": "d",
+      "label": "DB",
+      "type": "database"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "m",
+      "to": "a",
+      "y": 170,
+      "label": "새 배정 중단 · 종료 단계 알림",
+      "note": "앱도 새 작업 수락 중단"
+    },
+    {
+      "id": "m1",
+      "from": "a",
+      "to": "d",
+      "y": 250,
+      "label": "이미 받은 주문 처리 마무리"
+    },
+    {
+      "id": "m2",
+      "from": "d",
+      "to": "a",
+      "y": 296,
+      "label": "확정 결과",
+      "variant": "return"
+    },
+    {
+      "id": "m3",
+      "from": "a",
+      "to": "m",
+      "y": 342,
+      "label": "진행 중 0 · 자원 정리 후 종료",
+      "note": "제한 시간 초과 시 강제 종료 가능"
+    }
+  ],
+  "meta": {
+    "title": "배정 중단과 프로세스 종료 사이에 남은 요청을 끝낸다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "13-draining.html"
+  }
+}

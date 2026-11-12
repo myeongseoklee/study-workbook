@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "a",
+      "label": "트랜잭션 A",
+      "type": "backend"
+    },
+    {
+      "id": "d",
+      "label": "DB 재고 행",
+      "type": "database"
+    },
+    {
+      "id": "b",
+      "label": "트랜잭션 B",
+      "type": "backend"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "a",
+      "to": "d",
+      "y": 170,
+      "label": "stock ≥ 1이면 차감",
+      "note": "재고 1→0; A가 잠금 유지"
+    },
+    {
+      "id": "m1",
+      "from": "b",
+      "to": "d",
+      "y": 250,
+      "label": "같은 행 조건부 UPDATE",
+      "note": "A가 끝날 때까지 대기 가능"
+    },
+    {
+      "id": "m2",
+      "from": "a",
+      "to": "d",
+      "y": 330,
+      "label": "주문 추가 뒤 COMMIT"
+    },
+    {
+      "id": "m3",
+      "from": "d",
+      "to": "b",
+      "y": 376,
+      "label": "새 재고 0에서 조건 재평가",
+      "note": "변경 행 수 0",
+      "variant": "return"
+    }
+  ],
+  "meta": {
+    "title": "행 경쟁을 기다린 뒤 조건을 다시 평가한다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "09-stock.html"
+  }
+}

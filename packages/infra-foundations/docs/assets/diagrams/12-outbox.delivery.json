@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "dab53d53-3d86-4f97-8f8a-23e5e79bbf47",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/12-outbox.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/12-outbox.html",
+  "specification": {
+    "sha256": "00c1d57529a42bb7a5ec0889ad1179a57c21e3602db92b29c27325584d1f1ca1",
+    "bytes": 1536
+  },
+  "artifact": {
+    "sha256": "cc4b4c0c075dcfa9646e50e5152664b929193437ff016ad29879f960f952efc6",
+    "bytes": 832135
+  }
+}

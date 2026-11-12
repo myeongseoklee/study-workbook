@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "0fde9820-8b1d-46a1-91f6-3b79dacb8ae1",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/08-index.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/08-index.html",
+  "specification": {
+    "sha256": "e18bd89847bff849a6a4f589c1a5ae1242a624d126106b94f5c65b02eee7b434",
+    "bytes": 1997
+  },
+  "artifact": {
+    "sha256": "3066df3d0e4d86d6fe70bc68a701cafb912cd35d6d402757cf6e93a8586c33f4",
+    "bytes": 835022
+  }
+}

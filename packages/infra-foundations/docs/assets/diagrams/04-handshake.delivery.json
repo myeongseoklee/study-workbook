@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "ef3862c2-5d13-4c69-ae05-b31ad0fcdbf4",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/04-handshake.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/04-handshake.html",
+  "specification": {
+    "sha256": "d4c9b393127cb5b8b98c800b488c149c75799c58ca7b26aacd242919e366e697",
+    "bytes": 951
+  },
+  "artifact": {
+    "sha256": "087561b9a62904826ec59abbd02f48d17b941e27b76b1139e051d2f1ce960cbc",
+    "bytes": 827128
+  }
+}

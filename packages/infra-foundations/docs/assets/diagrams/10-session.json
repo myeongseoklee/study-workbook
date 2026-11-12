@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "b",
+      "label": "브라우저",
+      "type": "frontend"
+    },
+    {
+      "id": "a",
+      "label": "앱 A",
+      "type": "backend"
+    },
+    {
+      "id": "s",
+      "label": "공유 세션 저장소",
+      "type": "database"
+    },
+    {
+      "id": "n",
+      "label": "앱 B",
+      "type": "backend"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "b",
+      "to": "a",
+      "y": 170,
+      "label": "로그인 요청"
+    },
+    {
+      "id": "m1",
+      "from": "a",
+      "to": "s",
+      "y": 216,
+      "label": "S와 사용자·만료 기록"
+    },
+    {
+      "id": "m2",
+      "from": "a",
+      "to": "b",
+      "y": 262,
+      "label": "쿠키로 S 전달",
+      "variant": "return"
+    },
+    {
+      "id": "m3",
+      "from": "b",
+      "to": "n",
+      "y": 308,
+      "label": "다음 요청에 S 포함"
+    },
+    {
+      "id": "m4",
+      "from": "n",
+      "to": "s",
+      "y": 354,
+      "label": "S의 유효한 상태 조회"
+    },
+    {
+      "id": "m5",
+      "from": "s",
+      "to": "n",
+      "y": 400,
+      "label": "사용자·유효성 결과",
+      "variant": "return"
+    }
+  ],
+  "meta": {
+    "title": "다음 요청이 B로 가도 공유 세션을 찾는다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "10-session.html"
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "components": [
+    {
+      "id": "image",
+      "label": "읽기 전용 이미지",
+      "sublabel": "런타임 + 앱 파일",
+      "type": "database",
+      "pos": [
+        350,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "a",
+      "label": "컨테이너 A",
+      "sublabel": "A의 쓰기 계층",
+      "type": "backend",
+      "pos": [
+        40,
+        230
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "b",
+      "label": "컨테이너 B",
+      "sublabel": "B의 쓰기 계층",
+      "type": "backend",
+      "pos": [
+        660,
+        230
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "kernel",
+      "label": "호스트 Linux 커널",
+      "sublabel": "격리·자원 관리",
+      "type": "backend",
+      "pos": [
+        350,
+        420
+      ],
+      "size": [
+        170,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "e0",
+      "from": "image",
+      "to": "a",
+      "label": "같은 이미지"
+    },
+    {
+      "id": "e1",
+      "from": "image",
+      "to": "b",
+      "label": "같은 이미지"
+    },
+    {
+      "id": "e2",
+      "from": "a",
+      "to": "kernel",
+      "label": "커널 기능"
+    },
+    {
+      "id": "e3",
+      "from": "b",
+      "to": "kernel",
+      "label": "커널 기능"
+    }
+  ],
+  "meta": {
+    "title": "이미지는 공유해도 컨테이너의 변경은 따로다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "07-layers.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "실행·처리"
+        },
+        "database": {
+          "label": "데이터·저장"
+        },
+        "frontend": {
+          "label": "요청하는 쪽"
+        },
+        "cloud": {
+          "label": "클라우드 서비스"
+        },
+        "security": {
+          "label": "권한"
+        }
+      }
+    }
+  }
+}

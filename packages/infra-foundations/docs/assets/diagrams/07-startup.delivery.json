@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "b16a1579-1a01-4b87-897b-3f7604e7657c",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/private/tmp/infra-ch07-20261110/07-startup.json",
+  "output": "/private/tmp/infra-ch07-20261110/07-startup.html",
+  "specification": {
+    "sha256": "74ff3fc4804e5f9fb03e4da038db60a04100abd95c67158bc223a3eb2520fc51",
+    "bytes": 1985
+  },
+  "artifact": {
+    "sha256": "ff5e9143ac4ee337d63f62d6c07056be5ce895defbbbcc3c64d40d413cc41436",
+    "bytes": 835128
+  }
+}

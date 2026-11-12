@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "aa3642a6-ecea-4725-ae85-181b31e683eb",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/11-idempotency.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/11-idempotency.html",
+  "specification": {
+    "sha256": "a0ea20460ee39f59ca195880dc9be877e0319aef0b0aabf18dc83dca583ff5de",
+    "bytes": 1286
+  },
+  "artifact": {
+    "sha256": "f180c6e882d31841fad6fb7418abdc885fbc525768566c414bffc14d5dcc9933",
+    "bytes": 829645
+  }
+}

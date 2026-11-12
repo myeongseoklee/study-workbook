@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "c",
+      "label": "브라우저",
+      "type": "frontend"
+    },
+    {
+      "id": "s",
+      "label": "HTTPS 서버",
+      "type": "backend"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "c",
+      "to": "s",
+      "y": 170,
+      "label": "TCP 연결 위에서 ClientHello"
+    },
+    {
+      "id": "m1",
+      "from": "s",
+      "to": "c",
+      "y": 216,
+      "label": "ServerHello · 인증서 · 증명 등",
+      "note": "브라우저가 신뢰·도메인 등을 검증",
+      "variant": "security"
+    },
+    {
+      "id": "m2",
+      "from": "c",
+      "to": "s",
+      "y": 296,
+      "label": "TLS 확인 완료 메시지",
+      "note": "양쪽이 합의한 키로 보호",
+      "variant": "security"
+    },
+    {
+      "id": "m3",
+      "from": "c",
+      "to": "s",
+      "y": 376,
+      "label": "보호된 HTTP 요청"
+    },
+    {
+      "id": "m4",
+      "from": "s",
+      "to": "c",
+      "y": 422,
+      "label": "보호된 HTTP 응답",
+      "variant": "return"
+    }
+  ],
+  "meta": {
+    "title": "TCP 연결 뒤 TLS를 준비하고 HTTP를 보호한다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "04-tls.html"
+  }
+}

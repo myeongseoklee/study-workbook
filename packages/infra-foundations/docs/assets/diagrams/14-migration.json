@@ -1,0 +1,98 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "lanes": [
+    {
+      "id": "main",
+      "label": "진행 순서"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "add",
+      "lane": "main",
+      "col": 0,
+      "label": "새 열 추가",
+      "sublabel": "옛 열 유지",
+      "type": "backend"
+    },
+    {
+      "id": "compat",
+      "lane": "main",
+      "col": 1,
+      "label": "호환 버전 배포",
+      "sublabel": "옛 읽기 · 양쪽 쓰기",
+      "type": "backend"
+    },
+    {
+      "id": "fill",
+      "lane": "main",
+      "col": 2,
+      "label": "백필 · 검증",
+      "sublabel": "옛 작성자 제거 후",
+      "type": "backend"
+    },
+    {
+      "id": "read",
+      "lane": "main",
+      "col": 3,
+      "label": "v2 새 열 읽기",
+      "sublabel": "양쪽 쓰기는 유지",
+      "type": "backend"
+    },
+    {
+      "id": "drop",
+      "lane": "main",
+      "col": 4,
+      "label": "옛 구조 제거",
+      "sublabel": "롤백 기간·옛 사용자 종료",
+      "type": "backend"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "add",
+      "to": "compat",
+      "role": "main"
+    },
+    {
+      "id": "e2",
+      "from": "compat",
+      "to": "fill",
+      "role": "main"
+    },
+    {
+      "id": "e3",
+      "from": "fill",
+      "to": "read",
+      "role": "main"
+    },
+    {
+      "id": "e4",
+      "from": "read",
+      "to": "drop",
+      "role": "main"
+    }
+  ],
+  "mainPath": [
+    "add",
+    "compat",
+    "fill",
+    "read",
+    "drop"
+  ],
+  "meta": {
+    "title": "옛 읽기·쓰기가 사라진 증거를 모은 뒤 구조를 지운다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "14-migration.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "처리·상태 단계"
+        }
+      }
+    }
+  }
+}

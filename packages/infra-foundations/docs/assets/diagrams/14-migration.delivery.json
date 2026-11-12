@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "1b5cd3c7-ee70-470b-9a9a-9443a6acb847",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/14-migration.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/14-migration.html",
+  "specification": {
+    "sha256": "b0d34507073baa33fb0652482187b25873ca0a150d5692873e1c5f0f4126cc24",
+    "bytes": 1838
+  },
+  "artifact": {
+    "sha256": "d5cf28ff744cb077c9fd64dc18aac101f3ca0e1fe3e37136f98cbf14caea473d",
+    "bytes": 834013
+  }
+}

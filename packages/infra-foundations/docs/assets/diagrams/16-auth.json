@@ -1,0 +1,117 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "lanes": [
+    {
+      "id": "main",
+      "label": "진행 순서"
+    },
+    {
+      "id": "branch",
+      "label": "조건에 따른 다른 결과"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "net",
+      "lane": "main",
+      "col": 0,
+      "label": "요청 도착",
+      "sublabel": "경로·통신 허용",
+      "type": "backend"
+    },
+    {
+      "id": "tls",
+      "lane": "main",
+      "col": 1,
+      "label": "TLS 확인",
+      "sublabel": "서버 이름·전송 보호",
+      "type": "backend"
+    },
+    {
+      "id": "who",
+      "lane": "main",
+      "col": 2,
+      "label": "사용자 인증",
+      "sublabel": "유효 세션으로 A 확인",
+      "type": "backend"
+    },
+    {
+      "id": "allow",
+      "lane": "main",
+      "col": 3,
+      "label": "주문 권한 검사",
+      "sublabel": "소유자·허용 작업·상태",
+      "type": "backend"
+    },
+    {
+      "id": "reply",
+      "lane": "main",
+      "col": 4,
+      "label": "허용된 처리",
+      "sublabel": "주문 42 결과",
+      "type": "backend"
+    },
+    {
+      "id": "deny",
+      "lane": "branch",
+      "col": 3,
+      "label": "업무 접근 거부",
+      "sublabel": "연결돼도 조회 불가",
+      "type": "backend"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "net",
+      "to": "tls",
+      "role": "main"
+    },
+    {
+      "id": "e2",
+      "from": "tls",
+      "to": "who",
+      "role": "main"
+    },
+    {
+      "id": "e3",
+      "from": "who",
+      "to": "allow",
+      "role": "main"
+    },
+    {
+      "id": "e4",
+      "from": "allow",
+      "to": "reply",
+      "role": "main"
+    },
+    {
+      "id": "b-deny",
+      "from": "allow",
+      "to": "deny",
+      "label": "권한 없음",
+      "role": "branch"
+    }
+  ],
+  "mainPath": [
+    "net",
+    "tls",
+    "who",
+    "allow",
+    "reply"
+  ],
+  "meta": {
+    "title": "연결 성공·신원 확인·작업 허용은 다른 관문이다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "16-auth.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "처리·상태 단계"
+        }
+      }
+    }
+  }
+}

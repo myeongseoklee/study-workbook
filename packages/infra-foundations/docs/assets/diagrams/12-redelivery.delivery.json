@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "0ccda7ea-554e-4c00-96d8-528905c5977e",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/12-redelivery.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/12-redelivery.html",
+  "specification": {
+    "sha256": "9aa722d80a68b32861ab20056a745b782ab391923ae95afcaea51379e38717a7",
+    "bytes": 1972
+  },
+  "artifact": {
+    "sha256": "0f35afb8e107e3ce950933fb60439c53283332e96080283727da0b9955d98b28",
+    "bytes": 834804
+  }
+}

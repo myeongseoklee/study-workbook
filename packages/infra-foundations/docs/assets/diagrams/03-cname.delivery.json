@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "f3fea213-393a-4845-9999-a8ddaec4031e",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/03-cname.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/03-cname.html",
+  "specification": {
+    "sha256": "c039943f23f6877fb3188123205280f87a444e6a70a3edf5d0c1101e4de04d10",
+    "bytes": 1589
+  },
+  "artifact": {
+    "sha256": "dbd2d7b0ef198c708d5f684508d01fafc0fcb3256d28fc2dfe0ba5d0ed09c35d",
+    "bytes": 833331
+  }
+}

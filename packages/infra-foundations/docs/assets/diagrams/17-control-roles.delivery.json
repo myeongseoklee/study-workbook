@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "04cf1833-bea0-49df-9cd4-4a803912b6fe",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/17-control-roles.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/17-control-roles.html",
+  "specification": {
+    "sha256": "3ecc10ef3c24363ea9852cdb0309106fb6c4118942741f8d181f80b74a1f2f7d",
+    "bytes": 2494
+  },
+  "artifact": {
+    "sha256": "28b48363e5e1bf35c28c60b398cba2303174b80397ad1cd9fee295cf9607099d",
+    "bytes": 838875
+  }
+}

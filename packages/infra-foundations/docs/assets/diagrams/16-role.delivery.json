@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "126c7b8e-45a6-4b96-bbc7-b8eb01b63a55",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/16-role.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/16-role.html",
+  "specification": {
+    "sha256": "734baf8d5ac6c7a48bf96997588605365457a6a2a08b2a6ed5d029f9d2e13f7c",
+    "bytes": 1216
+  },
+  "artifact": {
+    "sha256": "7e7257f5dde31f85d1649792c8133ef73cb7b499f2fde63af6b4c0906a051854",
+    "bytes": 829137
+  }
+}

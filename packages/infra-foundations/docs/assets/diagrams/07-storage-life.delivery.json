@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "05bc588f-1f11-42a1-a151-919e4b26d1a6",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/07-storage-life.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/07-storage-life.html",
+  "specification": {
+    "sha256": "e78817a6eea0f030361f7caed2353589b568a73e8eb2a9c61ef3d78af3a07b2a",
+    "bytes": 1620
+  },
+  "artifact": {
+    "sha256": "cbfdb1c4d692051e537a529fdf2a0c5cdb7bfe015b26bbbf76233d175deb673e",
+    "bytes": 832994
+  }
+}

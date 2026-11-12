@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "410fd040-3c71-49a7-aa2a-d064644aca3c",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/13-draining.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/13-draining.html",
+  "specification": {
+    "sha256": "84c619c838f52935c3dbdd093006318dd0f53790299924dca63f18e22931bc07",
+    "bytes": 1227
+  },
+  "artifact": {
+    "sha256": "0c3e7173d21c21d4c68e5e3efda23e0d86f5c061063ff7d4ba570a2868e24ff3",
+    "bytes": 829174
+  }
+}

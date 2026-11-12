@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "components": [
+    {
+      "id": "a",
+      "label": "기존 컨테이너 A",
+      "sublabel": "메모리 · A의 변경",
+      "type": "backend",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "vol",
+      "label": "외부 볼륨",
+      "sublabel": "컨테이너와 다른 수명",
+      "type": "database",
+      "pos": [
+        350,
+        230
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "b",
+      "label": "새 컨테이너 B",
+      "sublabel": "새 메모리 · 새 쓰기 계층",
+      "type": "backend",
+      "pos": [
+        660,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "e0",
+      "from": "a",
+      "to": "vol",
+      "label": "데이터 기록"
+    },
+    {
+      "id": "e1",
+      "from": "vol",
+      "to": "b",
+      "label": "같은 볼륨 연결"
+    }
+  ],
+  "meta": {
+    "title": "컨테이너를 바꿔도 이어 읽을 데이터는 밖에 둔다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "07-storage-life.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "실행·처리"
+        },
+        "database": {
+          "label": "데이터·저장"
+        },
+        "frontend": {
+          "label": "요청하는 쪽"
+        },
+        "cloud": {
+          "label": "클라우드 서비스"
+        },
+        "security": {
+          "label": "권한"
+        }
+      }
+    }
+  }
+}

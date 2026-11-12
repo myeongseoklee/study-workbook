@@ -1,0 +1,83 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "lanes": [
+    {
+      "id": "main",
+      "label": "진행 순서"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "http",
+      "lane": "main",
+      "col": 0,
+      "label": "HTTP 데이터",
+      "sublabel": "주문의 뜻과 형식",
+      "type": "backend"
+    },
+    {
+      "id": "tcp",
+      "lane": "main",
+      "col": 1,
+      "label": "TCP 세그먼트",
+      "sublabel": "포트·순서 + HTTP",
+      "type": "backend"
+    },
+    {
+      "id": "ip",
+      "lane": "main",
+      "col": 2,
+      "label": "IP 패킷",
+      "sublabel": "IP 주소 + TCP",
+      "type": "backend"
+    },
+    {
+      "id": "link",
+      "lane": "main",
+      "col": 3,
+      "label": "링크 프레임",
+      "sublabel": "링크 정보 + IP",
+      "type": "backend"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "http",
+      "to": "tcp",
+      "role": "main"
+    },
+    {
+      "id": "e2",
+      "from": "tcp",
+      "to": "ip",
+      "role": "main"
+    },
+    {
+      "id": "e3",
+      "from": "ip",
+      "to": "link",
+      "role": "main"
+    }
+  ],
+  "mainPath": [
+    "http",
+    "tcp",
+    "ip",
+    "link"
+  ],
+  "meta": {
+    "title": "같은 주문 데이터에 계층별 정보가 붙는다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "02-encapsulation.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "처리·상태 단계"
+        }
+      }
+    }
+  }
+}

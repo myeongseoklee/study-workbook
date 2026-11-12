@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "7fc09c60-4cc8-4fb4-b77a-c2b4beda8e5d",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/04-reassembly.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/04-reassembly.html",
+  "specification": {
+    "sha256": "94bc68204e9840bd0d3f87026626aeebbb2af8d887c25ed10fb17e70aeddc1a2",
+    "bytes": 1373
+  },
+  "artifact": {
+    "sha256": "efae5fa268870dcd848237cea06f638cd5a285247baf6b74c00b74923f99d9af",
+    "bytes": 829946
+  }
+}

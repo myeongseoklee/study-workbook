@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "a",
+      "label": "내부 앱",
+      "type": "backend"
+    },
+    {
+      "id": "n",
+      "label": "NAT 경계",
+      "type": "backend"
+    },
+    {
+      "id": "x",
+      "label": "외부 배송 API",
+      "type": "external"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "a",
+      "to": "n",
+      "y": 170,
+      "label": "출발 10.0.1.10:51000"
+    },
+    {
+      "id": "m1",
+      "from": "n",
+      "to": "x",
+      "y": 216,
+      "label": "출발 203.0.113.10:62000",
+      "note": "내부 연결과 변환 결과의 대응 보관"
+    },
+    {
+      "id": "m2",
+      "from": "x",
+      "to": "n",
+      "y": 296,
+      "label": "응답 목적지 203.0.113.10:62000",
+      "variant": "return"
+    },
+    {
+      "id": "m3",
+      "from": "n",
+      "to": "a",
+      "y": 342,
+      "label": "목적지를 10.0.1.10:51000으로 복원",
+      "variant": "return"
+    }
+  ],
+  "meta": {
+    "title": "NAT는 나갈 때 바꾼 주소·포트의 대응을 기억한다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "05-nat.html"
+  }
+}

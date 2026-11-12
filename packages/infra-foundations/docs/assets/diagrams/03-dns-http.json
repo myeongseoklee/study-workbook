@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "b",
+      "label": "브라우저",
+      "type": "frontend"
+    },
+    {
+      "id": "r",
+      "label": "리졸버",
+      "type": "backend"
+    },
+    {
+      "id": "d",
+      "label": "권한 DNS",
+      "type": "backend"
+    },
+    {
+      "id": "w",
+      "label": "웹 서버",
+      "type": "backend"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "b",
+      "to": "r",
+      "y": 170,
+      "label": "shop.example.com의 A 조회"
+    },
+    {
+      "id": "m1",
+      "from": "r",
+      "to": "d",
+      "y": 216,
+      "label": "관리하는 이름의 주소 조회"
+    },
+    {
+      "id": "m2",
+      "from": "d",
+      "to": "r",
+      "y": 262,
+      "label": "203.0.113.10",
+      "variant": "return"
+    },
+    {
+      "id": "m3",
+      "from": "r",
+      "to": "b",
+      "y": 308,
+      "label": "주소 응답",
+      "variant": "return"
+    },
+    {
+      "id": "m4",
+      "from": "b",
+      "to": "w",
+      "y": 354,
+      "label": "연결 준비 뒤 HTTP 요청"
+    },
+    {
+      "id": "m5",
+      "from": "w",
+      "to": "b",
+      "y": 400,
+      "label": "HTTP 응답",
+      "variant": "return"
+    }
+  ],
+  "meta": {
+    "title": "DNS에 주소를 묻는 일과 웹 요청은 다른 경로다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "03-dns-http.html"
+  }
+}

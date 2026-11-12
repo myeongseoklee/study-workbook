@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "afd4b522-98b3-4a4e-bf0f-f5a4a82556f8",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/16-auth.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/16-auth.html",
+  "specification": {
+    "sha256": "12529f2c401f76595b8111c2f490a7cff1b0025b5308b5bed9f410a4f3f679e7",
+    "bytes": 2211
+  },
+  "artifact": {
+    "sha256": "f66a25af4f09de40966bd3379f8d2e09adfdd63f857c58a30820eddcc6ac16d3",
+    "bytes": 836235
+  }
+}

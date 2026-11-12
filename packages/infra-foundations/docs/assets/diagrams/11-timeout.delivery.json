@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "7d590117-3472-4984-9a90-64f5a26be204",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/11-timeout.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/11-timeout.html",
+  "specification": {
+    "sha256": "1a85d045b21b4808ea870908b33a7ffadefbfbf28b4609af679ce857b2743a5f",
+    "bytes": 1135
+  },
+  "artifact": {
+    "sha256": "621d391dd6b3666768b02ec51c1e4ed627c6c2cb3baac2f9fee70da05e0941c5",
+    "bytes": 829116
+  }
+}

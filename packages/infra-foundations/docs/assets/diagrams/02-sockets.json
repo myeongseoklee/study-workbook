@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "components": [
+    {
+      "id": "listen",
+      "label": "수신 대기 소켓",
+      "sublabel": "서버 :3000 · listen",
+      "type": "backend",
+      "pos": [
+        350,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "a",
+      "label": "손님 연결 A",
+      "sublabel": "10.0.1.20:51000",
+      "type": "frontend",
+      "pos": [
+        40,
+        420
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "sa",
+      "label": "연결 소켓 A",
+      "sublabel": "서버 :3000 ↔ 손님 A",
+      "type": "backend",
+      "pos": [
+        40,
+        230
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "b",
+      "label": "손님 연결 B",
+      "sublabel": "10.0.1.20:51001",
+      "type": "frontend",
+      "pos": [
+        660,
+        420
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "sb",
+      "label": "연결 소켓 B",
+      "sublabel": "서버 :3000 ↔ 손님 B",
+      "type": "backend",
+      "pos": [
+        660,
+        230
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "app",
+      "label": "주문 앱",
+      "sublabel": "각 소켓에서 읽고 쓰기",
+      "type": "backend",
+      "pos": [
+        350,
+        420
+      ],
+      "size": [
+        170,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "e0",
+      "from": "listen",
+      "to": "sa",
+      "label": "accept"
+    },
+    {
+      "id": "e1",
+      "from": "listen",
+      "to": "sb",
+      "label": "accept"
+    },
+    {
+      "id": "e2",
+      "from": "a",
+      "to": "sa",
+      "label": "연결 A"
+    },
+    {
+      "id": "e3",
+      "from": "b",
+      "to": "sb",
+      "label": "연결 B"
+    },
+    {
+      "id": "e4",
+      "from": "sa",
+      "to": "app",
+      "label": "바이트"
+    },
+    {
+      "id": "e5",
+      "from": "sb",
+      "to": "app",
+      "label": "바이트"
+    }
+  ],
+  "meta": {
+    "title": "같은 서버 포트로 들어와도 연결 소켓은 나뉜다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "02-sockets.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "실행·처리"
+        },
+        "database": {
+          "label": "데이터·저장"
+        },
+        "frontend": {
+          "label": "요청하는 쪽"
+        },
+        "cloud": {
+          "label": "클라우드 서비스"
+        },
+        "security": {
+          "label": "권한"
+        }
+      }
+    }
+  }
+}

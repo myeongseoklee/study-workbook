@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "a",
+      "label": "호출 주체",
+      "type": "backend"
+    },
+    {
+      "id": "s",
+      "label": "AWS STS",
+      "type": "security"
+    },
+    {
+      "id": "r",
+      "label": "AWS 서비스",
+      "type": "cloud"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "a",
+      "to": "s",
+      "y": 170,
+      "label": "역할 인수 요청",
+      "note": "신뢰·허용 조건 검증"
+    },
+    {
+      "id": "m1",
+      "from": "s",
+      "to": "a",
+      "y": 250,
+      "label": "만료가 있는 임시 자격증명",
+      "variant": "return"
+    },
+    {
+      "id": "m2",
+      "from": "a",
+      "to": "r",
+      "y": 296,
+      "label": "그 자격으로 서명한 API 요청",
+      "note": "적용 정책·대상·조건 평가"
+    },
+    {
+      "id": "m3",
+      "from": "r",
+      "to": "a",
+      "y": 376,
+      "label": "허용 결과 또는 거부",
+      "variant": "return"
+    }
+  ],
+  "meta": {
+    "title": "역할 이름이 아니라 검증된 임시 자격으로 요청한다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "16-role.html"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "b58dc1cc-b85f-4663-a756-8f028eb1f4ba",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/01-processes.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/01-processes.html",
+  "specification": {
+    "sha256": "3737b0332cbefc8f1c1df5a7993a31f4a86cd0e87c35a443ba49e6f3623cea92",
+    "bytes": 1588
+  },
+  "artifact": {
+    "sha256": "944bb293a315298d323a052cb0b67fadf38cc771ea6c6895558675b556cff179",
+    "bytes": 832880
+  }
+}

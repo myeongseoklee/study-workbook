@@ -65,6 +65,10 @@ A가 롤백했다면 재고 1을 기준으로 B가 변경을 진행할 수 있�
 
 [PostgreSQL 격리 규칙](https://www.postgresql.org/docs/current/transaction-iso.html)과 [잠금](https://www.postgresql.org/docs/current/explicit-locking.html)을 이 예의 기준으로 삼았다.
 
+[![행 경쟁을 기다린 뒤 조건을 다시 평가한다](assets/diagrams/09-stock-inline.png)](assets/diagrams/09-stock.png)
+
+행 경쟁을 기다린 뒤 조건을 다시 평가한다 — PostgreSQL Read Committed에서 본문의 조건부 UPDATE 사례다. A가 커밋해 재고가 0이면 B의 변경 행 수는 0이고 앱은 주문 추가를 하지 않는다. A 롤백 분기는 본문을 보자.
+
 ## 5. 다른 요청에는 어느 시점의 값이 보일까
 
 변경할 때마다 모든 읽기를 막으면 읽는 요청도 줄을 길게 선다. PostgreSQL은 **MVCC**, 즉 여러 버전의 행과 트랜잭션 정보를 이용하는 동시성 제어를 사용한다. 읽는 요청은 자신에게 보이는 시점의 버전을 선택해, 다른 트랜잭션이 바꾸는 중인 미확정 값을 그대로 읽지 않게 한다.
@@ -97,6 +101,10 @@ A가 롤백했다면 재고 1을 기준으로 B가 변경을 진행할 수 있�
 **WAL이 원자성과 영속성의 전부는 아니다.** 행 버전·트랜잭션 상태·잠금 등과 함께 작동한다. 모든 DB가 같은 구현을 쓰는 것도 아니다. 비동기 커밋처럼 영속 기록 전에 성공을 반환하는 설정은 장애 때 최근 성공 작업을 잃을 수 있으므로, 설정을 무시하고 “커밋이면 어떤 장애에도 절대 보존”이라고 단정하면 안 된다.
 
 [WAL 원리](https://www.postgresql.org/docs/current/wal-intro.html), [동기·비동기 커밋](https://www.postgresql.org/docs/current/wal-async-commit.html)을 참고했다.
+
+[![성공 응답보다 먼저 복구 근거를 영속 기록한다](assets/diagrams/09-wal-inline.png)](assets/diagrams/09-wal.png)
+
+성공 응답보다 먼저 복구 근거를 영속 기록한다 — 동기 커밋·정상적인 영속 저장·WAL과 데이터가 보존되는 장애 범위라는 본문의 가정이다. 나중에 페이지를 기록해도 WAL로 필요한 변경을 재현할 수 있다.
 
 ## 7. ACID를 재고 예제로 연결하기
 

@@ -1,0 +1,101 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "파일을 준비하는 것과 프로세스를 시작하는 것은 다른 단계다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "07-startup.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "준비·실행 단계"
+        },
+        "database": {
+          "label": "저장된 파일"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "main",
+      "label": "주문 앱 하나가 요청을 받기까지"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "build",
+      "lane": "main",
+      "col": 0,
+      "type": "backend",
+      "label": "이미지 빌드",
+      "sublabel": "앱·Node.js·의존성 준비"
+    },
+    {
+      "id": "image",
+      "lane": "main",
+      "col": 1,
+      "type": "database",
+      "label": "이미지 보관",
+      "sublabel": "아직 앱 프로세스 없음"
+    },
+    {
+      "id": "create",
+      "lane": "main",
+      "col": 2,
+      "type": "backend",
+      "label": "컨테이너 생성",
+      "sublabel": "create · 아직 실행 전"
+    },
+    {
+      "id": "start",
+      "lane": "main",
+      "col": 3,
+      "type": "backend",
+      "label": "프로세스 시작",
+      "sublabel": "start · 새 실행 메모리"
+    },
+    {
+      "id": "listen",
+      "lane": "main",
+      "col": 4,
+      "type": "backend",
+      "label": "수신 준비",
+      "sublabel": "앱이 :3000에서 대기"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "build",
+      "to": "image",
+      "role": "main"
+    },
+    {
+      "id": "e2",
+      "from": "image",
+      "to": "create",
+      "role": "main"
+    },
+    {
+      "id": "e3",
+      "from": "create",
+      "to": "start",
+      "role": "main"
+    },
+    {
+      "id": "e4",
+      "from": "start",
+      "to": "listen",
+      "role": "main"
+    }
+  ],
+  "mainPath": [
+    "build",
+    "image",
+    "create",
+    "start",
+    "listen"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "67ae194b-8e1d-4ec6-84b7-91f228adb25c",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/02-encapsulation.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/02-encapsulation.html",
+  "specification": {
+    "sha256": "bf6d10a7c0c657edf5cd62c2c0f99df7a984204afe3c34242b08fdaa556db1f6",
+    "bytes": 1492
+  },
+  "artifact": {
+    "sha256": "0fa6ce6653e92f02741a8f446bfaafdba27ed17f9a59bc09edcb908cac4b13d0",
+    "bytes": 832330
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "3fc593d5-b3c4-450a-bcd2-af741972ec36",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/10-bottleneck.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/10-bottleneck.html",
+  "specification": {
+    "sha256": "aa458946b5361d97277b10e1c6842a7de7a090def3875d473658baff2395146f",
+    "bytes": 1948
+  },
+  "artifact": {
+    "sha256": "9e393a60a197f46ce00b2eabac5b4eef40486343d8a74b7693af078d96ba212d",
+    "bytes": 835956
+  }
+}

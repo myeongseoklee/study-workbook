@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "52ca8374-ea21-4e69-874f-0e028138896e",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/06-race.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/06-race.html",
+  "specification": {
+    "sha256": "11312cc619004c40cbad2fff1bc1943bb620edcde2ab27b1b770ad3c63890fb7",
+    "bytes": 1322
+  },
+  "artifact": {
+    "sha256": "a079d9865b1a941b2abf1d1c48a00ca544ab7923a89a6debe44aff50962f4dc1",
+    "bytes": 830171
+  }
+}

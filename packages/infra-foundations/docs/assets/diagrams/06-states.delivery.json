@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "0cfc5122-7a3f-4c65-9fc4-e9222d953b4f",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/06-states.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/06-states.html",
+  "specification": {
+    "sha256": "65c243e59ff485eecbd5d5741b3e83f8467a6a8779a878583752775daca5d4fc",
+    "bytes": 1509
+  },
+  "artifact": {
+    "sha256": "37e061185e27fabce1fc870bb0d2847ffdea267a0eca9ade2b891871d14ae659",
+    "bytes": 832380
+  }
+}

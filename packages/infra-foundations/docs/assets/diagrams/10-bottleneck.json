@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "components": [
+    {
+      "id": "lb",
+      "label": "입구 로드밸런서",
+      "sublabel": "앱 대상 선택",
+      "type": "backend",
+      "pos": [
+        40,
+        230
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "a",
+      "label": "앱 A",
+      "sublabel": "가정: 60건/초",
+      "type": "backend",
+      "pos": [
+        350,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "b",
+      "label": "앱 B",
+      "sublabel": "가정: 60건/초",
+      "type": "backend",
+      "pos": [
+        350,
+        420
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "db",
+      "label": "공통 DB",
+      "sublabel": "가정: 100건/초",
+      "type": "database",
+      "pos": [
+        660,
+        230
+      ],
+      "size": [
+        170,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "e0",
+      "from": "lb",
+      "to": "a",
+      "label": "분배"
+    },
+    {
+      "id": "e1",
+      "from": "lb",
+      "to": "b",
+      "label": "분배"
+    },
+    {
+      "id": "e2",
+      "from": "a",
+      "to": "db",
+      "label": "공통 의존"
+    },
+    {
+      "id": "e3",
+      "from": "b",
+      "to": "db",
+      "label": "공통 의존"
+    }
+  ],
+  "meta": {
+    "title": "앱을 늘려도 공통 DB의 처리 능력은 그대로다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "10-bottleneck.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "실행·처리"
+        },
+        "database": {
+          "label": "데이터·저장"
+        },
+        "frontend": {
+          "label": "요청하는 쪽"
+        },
+        "cloud": {
+          "label": "클라우드 서비스"
+        },
+        "security": {
+          "label": "권한"
+        }
+      }
+    }
+  }
+}

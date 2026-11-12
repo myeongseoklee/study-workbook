@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "4384a2c1-461b-4f83-8805-27860ecb7374",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/08-pool.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/08-pool.html",
+  "specification": {
+    "sha256": "167399b8294cd43ae440b1e9db7a76ce3817aa9d9f1eb922fa1613df2bf904cf",
+    "bytes": 1438
+  },
+  "artifact": {
+    "sha256": "a16430ca211b2ff127e85e8550dffda2bec8fc1ace3564707f90885452a6eefd",
+    "bytes": 832065
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "f16ba04b-09dd-4613-ac1d-60c7402a0adb",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/04-tls.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/04-tls.html",
+  "specification": {
+    "sha256": "8046976965e1b68d6ec792ca17ec6573027e4b67b421a18b22936a35dfb59b75",
+    "bytes": 1288
+  },
+  "artifact": {
+    "sha256": "f88e36e55fb3ce10f8f971fe3d159771dcb2dd11eb9d47510b3496dab1238a60",
+    "bytes": 829135
+  }
+}

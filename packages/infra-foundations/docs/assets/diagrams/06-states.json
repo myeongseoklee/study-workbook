@@ -1,0 +1,83 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "lanes": [
+    {
+      "id": "main",
+      "label": "진행 순서"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "ready",
+      "lane": "main",
+      "col": 0,
+      "label": "준비",
+      "sublabel": "실행 가능 · CPU 차례 대기",
+      "type": "backend"
+    },
+    {
+      "id": "run",
+      "lane": "main",
+      "col": 1,
+      "label": "실행",
+      "sublabel": "CPU에서 명령 수행",
+      "type": "backend"
+    },
+    {
+      "id": "wait",
+      "lane": "main",
+      "col": 2,
+      "label": "I/O 대기",
+      "sublabel": "응답 사건 대기",
+      "type": "backend"
+    },
+    {
+      "id": "again",
+      "lane": "main",
+      "col": 3,
+      "label": "다시 준비",
+      "sublabel": "사건 도착 · 차례 대기",
+      "type": "backend"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "ready",
+      "to": "run",
+      "role": "main"
+    },
+    {
+      "id": "e2",
+      "from": "run",
+      "to": "wait",
+      "role": "main"
+    },
+    {
+      "id": "e3",
+      "from": "wait",
+      "to": "again",
+      "role": "main"
+    }
+  ],
+  "mainPath": [
+    "ready",
+    "run",
+    "wait",
+    "again"
+  ],
+  "meta": {
+    "title": "CPU를 기다리는 상태와 I/O를 기다리는 상태",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "06-states.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "처리·상태 단계"
+        }
+      }
+    }
+  }
+}

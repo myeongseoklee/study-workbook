@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "c",
+      "label": "손님",
+      "type": "frontend"
+    },
+    {
+      "id": "s",
+      "label": "주문 앱",
+      "type": "backend"
+    },
+    {
+      "id": "d",
+      "label": "DB",
+      "type": "database"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "c",
+      "to": "s",
+      "y": 170,
+      "label": "0ms 주문 전송 · 100ms 수신"
+    },
+    {
+      "id": "m1",
+      "from": "s",
+      "to": "d",
+      "y": 216,
+      "label": "주문 42 기록 요청"
+    },
+    {
+      "id": "m2",
+      "from": "d",
+      "to": "s",
+      "y": 262,
+      "label": "500ms 커밋 완료",
+      "variant": "return"
+    },
+    {
+      "id": "m3",
+      "from": "s",
+      "to": "c",
+      "y": 308,
+      "label": "성공 응답이 지연됨",
+      "note": "700ms 손님은 기다림 종료; 서버 결과와 별개"
+    }
+  ],
+  "meta": {
+    "title": "손님의 시간 초과 뒤에도 주문은 남아 있을 수 있다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "11-timeout.html"
+  }
+}

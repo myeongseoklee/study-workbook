@@ -1,0 +1,102 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "lanes": [
+    {
+      "id": "main",
+      "label": "진행 순서"
+    },
+    {
+      "id": "branch",
+      "label": "조건에 따른 다른 결과"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "queue",
+      "lane": "main",
+      "col": 0,
+      "label": "전달 가능",
+      "sublabel": "메시지 보관",
+      "type": "backend"
+    },
+    {
+      "id": "hidden",
+      "lane": "main",
+      "col": 1,
+      "label": "수신 · 임시 숨김",
+      "sublabel": "소비자가 처리 중",
+      "type": "backend"
+    },
+    {
+      "id": "work",
+      "lane": "main",
+      "col": 2,
+      "label": "업무 처리 성공",
+      "sublabel": "영수증 발송 등",
+      "type": "backend"
+    },
+    {
+      "id": "delete",
+      "lane": "main",
+      "col": 3,
+      "label": "삭제 확인",
+      "sublabel": "큐에서 제거",
+      "type": "backend"
+    },
+    {
+      "id": "again",
+      "lane": "branch",
+      "col": 1,
+      "label": "기한 뒤 재전달 가능",
+      "sublabel": "삭제 없이 기한 종료",
+      "type": "backend"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "queue",
+      "to": "hidden",
+      "role": "main"
+    },
+    {
+      "id": "e2",
+      "from": "hidden",
+      "to": "work",
+      "role": "main"
+    },
+    {
+      "id": "e3",
+      "from": "work",
+      "to": "delete",
+      "role": "main"
+    },
+    {
+      "id": "b-again",
+      "from": "hidden",
+      "to": "again",
+      "label": "종료·기한 만료",
+      "role": "branch"
+    }
+  ],
+  "mainPath": [
+    "queue",
+    "hidden",
+    "work",
+    "delete"
+  ],
+  "meta": {
+    "title": "수신은 완료가 아니다 — 완료 확인 없이 끝나면 다시 전달",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "12-redelivery.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "처리·상태 단계"
+        }
+      }
+    }
+  }
+}

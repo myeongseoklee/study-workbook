@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "76c73404-70f5-40c4-bd34-b2ccfaba8e8c",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/07-layers.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/07-layers.html",
+  "specification": {
+    "sha256": "1e30a994e39cfa838090bb1bad8368e9f80cf7252cc5bad4f03873f884813c77",
+    "bytes": 2029
+  },
+  "artifact": {
+    "sha256": "0b3edfcf7cb417e2cffc0bacf79e58e2141364baf80bb759340171258d79cc47",
+    "bytes": 836240
+  }
+}

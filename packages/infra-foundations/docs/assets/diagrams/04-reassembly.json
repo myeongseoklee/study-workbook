@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "c",
+      "label": "송신 TCP",
+      "type": "frontend"
+    },
+    {
+      "id": "s",
+      "label": "수신 TCP",
+      "type": "backend"
+    },
+    {
+      "id": "a",
+      "label": "수신 앱",
+      "type": "backend"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "c",
+      "to": "s",
+      "y": 170,
+      "label": "SEQ=104 · ER42 먼저 도착",
+      "note": "101~103 빈틈; 뒤 조각만 보관"
+    },
+    {
+      "id": "m1",
+      "from": "s",
+      "to": "c",
+      "y": 250,
+      "label": "ACK=101 · 앞부분 필요",
+      "variant": "return"
+    },
+    {
+      "id": "m2",
+      "from": "c",
+      "to": "s",
+      "y": 296,
+      "label": "SEQ=101 · ORD 재전송",
+      "note": "101~107 연속 완성"
+    },
+    {
+      "id": "m3",
+      "from": "s",
+      "to": "c",
+      "y": 376,
+      "label": "ACK=108",
+      "variant": "return"
+    },
+    {
+      "id": "m4",
+      "from": "s",
+      "to": "a",
+      "y": 422,
+      "label": "앱이 읽으면 ORDER42 바이트 제공",
+      "note": "한 번의 read로 올지는 별개"
+    }
+  ],
+  "meta": {
+    "title": "뒤 조각이 먼저 와도 앱에는 앞에서부터 전달한다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "04-reassembly.html"
+  }
+}

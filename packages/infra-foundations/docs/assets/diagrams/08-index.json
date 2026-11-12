@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "components": [
+    {
+      "id": "root",
+      "label": "시작 페이지",
+      "sublabel": "찾는 주문 번호 142",
+      "type": "database",
+      "pos": [
+        350,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "left",
+      "label": "1~100 구간",
+      "sublabel": "이번 탐색에서 건너뜀",
+      "type": "database",
+      "pos": [
+        40,
+        230
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "right",
+      "label": "101~200 구간",
+      "sublabel": "142를 포함하는 쪽",
+      "type": "database",
+      "pos": [
+        660,
+        230
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "row",
+      "label": "실제 주문 행",
+      "sublabel": "인덱스 항목의 위치로 접근",
+      "type": "database",
+      "pos": [
+        660,
+        420
+      ],
+      "size": [
+        170,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "e0",
+      "from": "root",
+      "to": "left",
+      "label": "다른 범위"
+    },
+    {
+      "id": "e1",
+      "from": "root",
+      "to": "right",
+      "label": "142 탐색",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e2",
+      "from": "right",
+      "to": "row",
+      "label": "행 위치",
+      "variant": "emphasis"
+    }
+  ],
+  "meta": {
+    "title": "인덱스는 맞지 않는 범위를 건너뛰게 한다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "08-index.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "실행·처리"
+        },
+        "database": {
+          "label": "데이터·저장"
+        },
+        "frontend": {
+          "label": "요청하는 쪽"
+        },
+        "cloud": {
+          "label": "클라우드 서비스"
+        },
+        "security": {
+          "label": "권한"
+        }
+      }
+    }
+  }
+}

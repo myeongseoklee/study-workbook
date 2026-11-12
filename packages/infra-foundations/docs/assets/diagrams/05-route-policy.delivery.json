@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "720a9940-367a-48a8-aded-0642837f858c",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/05-route-policy.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/05-route-policy.html",
+  "specification": {
+    "sha256": "276ac665e3b7f2ae8fea978ee2f0d70952d3c30b2c721576ef9cee3dfcfc346d",
+    "bytes": 1575
+  },
+  "artifact": {
+    "sha256": "fe6694915fe6e88411f3fee7e7afaed917075584b5c3114e501101a3c7fe728a",
+    "bytes": 832580
+  }
+}

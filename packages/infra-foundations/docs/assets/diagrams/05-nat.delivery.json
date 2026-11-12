@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "ff5b435b-f54b-4886-a77c-3c48f9b38662",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/05-nat.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/05-nat.html",
+  "specification": {
+    "sha256": "280e2912820206588c70283ffd7282234f7af9ded9665061385020163dea9707",
+    "bytes": 1185
+  },
+  "artifact": {
+    "sha256": "f9a4290d48b7b04a0575868da992d36fbcc507c408bc4aa83b5ab0566f7414a2",
+    "bytes": 829056
+  }
+}

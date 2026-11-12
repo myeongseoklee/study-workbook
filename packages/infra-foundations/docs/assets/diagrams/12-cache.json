@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "a",
+      "label": "앱",
+      "type": "backend"
+    },
+    {
+      "id": "c",
+      "label": "캐시",
+      "type": "database"
+    },
+    {
+      "id": "d",
+      "label": "원본 DB",
+      "type": "database"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "a",
+      "to": "c",
+      "y": 170,
+      "label": "상품 7 조회"
+    },
+    {
+      "id": "m1",
+      "from": "c",
+      "to": "a",
+      "y": 216,
+      "label": "유효한 결과 없음 · miss",
+      "variant": "return"
+    },
+    {
+      "id": "m2",
+      "from": "a",
+      "to": "d",
+      "y": 262,
+      "label": "원본 상품 읽기"
+    },
+    {
+      "id": "m3",
+      "from": "d",
+      "to": "a",
+      "y": 308,
+      "label": "상품 결과",
+      "variant": "return"
+    },
+    {
+      "id": "m4",
+      "from": "a",
+      "to": "c",
+      "y": 354,
+      "label": "결과를 저장 · TTL 설정"
+    }
+  ],
+  "meta": {
+    "title": "캐시가 없을 때만 원본을 읽는 기본 경로",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "12-cache.html"
+  }
+}

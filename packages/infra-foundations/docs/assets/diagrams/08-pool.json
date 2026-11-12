@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "participants": [
+    {
+      "id": "a",
+      "label": "요청 A",
+      "type": "frontend"
+    },
+    {
+      "id": "p",
+      "label": "연결 풀",
+      "type": "backend"
+    },
+    {
+      "id": "c",
+      "label": "요청 C",
+      "type": "frontend"
+    },
+    {
+      "id": "d",
+      "label": "DB",
+      "type": "database"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "c",
+      "to": "p",
+      "y": 170,
+      "label": "연결 빌리기 요청",
+      "note": "A·B 점유 중; C는 대기"
+    },
+    {
+      "id": "m1",
+      "from": "a",
+      "to": "p",
+      "y": 250,
+      "label": "사용하던 연결 반환"
+    },
+    {
+      "id": "m2",
+      "from": "p",
+      "to": "c",
+      "y": 296,
+      "label": "반환된 연결 대여",
+      "variant": "return"
+    },
+    {
+      "id": "m3",
+      "from": "c",
+      "to": "d",
+      "y": 342,
+      "label": "연결을 얻은 뒤 질의"
+    },
+    {
+      "id": "m4",
+      "from": "d",
+      "to": "c",
+      "y": 388,
+      "label": "질의 결과",
+      "variant": "return"
+    },
+    {
+      "id": "m5",
+      "from": "c",
+      "to": "p",
+      "y": 434,
+      "label": "연결 반환"
+    }
+  ],
+  "meta": {
+    "title": "DB가 쉬어도 연결을 빌리기 전부터 기다릴 수 있다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "08-pool.html"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "lanes": [
+    {
+      "id": "main",
+      "label": "진행 순서"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "change",
+      "lane": "main",
+      "col": 0,
+      "label": "변경 진행",
+      "sublabel": "메모리 페이지 · WAL 생성",
+      "type": "backend"
+    },
+    {
+      "id": "durable",
+      "lane": "main",
+      "col": 1,
+      "label": "WAL 영속 기록",
+      "sublabel": "필요한 변경 + 커밋 기록",
+      "type": "backend"
+    },
+    {
+      "id": "reply",
+      "lane": "main",
+      "col": 2,
+      "label": "커밋 성공 응답",
+      "sublabel": "앱이 결과를 알게 됨",
+      "type": "backend"
+    },
+    {
+      "id": "pages",
+      "lane": "main",
+      "col": 3,
+      "label": "나중의 페이지 기록",
+      "sublabel": "변경 데이터 반영",
+      "type": "backend"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "change",
+      "to": "durable",
+      "role": "main"
+    },
+    {
+      "id": "e2",
+      "from": "durable",
+      "to": "reply",
+      "role": "main"
+    },
+    {
+      "id": "e3",
+      "from": "reply",
+      "to": "pages",
+      "role": "main"
+    }
+  ],
+  "mainPath": [
+    "change",
+    "durable",
+    "reply",
+    "pages"
+  ],
+  "meta": {
+    "title": "성공 응답보다 먼저 복구 근거를 영속 기록한다",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "output": "09-wal.html",
+    "legend": {
+      "entries": {
+        "backend": {
+          "label": "처리·상태 단계"
+        }
+      }
+    }
+  }
+}

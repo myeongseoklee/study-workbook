@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "1b8dbb50-9ff2-489c-8c7a-86bd55f85929",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/03-dns-http.json",
+  "output": "/Users/myeongseok/Desktop/private/study/packages/infra-foundations/docs/assets/diagrams/03-dns-http.html",
+  "specification": {
+    "sha256": "f65c4b4f02ee03440308150dca7affd608b79658ea8407ce5cd4300e537a7633",
+    "bytes": 1433
+  },
+  "artifact": {
+    "sha256": "6bc6296dd5a5776b2f52ee39c4c369abaf79e36a9ad1843437f0b69069fd2d43",
+    "bytes": 831593
+  }
+}
